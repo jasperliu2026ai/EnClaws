@@ -75,7 +75,7 @@ After the containers start, open the **Web management panel** and begin configur
 > The current public documentation covers the minimal bootstrap command above plus the presence of a Web management panel. Additional setup details will be added as they are published.
 
 <p align="center">
-  <img src="./docs/assets/dashboard-enclaws-placeholder.png" alt="EnClaws dashboard placeholder" width="92%" />
+  <img src="./docs/assets/dashboard-enclaws-placeholder.jpg" alt="EnClaws dashboard placeholder" width="92%" />
 </p>
 
 ## Highlights
@@ -267,7 +267,7 @@ Apache License 2.0 does **not** grant trademark rights. For permitted and prohib
 Asset placeholders currently used by this README:
 
 - ./docs/assets/banner-enclaws-placeholder.png
-- ./docs/assets/dashboard-enclaws-placeholder.png
+- ./docs/assets/dashboard-enclaws-placeholder.jpg
 
 When production visuals are ready, replace those files in place to preserve README layout.
 -->
