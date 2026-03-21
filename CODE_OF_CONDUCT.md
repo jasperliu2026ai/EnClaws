@@ -1,3 +1,5 @@
+[English](./CODE_OF_CONDUCT.md) | [中文](./CODE_OF_CONDUCT.zh-CN.md)
+
 # Code of Conduct
 
 The EnClaws community aims to be a professional, measured, fact-respecting, and collaboration-friendly place.
