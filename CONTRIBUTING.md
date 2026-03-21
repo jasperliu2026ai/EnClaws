@@ -1,3 +1,5 @@
+[English](./CONTRIBUTING.md) | [中文](./CONTRIBUTING.zh-CN.md)
+
 # Contributing to EnClaws
 
 Thank you for helping turn an enterprise-grade digital assistant container platform from concept into a system that can actually run, be audited, and evolve.
