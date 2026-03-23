@@ -71,10 +71,10 @@ export const authHandlers: GatewayRequestHandlers = {
     }
 
     // Validate slug format
-    if (!/^[a-z0-9](?:[a-z0-9-]{0,126}[a-z0-9])?$/.test(tenantSlug)) {
+    if (!/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,126}[a-zA-Z0-9])?$/.test(tenantSlug)) {
       respond(false, undefined, errorShape(
         ErrorCodes.INVALID_PARAMS,
-        "Slug must be lowercase alphanumeric with hyphens, 1-128 chars",
+        "Slug must be alphanumeric with hyphens, 1-128 chars",
       ));
       return;
     }
