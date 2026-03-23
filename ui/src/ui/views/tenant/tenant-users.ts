@@ -251,14 +251,15 @@ export class TenantUsersView extends LitElement {
     }
   }
 
-  private async handleToggleStatus(userId: string, email: string, currentStatus: string) {
+  private async handleToggleStatus(userId: string, displayName: string | null, email: string | null, currentStatus: string) {
+    const label = displayName || email || userId;
     const newStatus = currentStatus === "active" ? "suspended" : "active";
     const action = newStatus === "suspended" ? "禁用" : "启用";
-    if (!confirm(`确定要${action}用户 ${email} 吗？`)) return;
+    if (!confirm(`确定要${action}用户 ${label} 吗？`)) return;
     this.error = "";
     try {
       await this.rpc("tenant.users.update", { userId, status: newStatus });
-      this.showSuccess(`已${action} ${email}`);
+      this.showSuccess(`已${action} ${label}`);
       await this.loadUsers();
     } catch (err) {
       this.showError(err instanceof Error ? err.message : `${action}失败`);
@@ -273,55 +274,10 @@ export class TenantUsersView extends LitElement {
     return html`
       <div class="header">
         <h2>用户管理</h2>
-        <button class="btn btn-primary" @click=${() => (this.showInvite = !this.showInvite)}>
-          ${this.showInvite ? "取消" : "邀请用户"}
-        </button>
       </div>
 
       ${this.error ? html`<div class="error-msg">${this.error}</div>` : nothing}
       ${this.success ? html`<div class="success-msg">${this.success}</div>` : nothing}
-
-      ${this.showInvite ? html`
-        <div class="invite-form">
-          <h3>邀请新用户</h3>
-          <form @submit=${this.handleInvite}>
-            <div class="form-row">
-              <div class="form-field">
-                <label>邮箱</label>
-                <input type="email" required placeholder="user@company.com"
-                  .value=${this.inviteEmail}
-                  @input=${(e: InputEvent) => (this.inviteEmail = (e.target as HTMLInputElement).value)} />
-              </div>
-              <div class="form-field">
-                <label>姓名</label>
-                <input type="text" placeholder="用户姓名"
-                  .value=${this.inviteDisplayName}
-                  @input=${(e: InputEvent) => (this.inviteDisplayName = (e.target as HTMLInputElement).value)} />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label>初始密码</label>
-                <input type="password" required placeholder="至少8位" minlength="8"
-                  .value=${this.invitePassword}
-                  @input=${(e: InputEvent) => (this.invitePassword = (e.target as HTMLInputElement).value)} />
-              </div>
-              <div class="form-field">
-                <label>角色</label>
-                <select .value=${this.inviteRole}
-                  @change=${(e: Event) => (this.inviteRole = (e.target as HTMLSelectElement).value)}>
-                  <option value="admin">管理员</option>
-                  <option value="member" selected>成员</option>
-                  <option value="viewer">只读</option>
-                </select>
-              </div>
-              <button class="btn btn-primary" type="submit" ?disabled=${this.inviting}>
-                ${this.inviting ? "邀请中..." : "发送邀请"}
-              </button>
-            </div>
-          </form>
-        </div>
-      ` : nothing}
 
       ${this.loading ? html`<div class="loading">加载中...</div>` : this.users.length === 0 ? html`<div class="empty">暂无用户</div>` : html`
         <table>
@@ -338,7 +294,7 @@ export class TenantUsersView extends LitElement {
           <tbody>
             ${this.users.map(user => html`
               <tr>
-                <td>${user.email}</td>
+                <td>${user.email ?? "-"}</td>
                 <td>${user.displayName ?? "-"}</td>
                 <td>
                   <span class="role-badge ${user.role}">${this.roleLabel(user.role)}</span>
@@ -361,10 +317,10 @@ export class TenantUsersView extends LitElement {
                       ` : nothing}
                       ${user.status === "active" ? html`
                         <button class="btn btn-warn btn-sm"
-                          @click=${() => this.handleToggleStatus(user.id, user.email, user.status)}>禁用</button>
+                          @click=${() => this.handleToggleStatus(user.id, user.displayName, user.email, user.status)}>禁用</button>
                       ` : html`
                         <button class="btn btn-success btn-sm"
-                          @click=${() => this.handleToggleStatus(user.id, user.email, user.status)}>启用</button>
+                          @click=${() => this.handleToggleStatus(user.id, user.displayName, user.email, user.status)}>启用</button>
                       `}
                     ` : nothing}
                   </div>

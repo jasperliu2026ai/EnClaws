@@ -71,10 +71,10 @@ export const authHandlers: GatewayRequestHandlers = {
     }
 
     // Validate slug format
-    if (!/^[a-z0-9](?:[a-z0-9-]{0,126}[a-z0-9])?$/.test(tenantSlug)) {
+    if (!/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,126}[a-zA-Z0-9])?$/.test(tenantSlug)) {
       respond(false, undefined, errorShape(
         ErrorCodes.INVALID_PARAMS,
-        "Slug must be lowercase alphanumeric with hyphens, 1-128 chars",
+        "Slug must be alphanumeric with hyphens, 1-128 chars",
       ));
       return;
     }
@@ -122,14 +122,15 @@ export const authHandlers: GatewayRequestHandlers = {
         console.warn(`[auth.register] Failed to seed tenant dir files for ${tenant.id}: ${dirErr instanceof Error ? dirErr.message : "unknown"}`);
       }
 
-      // Create owner user
+      // Create owner user (skip user-level directory init for page registration;
+      // directories will be created on-demand when the user actually starts a session)
       const user = await createUser({
         tenantId: tenant.id,
         email,
         password,
         displayName,
         role: "owner",
-      });
+      }, { skipDirInit: true });
 
       // Generate tokens
       const payload: JwtPayload = {
