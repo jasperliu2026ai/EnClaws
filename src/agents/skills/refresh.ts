@@ -4,6 +4,7 @@ import chokidar, { type FSWatcher } from "chokidar";
 import type { OpenClawConfig } from "../../config/config.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { CONFIG_DIR, resolveUserPath } from "../../utils.js";
+import { getTenantBootstrapContext } from "../workspace.js";
 import { resolvePluginSkillDirs } from "./plugin-skills.js";
 
 type SkillsChangeEvent = {
@@ -72,6 +73,11 @@ function resolveWatchPaths(workspaceDir: string, config?: OpenClawConfig): strin
   paths.push(...extraDirs);
   const pluginSkillDirs = resolvePluginSkillDirs({ workspaceDir, config });
   paths.push(...pluginSkillDirs);
+  // Multi-tenant: watch tenant-level skills directory so file changes trigger snapshot refresh
+  const tenantCtx = getTenantBootstrapContext(workspaceDir);
+  if (tenantCtx?.tenantDir) {
+    paths.push(path.join(tenantCtx.tenantDir, "skills"));
+  }
   return paths;
 }
 
@@ -82,15 +88,13 @@ function toWatchGlobRoot(raw: string): string {
 }
 
 function resolveWatchTargets(workspaceDir: string, config?: OpenClawConfig): string[] {
-  // Skills are defined by SKILL.md; watch only those files to avoid traversing
-  // or watching unrelated large trees (e.g. datasets) that can exhaust FDs.
+  // Watch skill root directories directly instead of glob patterns.
+  // Glob patterns like `dir/*/SKILL.md` are unreliable on Windows when new
+  // subdirectories are created after the watcher starts. Watching the raw
+  // directories is more reliable; we filter for SKILL.md in the event handler.
   const targets = new Set<string>();
   for (const root of resolveWatchPaths(workspaceDir, config)) {
-    const globRoot = toWatchGlobRoot(root);
-    // Some configs point directly at a skill folder.
-    targets.add(`${globRoot}/SKILL.md`);
-    // Standard layout: <skillsRoot>/<skillName>/SKILL.md
-    targets.add(`${globRoot}/*/SKILL.md`);
+    targets.add(root);
   }
   return Array.from(targets).toSorted();
 }
@@ -158,6 +162,7 @@ export function ensureSkillsWatcher(params: { workspaceDir: string; config?: Ope
   if (existing && existing.pathsKey === pathsKey && existing.debounceMs === debounceMs) {
     return;
   }
+  log.info(`Skills watcher (re)creating for ${workspaceDir}, targets: ${watchTargets.join(", ")}`);
   if (existing) {
     watchers.delete(workspaceDir);
     if (existing.timer) {
@@ -172,6 +177,8 @@ export function ensureSkillsWatcher(params: { workspaceDir: string; config?: Ope
       stabilityThreshold: debounceMs,
       pollInterval: 100,
     },
+    // Only watch 2 levels deep: skillsRoot/SKILL.md and skillsRoot/<name>/SKILL.md
+    depth: 1,
     // Avoid FD exhaustion on macOS when a workspace contains huge trees.
     // This watcher only needs to react to SKILL.md changes.
     ignored: DEFAULT_SKILLS_WATCH_IGNORED,
@@ -180,6 +187,7 @@ export function ensureSkillsWatcher(params: { workspaceDir: string; config?: Ope
   const state: SkillsWatchState = { watcher, pathsKey, debounceMs };
 
   const schedule = (changedPath?: string) => {
+    log.info(`Skills watcher detected change: ${changedPath}`);
     state.pendingPath = changedPath ?? state.pendingPath;
     if (state.timer) {
       clearTimeout(state.timer);
@@ -188,6 +196,7 @@ export function ensureSkillsWatcher(params: { workspaceDir: string; config?: Ope
       const pendingPath = state.pendingPath;
       state.pendingPath = undefined;
       state.timer = undefined;
+      log.info(`Skills snapshot version bumped for ${workspaceDir}, changedPath: ${pendingPath}`);
       bumpSkillsSnapshotVersion({
         workspaceDir,
         reason: "watch",
@@ -196,9 +205,10 @@ export function ensureSkillsWatcher(params: { workspaceDir: string; config?: Ope
     }, debounceMs);
   };
 
-  watcher.on("add", (p) => schedule(p));
-  watcher.on("change", (p) => schedule(p));
-  watcher.on("unlink", (p) => schedule(p));
+  const isSkillFile = (p: string) => p.endsWith("SKILL.md");
+  watcher.on("add", (p) => isSkillFile(p) && schedule(p));
+  watcher.on("change", (p) => isSkillFile(p) && schedule(p));
+  watcher.on("unlink", (p) => isSkillFile(p) && schedule(p));
   watcher.on("error", (err) => {
     log.warn(`skills watcher error (${workspaceDir}): ${String(err)}`);
   });

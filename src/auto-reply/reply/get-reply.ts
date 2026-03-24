@@ -133,7 +133,6 @@ export async function getReplyFromConfig(
       workspaceDir: workspaceDirRaw,
     };
     await ensureTenantBootstrapFiles(tenantBootstrapContext);
-    registerTenantBootstrapContext(workspaceDirRaw, tenantBootstrapContext);
   }
 
   const workspace = await ensureAgentWorkspace({
@@ -142,6 +141,16 @@ export async function getReplyFromConfig(
     ensureBootstrapFiles: !ctx.TenantId && !agentCfg?.skipBootstrap && !isFastTestEnv,
   });
   const workspaceDir = workspace.dir;
+
+  // Register tenant context AFTER ensureAgentWorkspace so the key uses
+  // the same resolved path that downstream callers (buildWorkspaceSkillSnapshot,
+  // loadWorkspaceSkillEntries) will use for lookup.
+  if (tenantBootstrapContext) {
+    registerTenantBootstrapContext(workspaceDir, {
+      ...tenantBootstrapContext,
+      workspaceDir,
+    });
+  }
   const agentDir = ctx.TenantId
     ? resolveTenantAgentDir(ctx.TenantId, agentId)
     : resolveAgentDir(cfg, agentId);
