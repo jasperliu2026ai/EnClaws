@@ -64,18 +64,34 @@ If OpenClaw is the personal operator, EnClaws is the operating system for enterp
 
 ## Quick start
 
-From the repository root:
+### Option 1 — One-line install (macOS / Linux)
 
 ```bash
-git clone https://github.com/HashSTACS-HK/EnClaws.git
-cd EnClaws
-docker-compose up -d
+curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/install.sh | bash
 ```
 
-After the containers start, open the **Web management panel** and begin configuring your multi-user enterprise assistant environment.
+### Option 2 — Build from source
 
-> [!NOTE]
-> The current public documentation covers the minimal bootstrap command above plus the presence of a Web management panel. Additional setup details will be added as they are published.
+**Prerequisites:** [Node.js](https://nodejs.org/) >= 22.12.0 and [pnpm](https://pnpm.io/).
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/hashSTACS-Global/EnClaws.git
+cd EnClaws
+
+# 2. Install dependencies and build
+pnpm install
+pnpm build
+
+# 3. Create your environment file
+cp .env.example .env
+# Edit .env — at minimum set OPENCLAW_GATEWAY_TOKEN and at least one model provider API key
+
+# 4. Start the Gateway
+node --env-file=.env dist/index.js gateway --port 18789
+```
+
+After startup, the Gateway is available at `http://localhost:18789`.
 
 <p align="center">
   <img src="./docs/assets/dashboard-enclaws-placeholder.jpg" alt="EnClaws dashboard placeholder" width="92%" />
