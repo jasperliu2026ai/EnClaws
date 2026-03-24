@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Enclaws Installer for macOS and Linux
-# Usage: curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS/enclaws/main/install.sh | bash
+# Usage: curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/install.sh | bash
 
 BOLD='\033[1m'
 ACCENT='\033[38;2;100;149;237m'       # cornflower-blue #6495ED
@@ -365,7 +365,7 @@ show_install_plan() {
 }
 
 show_footer_links() {
-    local repo_url="https://github.com/hashSTACS/enclaws"
+    local repo_url="https://github.com/hashSTACS-Global/EnClaws"
     if [[ -n "$GUM" ]]; then
         local content
         content="$(printf '%s\n%s' "Need help?" "Docs: ${repo_url}")"
@@ -625,7 +625,7 @@ TAGLINE=$(pick_tagline)
 NO_ONBOARD=${ENCLAWS_NO_ONBOARD:-0}
 NO_PROMPT=${ENCLAWS_NO_PROMPT:-0}
 DRY_RUN=${ENCLAWS_DRY_RUN:-0}
-ENCLAWS_REPO_URL="${ENCLAWS_REPO_URL:-https://github.com/hashSTACS/enclaws.git}"
+ENCLAWS_REPO_URL="${ENCLAWS_REPO_URL:-https://github.com/hashSTACS-Global/EnClaws.git}"
 ENCLAWS_REPO_BRANCH="${ENCLAWS_REPO_BRANCH:-main}"
 GIT_DIR_DEFAULT="${HOME}/enclaws"
 GIT_DIR=${ENCLAWS_GIT_DIR:-$GIT_DIR_DEFAULT}
@@ -641,7 +641,7 @@ print_usage() {
 Enclaws installer (macOS + Linux)
 
 Usage:
-  curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS/enclaws/main/install.sh | bash -s -- [options]
+  curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/install.sh | bash -s -- [options]
 
 Options:
   --git-dir, --dir <path>             Checkout directory (default: ~/enclaws)
@@ -653,7 +653,7 @@ Options:
   --help, -h                            Show this help
 
 Environment variables:
-  ENCLAWS_REPO_URL=...                Git repository URL (default: https://github.com/hashSTACS/enclaws.git)
+  ENCLAWS_REPO_URL=...                Git repository URL (default: https://github.com/hashSTACS-Global/EnClaws.git)
   ENCLAWS_REPO_BRANCH=...            Git branch (default: main)
   ENCLAWS_GIT_DIR=...                Checkout directory (default: ~/enclaws)
   ENCLAWS_GIT_UPDATE=0|1             Pull latest changes (default: 1)
@@ -665,8 +665,8 @@ Environment variables:
   SHARP_IGNORE_GLOBAL_LIBVIPS=0|1    Default: 1 (avoid sharp building against global libvips)
 
 Examples:
-  curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS/enclaws/main/install.sh | bash
-  curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS/enclaws/main/install.sh | bash -s -- --no-onboard
+  curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/install.sh | bash
+  curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/install.sh | bash -s -- --no-onboard
   ENCLAWS_REPO_URL=https://gitlab.internal/team/enclaws.git bash install.sh
 EOF
 }
@@ -782,7 +782,7 @@ print_homebrew_admin_fix() {
     echo "  2) Ask an Administrator to grant admin rights, then sign out/in:"
     echo "     sudo dseditgroup -o edit -a ${current_user} -t user admin"
     echo "Then retry:"
-    echo "  curl -fsSL https://raw.githubusercontent.com/hashSTACS/enclaws/main/install.sh | bash"
+    echo "  curl -fsSL https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/install.sh | bash"
 }
 
 install_homebrew() {
@@ -1488,6 +1488,14 @@ open_browser() {
     if [[ "$OS" == "macos" ]]; then
         open "$url" 2>/dev/null || true
     elif [[ "$OS" == "linux" ]]; then
+        # Skip browser opening on headless servers (no DISPLAY / WAYLAND)
+        if [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
+            ui_info "No display detected (headless server). Open manually:"
+            echo ""
+            echo "    $url"
+            echo ""
+            return 0
+        fi
         if command -v xdg-open &>/dev/null; then
             xdg-open "$url" 2>/dev/null || true
         elif command -v sensible-browser &>/dev/null; then
@@ -1517,8 +1525,21 @@ start_gateway_after_install() {
     ui_success "以后启动只需运行: enclaws-gateway"
     echo ""
 
-    # Auto-open browser after a short delay (background)
-    ( sleep 3 && open_browser "$gateway_url" ) &
+    # Wait for the gateway to be ready, then open browser (background)
+    (
+        local max_wait=60
+        local elapsed=0
+        while [[ $elapsed -lt $max_wait ]]; do
+            sleep 1
+            elapsed=$((elapsed + 1))
+            if curl -sf -o /dev/null "http://localhost:18789" 2>/dev/null || \
+               wget -q -O /dev/null "http://localhost:18789" 2>/dev/null; then
+                open_browser "$gateway_url"
+                exit 0
+            fi
+        done
+        ui_warn "Gateway did not respond within ${max_wait}s — open manually: ${gateway_url}"
+    ) &
 
     cd "$repo_dir"
     exec node --env-file=.env dist/index.js gateway --port 18789 --allow-unconfigured

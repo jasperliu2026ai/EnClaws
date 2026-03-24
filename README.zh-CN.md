@@ -11,8 +11,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/HashSTACS-HK/EnClaws/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/HashSTACS-HK/EnClaws?style=social"></a>
-  <a href="https://github.com/HashSTACS-HK/EnClaws/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/HashSTACS-HK/EnClaws"></a>
+  <a href="https://github.com/hashSTACS-Global/EnClaws/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/hashSTACS-Global/EnClaws?style=social"></a>
+  <a href="https://github.com/hashSTACS-Global/EnClaws/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/hashSTACS-Global/EnClaws"></a>
   <a href="./LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
 </p>
 
@@ -64,18 +64,34 @@ OpenClaw 专注于个人助理体验，而 EnClaws 则聚焦于数字AI员工的
 
 ## 快速开始
 
-在仓库根目录下执行：
+### 方式一 — 一行命令安装（macOS / Linux）
 
 ```bash
-git clone https://github.com/HashSTACS-HK/EnClaws.git
-cd EnClaws
-docker-compose up -d
+curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/install.sh | bash
 ```
 
-容器启动后，打开 **Web 管理面板**，即可开始配置多用户企业助理环境。
+### 方式二 — 从源码构建
 
-> [!NOTE]
-> 当前公开文档仅涵盖上述最小化启动命令和 Web 管理面板的基本说明。更多设置细节将随项目进展陆续补充。
+**前置条件：** 已安装 [Node.js](https://nodejs.org/) >= 22.12.0 及 [pnpm](https://pnpm.io/)。
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/hashSTACS-Global/EnClaws.git
+cd EnClaws
+
+# 2. 安装依赖并构建
+pnpm install
+pnpm build
+
+# 3. 创建环境变量文件
+cp .env.example .env
+# 编辑 .env —— 至少设置 OPENCLAW_GATEWAY_TOKEN 以及一个模型提供商的 API Key
+
+# 4. 启动 Gateway
+node --env-file=.env dist/index.js gateway --port 18789
+```
+
+启动完成后，Gateway 默认可通过 `http://localhost:18789` 访问。
 
 <p align="center">
   <img src="./docs/assets/dashboard-enclaws-placeholder.jpg" alt="EnClaws 仪表盘占位图" width="92%" />
