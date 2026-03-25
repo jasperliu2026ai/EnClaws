@@ -218,43 +218,68 @@ export class TenantChannelsView extends LitElement {
     .btn-danger { background: var(--bg-destructive, #7f1d1d); color: var(--text-destructive, #fca5a5); }
     .btn-outline { background: transparent; border: 1px solid var(--border, #262626); color: var(--text, #e5e5e5); }
     .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1rem; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 1.25rem; }
     .channel-card {
       background: var(--card, #141414); border: 1px solid var(--border, #262626);
-      border-radius: var(--radius-lg, 8px); padding: 1.25rem;
+      border-radius: var(--radius-lg, 10px); overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .channel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-    .channel-name { font-size: 0.95rem; font-weight: 600; }
+    .channel-card:hover {
+      border-color: #3b82f6; box-shadow: 0 2px 12px rgba(59,130,246,0.08);
+    }
+    .channel-card-body { padding: 1.25rem; }
+    .channel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border, #262626);
+    }
+    .channel-name {
+      font-size: 1rem; font-weight: 600;
+      display: flex; align-items: center;
+    }
+    .channel-header-right { display: flex; align-items: center; gap: 0.5rem; }
     .channel-type {
-      font-size: 0.75rem; padding: 0.15rem 0.45rem; border-radius: 4px;
-      background: var(--border, #262626); color: var(--text-secondary, #a3a3a3);
+      font-size: 0.72rem; padding: 0.18rem 0.55rem; border-radius: 4px;
+      background: #1d4ed8; color: #fff; font-weight: 500; letter-spacing: 0.02em;
     }
     .policy-badge {
-      font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.4rem;
+      font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 4px;
+      font-weight: 500; letter-spacing: 0.02em;
     }
-    .policy-badge.open { background: #052e16; color: #86efac; }
-    .policy-badge.allowlist { background: #1e1b4b; color: #a5b4fc; }
-    .policy-badge.disabled { background: #2d1215; color: #fca5a5; }
-    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.3rem; }
-    .status-dot.active { background: #22c55e; }
+    .policy-badge.open { background: #16a34a; color: #fff; }
+    .policy-badge.allowlist { background: #7c3aed; color: #fff; }
+    .policy-badge.disabled { background: #dc2626; color: #fff; }
+    .info-row {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.82rem; padding: 0.45rem 0;
+      border-bottom: 1px solid var(--border, #262626);
+    }
+    .info-row:last-of-type { border-bottom: none; }
+    .info-label {
+      flex-shrink: 0; width: 5.5rem; font-size: 0.75rem;
+      color: var(--text, #e5e5e5); font-weight: 600;
+    }
+    .info-label::after { content: ":"; }
+    .info-value {
+      display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+      font-weight: 500; min-width: 0;
+    }
+    .info-value.mono { font-family: monospace; font-size: 0.78rem; }
+    .info-muted { font-size: 0.72rem; color: var(--text-muted, #525252); font-weight: 400; }
+    .info-divider { height: 0; margin: 0.3rem 0; border-top: 1px dashed var(--border, #262626); }
+    .connection-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.55rem;
+      border-radius: 10px; letter-spacing: 0.03em;
+    }
+    .connection-badge.online { background: #16a34a; color: #fff; }
+    .connection-badge.offline { background: #71717a; color: #fff; }
+    .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.active { background: #22c55e; box-shadow: 0 0 6px #22c55e88; }
     .status-dot.inactive { background: #525252; }
-    .channel-actions { display: flex; gap: 0.4rem; margin-top: 0.75rem; }
-    .apps-section { margin-top: 0.75rem; border-top: 1px solid var(--border, #262626); padding-top: 0.5rem; }
-    .apps-section-title { font-size: 0.75rem; color: var(--text-muted, #525252); margin-bottom: 0.4rem; }
-    .app-item {
-      font-size: 0.8rem; padding: 0.5rem 0.6rem; background: var(--bg, #0a0a0a);
-      border-radius: 4px; margin-bottom: 0.3rem;
-    }
-    .app-item-row { display: flex; justify-content: space-between; align-items: center; }
-    .app-item-info { display: flex; gap: 0.5rem; align-items: center; }
-    .agent-info {
-      font-size: 0.72rem; color: var(--text-secondary, #a3a3a3);
-      margin-top: 0.25rem; padding-left: 0.2rem;
-    }
-    .agent-tag {
-      display: inline-block; font-size: 0.68rem; padding: 0.1rem 0.35rem;
-      background: #1a1a2e; border: 1px solid #2d2d44; border-radius: 3px;
-      color: #a5b4fc; margin-right: 0.3rem;
+    .channel-actions {
+      display: flex; gap: 0.5rem; padding-top: 0.85rem;
+      margin-top: 0.5rem;
     }
     .error-msg {
       background: var(--bg-destructive, #2d1215); border: 1px solid var(--border-destructive, #7f1d1d);
@@ -1064,48 +1089,48 @@ export class TenantChannelsView extends LitElement {
             <span class="status-dot ${ch.isActive ? "active" : "inactive"}"></span>
             ${ch.channelName ?? typeName}
           </div>
-          <div>
+          <div class="channel-header-right">
             <span class="channel-type">${typeName}</span>
             <span class="policy-badge ${ch.channelPolicy}">${policyLabel}</span>
           </div>
         </div>
-        ${hasConnectionInfo ? html`
-          <div style="display:flex;align-items:center;gap:0.3rem;font-size:0.78rem;margin-bottom:0.5rem;">
-            <span style="color:var(--text-secondary,#a3a3a3)">${t("tenantChannels.connectionStatus")}:</span>
-            <span class="status-dot ${anyConnected ? "active" : "inactive"}"></span>
-            <span style="color:${anyConnected ? "#22c55e" : "var(--text-muted,#525252)"}">
-              ${anyConnected ? t("tenantChannels.online") : t("tenantChannels.offline")}
-            </span>
-          </div>
-        ` : nothing}
-        ${ch.apps && ch.apps.length > 0 ? html`
-          <div class="apps-section">
-            <div class="apps-section-title">${t("tenantChannels.appsAndAgents")} (${ch.apps.length})</div>
-            ${ch.apps.map((app) => html`
-              <div class="app-item">
-                <div class="app-item-row">
-                  <div class="app-item-info">
-                    <span>${app.botName || app.appId}</span>
-                    <span class="policy-badge ${app.groupPolicy}" style="font-size:0.65rem">
-                      ${this.policyOptions.find((p) => p.value === app.groupPolicy)?.label ?? app.groupPolicy}
-                    </span>
-                  </div>
-                  <span style="font-size:0.7rem;color:var(--text-muted,#525252)">${app.appId}</span>
-                </div>
-                ${app.agent ? html`
-                  <div class="agent-info">
-                    <span class="agent-tag">${t("tenantChannels.agent")}</span>
-                    ${(app.agent.config?.displayName as string) || app.agent.name || app.agent.agentId}
-                    <span style="color:var(--text-muted,#525252);margin-left:0.3rem">(${app.agent.agentId})</span>
-                  </div>
-                ` : nothing}
+        <div class="channel-card-body">
+          ${hasConnectionInfo ? html`
+            <div class="info-row">
+              <span class="info-label">${t("tenantChannels.connectionStatus")}</span>
+              <span class="connection-badge ${anyConnected ? "online" : "offline"}">
+                <span class="status-dot ${anyConnected ? "active" : "inactive"}"></span>
+                ${anyConnected ? t("tenantChannels.online") : t("tenantChannels.offline")}
+              </span>
+            </div>
+          ` : nothing}
+          ${ch.apps && ch.apps.length > 0 ? ch.apps.map((app, idx) => html`
+            <div class="info-row">
+              <span class="info-label">${t("tenantChannels.botName")}</span>
+              <span class="info-value">
+                ${app.botName || "-"}
+                <span class="policy-badge ${app.groupPolicy}" style="font-size:0.62rem">${this.policyOptions.find((p) => p.value === app.groupPolicy)?.label ?? app.groupPolicy}</span>
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">${t("tenantChannels.appId")}</span>
+              <span class="info-value mono">${app.appId}</span>
+            </div>
+            ${app.agent ? html`
+              <div class="info-row">
+                <span class="info-label">${t("tenantChannels.agent")}</span>
+                <span class="info-value">
+                  ${(app.agent.config?.displayName as string) || app.agent.name || app.agent.agentId}
+                  <span class="info-muted">(${app.agent.agentId})</span>
+                </span>
               </div>
-            `)}
+            ` : nothing}
+            ${idx < ch.apps.length - 1 ? html`<div class="info-divider"></div>` : nothing}
+          `) : nothing}
+          <div class="channel-actions">
+            <button class="btn btn-outline btn-sm" @click=${() => this.startEdit(ch)}>${t("tenantChannels.edit")}</button>
+            <button class="btn btn-danger btn-sm" @click=${() => this.handleDelete(ch)}>${t("tenantChannels.delete")}</button>
           </div>
-        ` : nothing}
-        <div class="channel-actions">
-          <button class="btn btn-outline btn-sm" @click=${() => this.startEdit(ch)}>${t("tenantChannels.edit")}</button>
-          <button class="btn btn-danger btn-sm" @click=${() => this.handleDelete(ch)}>${t("tenantChannels.delete")}</button>
         </div>
       </div>
     `;
