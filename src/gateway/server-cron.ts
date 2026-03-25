@@ -31,6 +31,7 @@ import { SsrFBlockedError } from "../infra/net/ssrf.js";
 import { deliverOutboundPayloads } from "../infra/outbound/deliver.js";
 import { enqueueSystemEvent } from "../infra/system-events.js";
 import { getChildLogger } from "../logging.js";
+import { createSubsystemLogger } from "../logging/subsystem.js";
 import { normalizeAgentId, toAgentStoreSessionKey } from "../routing/session-key.js";
 import { defaultRuntime } from "../runtime.js";
 
@@ -40,6 +41,7 @@ export type GatewayCronState = {
   cronEnabled: boolean;
 };
 
+const debugCronLog = createSubsystemLogger("gateway/cron-debug");
 const CRON_WEBHOOK_TIMEOUT_MS = 10_000;
 
 function redactWebhookUrl(url: string): string {
@@ -190,6 +192,7 @@ export function buildGatewayCronService(params: {
     },
     runHeartbeatOnce: async (opts) => {
       const { runtimeConfig, agentId, sessionKey } = resolveCronWakeTarget(opts);
+      debugCronLog.info(`[DEBUG-CRON] single-tenant runHeartbeatOnce fired agentId=${agentId} sessionKey=${sessionKey} reason=${opts?.reason}`);
       // Merge cron-supplied heartbeat overrides (e.g. target: "last") with the
       // fully resolved agent heartbeat config so cron-triggered heartbeats
       // respect agent-specific overrides (agents.list[].heartbeat) before
@@ -467,6 +470,7 @@ export function buildTenantCronService(params: {
    */
   async function tenantRunHeartbeat(opts: { sessionKey: string; text: string }): Promise<void> {
     const { sessionKey, text } = opts;
+    debugCronLog.info(`[DEBUG-CRON] tenantRunHeartbeat fired tenantId=${params.tenantId} userId=${params.userId} sessionKey=${sessionKey}`);
     const idempotencyKey = `cron-tenant-announce:${params.tenantId}:${Date.now()}`;
 
     // Step 1: Run agent via gateway WITHOUT delivery so we can control delivery.
@@ -517,10 +521,7 @@ export function buildTenantCronService(params: {
       senderOpenId && channel === "feishu" ? `<at id=${senderOpenId}></at> ` : "";
     const deliveryText = (mentionPrefix + responseText).trim();
 
-    cronLogger.info(
-      { sessionKey, channel, to, accountId, hasMention: !!senderOpenId },
-      "cron: tenant heartbeat: delivering",
-    );
+    debugCronLog.info(`[DEBUG-CRON] tenant heartbeat: delivering tenantId=${params.tenantId} userId=${params.userId} sessionKey=${sessionKey} channel=${channel} to=${to} accountId=${accountId}`);
 
     // Step 4: Deliver directly — bypasses the gateway's agent delivery path
     // which reads from the global session store and cannot resolve tenant sessions.

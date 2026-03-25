@@ -610,6 +610,7 @@ export async function runHeartbeatOnce(opts: {
   }
 
   const startedAt = opts.deps?.nowMs?.() ?? Date.now();
+  log.info(`[DEBUG-HB] runHeartbeatOnce fired agentId=${agentId} sessionKey=${opts.sessionKey ?? "(default)"} reason=${opts.reason ?? "(none)"}`);
   if (!isWithinActiveHours(cfg, heartbeat, startedAt)) {
     return { status: "skipped", reason: "quiet-hours" };
   }
@@ -915,6 +916,7 @@ export async function runHeartbeatOnce(opts: {
       }
     }
 
+    log.info(`[DEBUG-HB] delivering heartbeat response agentId=${agentId} sessionKey=${sessionKey} channel=${delivery.channel} to=${delivery.to} accountId=${deliveryAccountId}`);
     await deliverOutboundPayloads({
       cfg,
       channel: delivery.channel,
@@ -1149,6 +1151,7 @@ export function startHeartbeatRunner(opts: {
         continue;
       }
 
+      log.info(`[DEBUG-HB] heartbeatRunner tick firing runOnce agentId=${agent.agentId} reason=${reason} intervalMs=${agent.intervalMs}`);
       let res: HeartbeatRunResult;
       try {
         res = await runOnce({
