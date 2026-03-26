@@ -1207,8 +1207,9 @@ ensure_user_local_bin_on_path() {
 
     # shellcheck disable=SC2016
     local path_line='export PATH="$HOME/.local/bin:$PATH"'
-    for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-        if [[ -f "$rc" ]] && ! grep -q ".local/bin" "$rc"; then
+    for rc in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.zprofile"; do
+        touch "$rc"
+        if ! grep -q ".local/bin" "$rc"; then
             echo "$path_line" >> "$rc"
         fi
     done
@@ -1387,8 +1388,9 @@ WRAPPER
     # Add ~/.enclaws/bin to shell profile if not already there
     # shellcheck disable=SC2016
     local path_line='export PATH="$HOME/.enclaws/bin:$PATH"'
-    for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-        if [[ -f "$rc" ]] && ! grep -q ".enclaws/bin" "$rc"; then
+    for rc in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.zprofile"; do
+        touch "$rc"
+        if ! grep -q ".enclaws/bin" "$rc"; then
             echo "$path_line" >> "$rc"
         fi
     done
