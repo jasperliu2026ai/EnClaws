@@ -1,5 +1,6 @@
 import { createRequire } from "node:module";
 import { resolveEffectiveMessagesConfig, resolveHumanDelayConfig } from "../../agents/identity.js";
+import { queueEmbeddedPiMessageBySessionKey } from "../../agents/pi-embedded.js";
 import { createMemoryGetTool, createMemorySearchTool } from "../../agents/tools/memory-tool.js";
 import { handleSlackAction } from "../../agents/tools/slack-actions.js";
 import {
@@ -255,6 +256,7 @@ export function createPluginRuntime(): PluginRuntime {
     logging: createRuntimeLogging(),
     state: { resolveStateDir },
     tenant: createRuntimeTenant(),
+    agent: createRuntimeAgent(),
   };
 }
 
@@ -484,6 +486,20 @@ function createRuntimeTenant(): PluginRuntime["tenant"] {
     autoProvision: async (params) => {
       const { autoProvisionTenantUser } = await import("../../infra/channel-auto-provision.js");
       return autoProvisionTenantUser(params);
+    },
+  };
+}
+
+function createRuntimeAgent(): PluginRuntime["agent"] {
+  return {
+    steerMessage: ({ sessionKey, text }) => {
+      const result = queueEmbeddedPiMessageBySessionKey(sessionKey, text);
+      if (!result) {
+        console.warn(`[steer] failed: sessionKey=${sessionKey}`);
+      } else {
+        console.warn(`[steer] injected OK: sessionKey=${sessionKey}`);
+      }
+      return result;
     },
   };
 }

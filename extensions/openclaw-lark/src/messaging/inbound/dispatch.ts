@@ -29,6 +29,7 @@ import {
   threadScopedKey,
   registerActiveDispatcher,
   unregisterActiveDispatcher,
+  consumeAbortedCardMessageId,
 } from '../../channel/chat-queue';
 import { isLikelyAbortText } from '../../channel/abort-detect';
 import { type DispatchContext, buildDispatchContext, resolveThreadSessionKey } from './dispatch-context';
@@ -76,7 +77,7 @@ async function dispatchNormalMessage(
     return;
   }
 
-  const { dispatcher, replyOptions, markDispatchIdle, markFullyComplete, abortCard } = createFeishuReplyDispatcher({
+  const { dispatcher, replyOptions, markDispatchIdle, markFullyComplete, abortCard, getCardMessageId } = createFeishuReplyDispatcher({
     cfg: dc.accountScopedCfg,
     agentId: dc.route.agentId,
     chatId: dc.ctx.chatId,
@@ -91,12 +92,25 @@ async function dispatchNormalMessage(
   // underlying LLM request (not just the streaming card UI).
   const abortController = new AbortController();
 
+  const effectiveSessionKey = dc.threadSessionKey ?? dc.route.sessionKey;
+
   // Register the active dispatcher so the monitor abort fast-path can
   // terminate the streaming card before this task completes.
+  // The steer callback allows the event-handler fast-path to inject
+  // user messages into the running agent session without waiting for
+  // the serial queue (analogous to the abort fast-path).
   const queueKey = buildQueueKey(dc.account.accountId, dc.ctx.chatId, dc.ctx.threadId, dc.isGroup ? dc.ctx.senderId : undefined);
-  registerActiveDispatcher(queueKey, { abortCard, abortController });
-
-  const effectiveSessionKey = dc.threadSessionKey ?? dc.route.sessionKey;
+  registerActiveDispatcher(queueKey, {
+    abortCard,
+    abortController,
+    steer: (text: string) => {
+      return dc.core.agent.steerMessage({
+        sessionKey: effectiveSessionKey,
+        text,
+      });
+    },
+    getCardMessageId: () => getCardMessageId(),
+  });
   dc.log(`feishu[${dc.account.accountId}]: dispatching to agent (session=${effectiveSessionKey})`);
   log.info(`dispatching to agent (session=${effectiveSessionKey})`);
 
@@ -256,8 +270,19 @@ export async function dispatchToAgent(params: {
   // Resolve per-group skill filter (per-group > default "*")
   const skillFilter = dc.isGroup ? (params.groupConfig?.skills ?? params.defaultGroupConfig?.skills) : undefined;
 
+  // If this is an abort message, check for a stored card message ID from
+  // the abort fast-path so the feedback replies to the original bot card.
+  let effectiveReplyToMessageId = params.replyToMessageId;
+  if (isLikelyAbortText(params.ctx.content?.trim() ?? '')) {
+    const abortQueueKey = buildQueueKey(dc.account.accountId, dc.ctx.chatId, dc.ctx.threadId, dc.isGroup ? dc.ctx.senderId : undefined);
+    const abortedCardMsgId = consumeAbortedCardMessageId(abortQueueKey);
+    if (abortedCardMsgId) {
+      effectiveReplyToMessageId = abortedCardMsgId;
+    }
+  }
+
   if (isCommand) {
-    await dispatchSystemCommand(dc, ctxPayload, isBareNewOrReset, params.replyToMessageId);
+    await dispatchSystemCommand(dc, ctxPayload, isBareNewOrReset, effectiveReplyToMessageId);
     // /new and /reset explicitly start a new session — clear pending history
     if (isBareNewOrReset && dc.isGroup && historyKey && params.chatHistories) {
       clearHistoryEntriesIfEnabled({
@@ -277,7 +302,7 @@ export async function dispatchToAgent(params: {
       params.chatHistories,
       historyKey,
       params.historyLimit,
-      params.replyToMessageId,
+      effectiveReplyToMessageId,
       skillFilter,
       params.skipTyping,
     );

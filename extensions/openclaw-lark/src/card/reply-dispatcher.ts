@@ -321,5 +321,6 @@ export function createFeishuReplyDispatcher(params: CreateFeishuReplyDispatcherP
       controller?.markFullyComplete();
     },
     abortCard,
+    getCardMessageId: () => controller?.cardMessageId ?? undefined,
   };
 }

@@ -152,6 +152,8 @@ export interface FeishuReplyDispatcherResult {
   markDispatchIdle: () => void;
   markFullyComplete: () => void;
   abortCard: () => Promise<void>;
+  /** Get the streaming card's Feishu message ID (for abort reply targeting). */
+  getCardMessageId: () => string | undefined;
 }
 
 // ---------------------------------------------------------------------------

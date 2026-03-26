@@ -16,7 +16,7 @@ import { isMessageExpired } from '../messaging/inbound/dedup';
 import { withTicket } from '../core/lark-ticket';
 import { larkLogger } from '../core/lark-logger';
 import { handleCardAction } from '../tools/auto-auth';
-import { enqueueFeishuChatTask, buildQueueKey, hasActiveTask, getActiveDispatcher } from './chat-queue';
+import { enqueueFeishuChatTask, buildQueueKey, hasActiveTask, getActiveDispatcher, setAbortedCardMessageId } from './chat-queue';
 import { extractRawTextFromEvent, isLikelyAbortText } from './abort-detect';
 import type { MonitorContext } from './types';
 
@@ -89,17 +89,52 @@ export async function handleMessageEvent(ctx: MonitorContext, data: unknown): Pr
     // reply dispatcher for this chat, fire abortCard() immediately
     // (before the message enters the serial queue) so the streaming
     // card is terminated without waiting for the current task.
+    // The message still enters the queue so the core pipeline can send
+    // the "该任务已终止。" feedback via tryFastAbortFromMessage.
     const abortText = extractRawTextFromEvent(event);
-    if (abortText && isLikelyAbortText(abortText)) {
+    const isAbortText = Boolean(abortText && isLikelyAbortText(abortText));
+    if (isAbortText) {
       const queueKey = buildQueueKey(accountId, chatId, threadId, senderQueueId);
       if (hasActiveTask(queueKey)) {
         const active = getActiveDispatcher(queueKey);
         if (active) {
           log(`feishu[${accountId}]: abort fast-path triggered for chat ${chatId} (text="${abortText}")`);
+          // Capture the card message ID before aborting so the subsequent
+          // /stop feedback can reply to the original bot card.
+          const cardMsgId = active.getCardMessageId?.();
+          if (cardMsgId) {
+            setAbortedCardMessageId(queueKey, cardMsgId);
+          }
           active.abortController?.abort();
           active.abortCard().catch((err) => {
             error(`feishu[${accountId}]: abort fast-path abortCard failed: ${String(err)}`);
           });
+        }
+      }
+    }
+
+    // ---- Steer fast-path (interjection via /btw prefix) ----
+    // Only messages starting with "/btw " (case-insensitive) are eligible
+    // for steer injection.  The prefix is stripped before sending to the
+    // agent so the LLM sees clean supplementary text.
+    if (!isAbortText) {
+      const messageText = extractRawTextFromEvent(event);
+      const btwMatch = messageText?.match(/^\/btw\s+/i);
+      if (btwMatch) {
+        const queueKey = buildQueueKey(accountId, chatId, threadId, senderQueueId);
+        if (hasActiveTask(queueKey)) {
+          const active = getActiveDispatcher(queueKey);
+          if (active?.steer) {
+            const steerText = messageText!.slice(btwMatch[0].length).trim();
+            if (steerText) {
+              const steered = active.steer(steerText);
+              if (steered) {
+                log(`feishu[${accountId}]: /btw steer injected into active run for chat ${chatId}`);
+                return;
+              }
+              log(`feishu[${accountId}]: /btw steer failed for chat ${chatId}, falling through to queue`);
+            }
+          }
         }
       }
     }

@@ -163,10 +163,10 @@ export function resetAbortMemoryForTest(): void {
 
 export function formatAbortReplyText(stoppedSubagents?: number): string {
   if (typeof stoppedSubagents !== "number" || stoppedSubagents <= 0) {
-    return "⚙️ Agent was aborted.";
+    return "该任务已终止。";
   }
-  const label = stoppedSubagents === 1 ? "sub-agent" : "sub-agents";
-  return `⚙️ Agent was aborted. Stopped ${stoppedSubagents} ${label}.`;
+  const label = stoppedSubagents === 1 ? "个子任务" : "个子任务";
+  return `该任务已终止。已停止 ${stoppedSubagents} ${label}。`;
 }
 
 export function resolveSessionEntryForKey(

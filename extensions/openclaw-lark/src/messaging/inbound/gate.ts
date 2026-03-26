@@ -36,6 +36,7 @@ import {
   resolveGroupSenderPolicyContext,
 } from './policy';
 import { mentionedBot } from './mention';
+import { isLikelyAbortText } from '../../channel/abort-detect';
 import { sendPairingReply } from './gate-effects';
 
 /** Prevent spamming the legacy groupAllowFrom migration warning. */
@@ -224,18 +225,22 @@ function checkGroupGate(params: {
   });
 
   if (requireMention && !mentionedBot(ctx)) {
-    log(`feishu[${account.accountId}]: message in group ${ctx.chatId} did not mention bot, recording to history`);
-
-    return {
-      allowed: false,
-      reason: 'no_mention',
-      historyEntry: {
-        sender: ctx.senderId,
-        body: `${ctx.senderName ?? ctx.senderId}: ${ctx.content}`,
-        timestamp: Date.now(),
-        messageId: ctx.messageId,
-      },
-    };
+    // Abort/stop commands bypass the mention requirement so the core pipeline
+    // can send "该任务已终止。" feedback even without a bot mention.
+    if (!isLikelyAbortText(ctx.content ?? '')) {
+      log(`feishu[${account.accountId}]: message in group ${ctx.chatId} did not mention bot, recording to history`);
+      return {
+        allowed: false,
+        reason: 'no_mention',
+        historyEntry: {
+          sender: ctx.senderId,
+          body: `${ctx.senderName ?? ctx.senderId}: ${ctx.content}`,
+          timestamp: Date.now(),
+          messageId: ctx.messageId,
+        },
+      };
+    }
+    log(`feishu[${account.accountId}]: abort command in group ${ctx.chatId} bypassing mention requirement`);
   }
 
   return { allowed: true };

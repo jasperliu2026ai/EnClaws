@@ -298,6 +298,9 @@ function createMockRuntime(): PluginRuntime {
     tenant: {
       autoProvision: vi.fn(() => null) as unknown as PluginRuntime["tenant"]["autoProvision"],
     },
+    agent: {
+      steerMessage: vi.fn(() => false) as unknown as PluginRuntime["agent"]["steerMessage"],
+    },
   };
 }
 

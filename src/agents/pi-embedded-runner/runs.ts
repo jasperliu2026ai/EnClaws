@@ -12,6 +12,8 @@ type EmbeddedPiQueueHandle = {
 };
 
 const ACTIVE_EMBEDDED_RUNS = new Map<string, EmbeddedPiQueueHandle>();
+/** Reverse mapping: sessionKey → sessionId for active runs. */
+const SESSION_KEY_TO_ID = new Map<string, string>();
 type EmbeddedRunWaiter = {
   resolve: (ended: boolean) => void;
   timer: NodeJS.Timeout;
@@ -35,6 +37,19 @@ export function queueEmbeddedPiMessage(sessionId: string, text: string): boolean
   logMessageQueued({ sessionId, source: "pi-embedded-runner" });
   void handle.queueMessage(text);
   return true;
+}
+
+/**
+ * Queue a steer message by sessionKey (reverse-lookup).
+ * Used by the plugin steer fast-path which only knows the sessionKey.
+ */
+export function queueEmbeddedPiMessageBySessionKey(sessionKey: string, text: string): boolean {
+  const sessionId = SESSION_KEY_TO_ID.get(sessionKey.toLowerCase());
+  if (!sessionId) {
+    diag.debug(`queue by sessionKey failed: sessionKey=${sessionKey} reason=no_mapping`);
+    return false;
+  }
+  return queueEmbeddedPiMessage(sessionId, text);
 }
 
 export function abortEmbeddedPiRun(sessionId: string): boolean {
@@ -122,6 +137,9 @@ export function setActiveEmbeddedRun(
 ) {
   const wasActive = ACTIVE_EMBEDDED_RUNS.has(sessionId);
   ACTIVE_EMBEDDED_RUNS.set(sessionId, handle);
+  if (sessionKey) {
+    SESSION_KEY_TO_ID.set(sessionKey.toLowerCase(), sessionId);
+  }
   logSessionStateChange({
     sessionId,
     sessionKey,
@@ -129,7 +147,7 @@ export function setActiveEmbeddedRun(
     reason: wasActive ? "run_replaced" : "run_started",
   });
   if (!sessionId.startsWith("probe-")) {
-    diag.debug(`run registered: sessionId=${sessionId} totalActive=${ACTIVE_EMBEDDED_RUNS.size}`);
+    diag.debug(`run registered: sessionId=${sessionId} sessionKey=${sessionKey} totalActive=${ACTIVE_EMBEDDED_RUNS.size}`);
   }
 }
 
@@ -140,6 +158,9 @@ export function clearActiveEmbeddedRun(
 ) {
   if (ACTIVE_EMBEDDED_RUNS.get(sessionId) === handle) {
     ACTIVE_EMBEDDED_RUNS.delete(sessionId);
+    if (sessionKey) {
+      SESSION_KEY_TO_ID.delete(sessionKey.toLowerCase());
+    }
     logSessionStateChange({ sessionId, sessionKey, state: "idle", reason: "run_completed" });
     if (!sessionId.startsWith("probe-")) {
       diag.debug(`run cleared: sessionId=${sessionId} totalActive=${ACTIVE_EMBEDDED_RUNS.size}`);

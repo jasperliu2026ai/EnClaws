@@ -19,10 +19,31 @@ type QueueStatus = 'queued' | 'immediate';
 export interface ActiveDispatcherEntry {
   abortCard: () => Promise<void>;
   abortController?: AbortController;
+  /** Inject a user message into the running agent session (steer). */
+  steer?: (text: string) => boolean;
+  /** Get the streaming card's message ID (for abort reply targeting). */
+  getCardMessageId?: () => string | undefined;
 }
 
 const chatQueues = new Map<string, Promise<void>>();
 const activeDispatchers = new Map<string, ActiveDispatcherEntry>();
+
+/**
+ * Temporary storage for the aborted card's message ID per queue key.
+ * Set by the abort fast-path so the subsequent `/stop` message dispatch
+ * can reply to the original bot card instead of the user's stop message.
+ */
+const abortedCardMessageIds = new Map<string, string>();
+
+export function setAbortedCardMessageId(key: string, messageId: string): void {
+  abortedCardMessageIds.set(key, messageId);
+}
+
+export function consumeAbortedCardMessageId(key: string): string | undefined {
+  const id = abortedCardMessageIds.get(key);
+  if (id) abortedCardMessageIds.delete(key);
+  return id;
+}
 
 /**
  * Append `:thread:{threadId}` suffix when threadId is present.
@@ -85,4 +106,5 @@ export function enqueueFeishuChatTask(params: {
 export function _resetChatQueueState(): void {
   chatQueues.clear();
   activeDispatchers.clear();
+  abortedCardMessageIds.clear();
 }

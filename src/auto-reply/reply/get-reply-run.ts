@@ -422,11 +422,13 @@ export async function runPreparedReply(
   const queuedBody = mediaNote
     ? [mediaNote, mediaReplyHint, queueBodyBase].filter(Boolean).join("\n").trim()
     : queueBodyBase;
+  const effectiveInlineMode = perMessageQueueMode;
+
   const resolvedQueue = resolveQueueSettings({
     cfg,
     channel: sessionCtx.Provider,
     sessionEntry,
-    inlineMode: perMessageQueueMode,
+    inlineMode: effectiveInlineMode,
     inlineOptions: perMessageQueueOptions,
   });
   const sessionLaneKey = resolveEmbeddedSessionLane(sessionKey ?? sessionIdFinal);

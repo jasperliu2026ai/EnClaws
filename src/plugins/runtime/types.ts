@@ -389,4 +389,13 @@ export type PluginRuntime = {
       displayName?: string;
     }) => Promise<{ userId: string; unionId: string; userCreated: boolean } | null>;
   };
+  agent: {
+    /** Inject a user message into a running agent session (steer).
+     *  Looks up sessionId from the active run registry using sessionKey.
+     *  Returns true if the message was successfully queued. */
+    steerMessage: (params: {
+      sessionKey: string;
+      text: string;
+    }) => boolean;
+  };
 };
