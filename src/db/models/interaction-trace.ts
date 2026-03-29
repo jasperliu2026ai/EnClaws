@@ -6,6 +6,12 @@ import { query, getDbType, DB_SQLITE } from "../index.js";
 import * as sqliteTrace from "../sqlite/models/interaction-trace.js";
 import type { LlmInteractionTrace } from "../types.js";
 
+/** Sanitize a value for PostgreSQL JSONB — strip \u0000 null bytes which PG rejects. */
+function sanitizeJson(val: unknown): string | null {
+  if (val == null) return null;
+  return JSON.stringify(val).replace(/\\u0000/g, "");
+}
+
 function rowToTrace(row: Record<string, unknown>): LlmInteractionTrace {
   return {
     id: row.id as string,
@@ -77,10 +83,10 @@ export async function createInteractionTrace(params: {
         params.provider ?? null,
         params.model ?? null,
         params.systemPrompt ?? null,
-        JSON.stringify(params.messages),
-        params.tools ? JSON.stringify(params.tools) : null,
-        params.requestParams ? JSON.stringify(params.requestParams) : null,
-        params.response ? JSON.stringify(params.response) : null,
+        sanitizeJson(params.messages),
+        sanitizeJson(params.tools),
+        sanitizeJson(params.requestParams),
+        sanitizeJson(params.response),
         params.stopReason ?? null,
         params.errorMessage ?? null,
         params.inputTokens ?? 0,
