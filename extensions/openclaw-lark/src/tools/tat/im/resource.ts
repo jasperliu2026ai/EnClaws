@@ -16,6 +16,7 @@ import type { OpenClawPluginApi } from 'openclaw/plugin-sdk';
 import { buildRandomTempFilePath } from 'openclaw/plugin-sdk';
 import { Type } from '@sinclair/typebox';
 import { json, createToolContext, formatLarkError } from '../../oapi/helpers';
+import * as crypto from 'node:crypto';
 import * as fsPromises from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -89,20 +90,30 @@ async function extractBuffer(res: any): Promise<{
 }
 
 /**
- * 将 buffer 保存到临时文件，返回路径。
+ * 将 buffer 保存到用户工作空间的 download 目录。
+ * agent 运行期间 process.cwd() 已被设为当前用户的 workspace 目录。
+ * 若 workspace 不可用则回退到临时目录。
  */
-async function saveToTempFile(buffer: Buffer, contentType: string, prefix: string): Promise<string> {
+async function saveToWorkspaceOrTemp(buffer: Buffer, contentType: string, prefix: string): Promise<string> {
   const mimeType = contentType ? contentType.split(';')[0].trim() : '';
   const mimeExt = mimeType ? MIME_TO_EXT[mimeType] : undefined;
+  const ext = mimeExt ? `.${mimeExt}` : '';
+  const fileName = `${prefix}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext}`;
 
-  const filePath = buildRandomTempFilePath({
-    prefix,
-    extension: mimeExt,
-  });
-
-  await fsPromises.mkdir(path.dirname(filePath), { recursive: true });
-  await fsPromises.writeFile(filePath, buffer);
-  return filePath;
+  // Prefer workspace/download (cwd is set to workspace during agent execution)
+  const wsDownloadDir = path.join(process.cwd(), 'download');
+  try {
+    await fsPromises.mkdir(wsDownloadDir, { recursive: true });
+    const filePath = path.join(wsDownloadDir, fileName);
+    await fsPromises.writeFile(filePath, buffer);
+    return filePath;
+  } catch {
+    // Fallback to temp dir if workspace is not writable
+    const filePath = buildRandomTempFilePath({ prefix, extension: mimeExt });
+    await fsPromises.mkdir(path.dirname(filePath), { recursive: true });
+    await fsPromises.writeFile(filePath, buffer);
+    return filePath;
+  }
 }
 
 // ===========================================================================
@@ -141,7 +152,7 @@ export function registerFeishuImBotImageTool(api: OpenClawPluginApi) {
         '\n\n适用场景：用户直接发送给机器人的消息、用户引用的消息、机器人收到的群聊消息中的图片/文件。' +
         '即当前对话上下文中出现的 message_id 和 image_key/file_key，应使用本工具下载。' +
         '\n引用消息的 message_id 可从上下文中的 [message_id=om_xxx] 提取，无需向用户询问。' +
-        '\n\n文件自动保存到 /tmp/openclaw/ 下，返回值中的 saved_path 为实际保存路径。',
+        '\n\n文件自动保存到当前用户工作空间的 download 目录下，返回值中的 saved_path 为实际保存路径。',
       parameters: FeishuImBotImageSchema,
       async execute(_toolCallId: string, params: unknown) {
         const p = params as FeishuImBotImageParams;
@@ -163,7 +174,7 @@ export function registerFeishuImBotImageTool(api: OpenClawPluginApi) {
           const { buffer, contentType } = await extractBuffer(res);
           log.info(`download: ${buffer.length} bytes, content-type=${contentType}`);
 
-          const savedPath = await saveToTempFile(buffer, contentType, 'bot-resource');
+          const savedPath = await saveToWorkspaceOrTemp(buffer, contentType, 'bot-resource');
           log.info(`download: saved to ${savedPath}`);
 
           return json({

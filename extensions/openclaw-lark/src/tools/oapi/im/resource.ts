@@ -14,6 +14,7 @@ import type { OpenClawPluginApi } from 'openclaw/plugin-sdk';
 import { buildRandomTempFilePath } from 'openclaw/plugin-sdk';
 import { Type } from '@sinclair/typebox';
 import { json, createToolContext, handleInvokeErrorWithAutoAuth } from '../helpers';
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -149,18 +150,24 @@ export function registerFeishuImUserFetchResourceTool(api: OpenClawPluginApi) {
           const contentType = res.headers?.['content-type'] || '';
           log.info(`fetch_resource: content-type=${contentType}`);
 
-          // 从 Content-Type 推断扩展名，自动生成保存路径
+          // 从 Content-Type 推断扩展名
           const mimeType = contentType ? contentType.split(';')[0].trim() : '';
           const mimeExt = mimeType ? MIME_TO_EXT[mimeType] : undefined;
+          const ext = mimeExt ? `.${mimeExt}` : '';
+          const fileName = `im-resource-${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext}`;
 
-          const finalPath = buildRandomTempFilePath({
-            prefix: 'im-resource',
-            extension: mimeExt,
-          });
+          // 优先保存到用户工作空间的 download 目录（agent 运行期间 cwd 已设为 workspace）
+          let finalPath: string;
+          const wsDownloadDir = path.join(process.cwd(), 'download');
+          try {
+            await fs.mkdir(wsDownloadDir, { recursive: true });
+            finalPath = path.join(wsDownloadDir, fileName);
+          } catch {
+            // 回退到临时目录
+            finalPath = buildRandomTempFilePath({ prefix: 'im-resource', extension: mimeExt });
+            await fs.mkdir(path.dirname(finalPath), { recursive: true });
+          }
           log.info(`fetch_resource: saving to ${finalPath}`);
-
-          // 确保父目录存在
-          await fs.mkdir(path.dirname(finalPath), { recursive: true });
 
           // 保存文件
           try {
