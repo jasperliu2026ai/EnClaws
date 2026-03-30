@@ -29,6 +29,8 @@ export async function downloadResources(params: {
   maxBytes: number;
   log?: (msg: string) => void;
   accountId?: string;
+  /** Override base directory for media storage (multi-tenant). */
+  mediaBaseDir?: string;
 }): Promise<FeishuMediaInfo[]> {
   const { cfg, messageId, resources, maxBytes, log, accountId } = params;
 
@@ -54,7 +56,7 @@ export async function downloadResources(params: {
       }
 
       const fileName = result.fileName || res.fileName;
-      const saved = await core.channel.media.saveMediaBuffer(result.buffer, contentType, 'inbound', maxBytes, fileName);
+      const saved = await core.channel.media.saveMediaBuffer(result.buffer, contentType, 'inbound', maxBytes, fileName, params.mediaBaseDir);
 
       const placeholder = inferPlaceholderFromType(res.type);
       out.push({

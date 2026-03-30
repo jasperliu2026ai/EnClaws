@@ -305,6 +305,7 @@ export async function dispatchToAgent(params: {
       ...params.mediaPayload,
       ...(groupSystemPrompt ? { GroupSystemPrompt: groupSystemPrompt } : {}),
       ...(dc.ctx.threadId ? { MessageThreadId: dc.ctx.threadId } : {}),
+      ...(dc.ctx.rawSender?.sender_id?.union_id ? { SenderUnionId: dc.ctx.rawSender.sender_id.union_id } : {}),
     },
   });
 

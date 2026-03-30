@@ -158,6 +158,24 @@ export async function resolveMedia(params: {
 
   const mediaMaxBytes = (accountFeishuCfg?.mediaMaxMb ?? 30) * 1024 * 1024;
 
+  // Resolve tenant-scoped media directory when tenantId is available in account config
+  let mediaBaseDir: string | undefined;
+  const tenantId = (account.config as Record<string, unknown>)?.tenantId as string | undefined;
+  if (tenantId && ctx.senderId) {
+    try {
+      const { LarkClient: LC } = await import('../../core/lark-client');
+      const unionId = ctx.rawSender?.sender_id?.union_id;
+      const userId = unionId || ctx.senderId;
+      const userDir = LC.runtime?.channel?.session?.resolveTenantUserDir?.(tenantId, userId);
+      if (userDir) {
+        const path = await import('path');
+        mediaBaseDir = path.join(userDir, 'media');
+      }
+    } catch {
+      // Fall back to default media dir
+    }
+  }
+
   const mediaList = await downloadResources({
     cfg: accountScopedCfg,
     messageId: ctx.messageId,
@@ -165,6 +183,7 @@ export async function resolveMedia(params: {
     maxBytes: mediaMaxBytes,
     log,
     accountId: account.accountId,
+    mediaBaseDir,
   });
 
   if (mediaList.length > 0) {
