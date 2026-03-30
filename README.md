@@ -1,7 +1,7 @@
 # EnClaws — Enterprise AI Assistant Container Platform
 
 <p align="center">
-  <img src="./docs/assets/banner-enclaws-placeholder.png" alt="EnClaws banner placeholder" width="100%" />
+  <img src="https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/docs/assets/banner-enclaws-placeholder.png" alt="EnClaws banner placeholder" width="100%" />
 </p>
 
 <p align="center">
@@ -63,23 +63,52 @@ In the Claw world, the split is simple:
 
 If OpenClaw is the personal operator, EnClaws is the enterprise operating environment.
 
-## Quick start (TL;DR)
+## Quick start
 
-From the repository root:
+### Option 1 — npm install (all platforms)
 
 ```bash
-git clone https://github.com/hashSTACS/EnClaws.git
-cd EnClaws
-docker-compose up -d
+npm install -g enclaws
+enclaws gateway
 ```
 
-After the containers start, open the **Web management panel** and begin configuring your multi-user enterprise assistant environment.
+### Option 2 — Windows one-click installer
 
-> [!NOTE]
-> The current public documentation covers the minimal bootstrap command above plus the presence of a Web management panel. Additional setup details will be added as they are published.
+Download `EnClaws-Setup-x.x.x.exe` from [Releases](https://github.com/hashSTACS-Global/EnClaws/releases), double-click to install. No admin rights required, Node.js runtime included, fully offline.
+
+After installation, open the desktop shortcut "EnClaws" or run `enclaws gateway` in a new terminal.
+
+### Option 3 — One-line install (macOS / Linux)
+
+```bash
+curl -fsSL --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/install.sh | bash
+```
+
+### Option 4 — Build from source
+
+**Prerequisites:** [Node.js](https://nodejs.org/) >= 22.12.0 and [pnpm](https://pnpm.io/).
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/hashSTACS-Global/EnClaws.git
+cd EnClaws
+
+# 2. Install dependencies and build
+pnpm install
+pnpm build
+pnpm ui:build # auto-installs UI deps on first run
+
+# 3. Register the enclaws command globally
+npm link
+
+# 4. Start the Gateway
+enclaws gateway
+```
+
+After startup, the Gateway is available at `http://localhost:18789`.
 
 <p align="center">
-  <img src="./docs/assets/dashboard-enclaws-placeholder.jpg" alt="EnClaws dashboard placeholder" width="92%" />
+  <img src="https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/docs/assets/dashboard-enclaws-placeholder.jpg" alt="EnClaws dashboard placeholder" width="92%" />
 </p>
 
 ## Highlights
@@ -264,10 +293,10 @@ Stay close to releases, operator feedback, and product discussion:
 
 <p align="center">
   <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=2der9793-7a5d-452c-b575-1a1f6bbe540f">
-    <img src="docs/assets/community-feishu-qr.jpg" alt="Feishu QR code for joining the EnClaws group" width="280" />
+    <img src="https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/docs/assets/community-feishu-qr.jpg" alt="Feishu QR code for joining the EnClaws group" width="280" />
   </a>
   <a href="https://discord.gg/ExT4MEnK4w">
-    <img src="./docs/assets/community-discord-qr.jpg" alt="Discord QR code for joining the EnClaws server" width="280" />
+    <img src="https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/docs/assets/community-discord-qr.jpg" alt="Discord QR code for joining the EnClaws server" width="280" />
   </a>
 </p>
 

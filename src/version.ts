@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 
 declare const __OPENCLAW_VERSION__: string | undefined;
-const CORE_PACKAGE_NAME = "openclaw";
+const CORE_PACKAGE_NAME = "enclaws";
 
 const PACKAGE_JSON_CANDIDATES = [
   "../package.json",
@@ -88,7 +88,12 @@ export function resolveRuntimeServiceVersion(
   );
 }
 
-// Single source of truth for the current OpenClaw version.
+// Product display name — single source of truth for branding.
+export const PRODUCT_NAME = "EnClaws";
+export const PRODUCT_NAME_UPPER = PRODUCT_NAME.toUpperCase();
+export const PRODUCT_NAME_LOWER = PRODUCT_NAME.toLowerCase();
+
+// Single source of truth for the current EnClaws version.
 // - Embedded/bundled builds: injected define or env var.
 // - Dev/npm builds: package.json.
 export const VERSION =
