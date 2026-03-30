@@ -96,6 +96,7 @@ cd EnClaws
 # 2. Install dependencies and build
 pnpm install
 pnpm build
+pnpm ui:build # auto-installs UI deps on first run
 
 # 3. Register the enclaws command globally
 npm link

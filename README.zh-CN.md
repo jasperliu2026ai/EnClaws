@@ -92,6 +92,7 @@ cd EnClaws
 # 2. 安装依赖并构建
 pnpm install
 pnpm build
+pnpm ui:build # 首次运行时自动安装用户界面依赖项
 
 # 3. 注册 enclaws 全局命令
 npm link
