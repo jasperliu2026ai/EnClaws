@@ -22,7 +22,7 @@
  */
 
 import pg from "pg";
-import { initSqliteDb, closeSqliteDb, sqliteQuery, withSqliteTransaction } from "./sqlite/index.js";
+import { initSqliteDb, closeSqliteDb, sqliteQuery, getSqliteDb, withSqliteTransaction } from "./sqlite/index.js";
 import type { SqliteQueryResult } from "./sqlite/index.js";
 
 const { Pool } = pg;
@@ -160,31 +160,26 @@ export async function withTransaction<T>(
   fn: (client: DbClient) => Promise<T>,
 ): Promise<T> {
   if (dbType === DB_SQLITE) {
-    // SQLite transactions are synchronous. Wrap the async fn for compatibility.
-    // We use a thin adapter that makes sqliteQuery look like a client.
-    return withSqliteTransaction((client) => {
-      // Create a proxy DbClient-like object
-      const fakeClient = {
-        query: (text: string, vals?: unknown[]) => {
-          const result = client.query(text, vals);
-          return Promise.resolve(result);
-        },
-        release: () => {},
-      } as unknown as DbClient;
-      // Run the async function synchronously — this works because
-      // SQLite operations are synchronous within node:sqlite.
-      // The async wrapper is for interface compatibility.
-      let resolved: T;
-      let rejected: unknown;
-      const promise = fn(fakeClient);
-      // Since sqliteQuery is synchronous, the promise should resolve immediately
-      promise.then(
-        (v) => { resolved = v; },
-        (e) => { rejected = e; },
-      );
-      if (rejected !== undefined) throw rejected;
-      return resolved!;
-    });
+    // SQLite operations are synchronous, but the callback fn is async
+    // (for interface compatibility with PgSQL). We manage BEGIN/COMMIT
+    // manually and await the async callback — no interleaving can happen
+    // because SQLite is single-threaded and synchronous.
+    const database = getSqliteDb();
+    const fakeClient = {
+      query: (text: string, vals?: unknown[]) => {
+        return Promise.resolve(sqliteQuery(text, vals));
+      },
+      release: () => {},
+    } as unknown as DbClient;
+    database.exec("BEGIN");
+    try {
+      const result = await fn(fakeClient);
+      database.exec("COMMIT");
+      return result;
+    } catch (err) {
+      database.exec("ROLLBACK");
+      throw err;
+    }
   }
   const db = getDb();
   const client = await db.connect();
