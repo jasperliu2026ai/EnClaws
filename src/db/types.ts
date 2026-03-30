@@ -49,7 +49,7 @@ export interface CreateTenantInput {
 // User
 // ============================================================
 
-export type UserRole = "owner" | "admin" | "member" | "viewer";
+export type UserRole = "platform-admin" | "owner" | "admin" | "member" | "viewer";
 export type UserStatus = "active" | "invited" | "suspended" | "deleted";
 
 export interface UserSettings {
@@ -423,6 +423,10 @@ export interface SysToolsConfigRow {
 // ============================================================
 
 export const PERMISSIONS = {
+  // Platform management
+  "platform.overview": ["platform-admin"],
+  "platform.tenants": ["platform-admin"],
+
   // Tenant management
   "tenant.read": ["owner", "admin"],
   "tenant.update": ["owner", "admin"],

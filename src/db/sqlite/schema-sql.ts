@@ -183,6 +183,9 @@ CREATE TABLE IF NOT EXISTS usage_records (
 );
 CREATE INDEX IF NOT EXISTS idx_usage_tenant_time ON usage_records (tenant_id, recorded_at);
 CREATE INDEX IF NOT EXISTS idx_usage_user ON usage_records (tenant_id, user_id, recorded_at);
+CREATE INDEX IF NOT EXISTS idx_usage_recorded_at ON usage_records (recorded_at);
+CREATE INDEX IF NOT EXISTS idx_usage_model_time ON usage_records (model, recorded_at);
+CREATE INDEX IF NOT EXISTS idx_usage_agent_time ON usage_records (agent_id, recorded_at);
 
 -- 11. LLM Interaction Traces
 CREATE TABLE IF NOT EXISTS llm_interaction_traces (
@@ -215,6 +218,8 @@ CREATE INDEX IF NOT EXISTS idx_traces_session ON llm_interaction_traces (tenant_
 CREATE INDEX IF NOT EXISTS idx_traces_turn ON llm_interaction_traces (turn_id);
 CREATE INDEX IF NOT EXISTS idx_traces_user ON llm_interaction_traces (user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_traces_agent ON llm_interaction_traces (tenant_id, agent_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_traces_created_at ON llm_interaction_traces (created_at);
+CREATE INDEX IF NOT EXISTS idx_traces_model_time ON llm_interaction_traces (model, created_at);
 
 -- 12. Migration tracking
 CREATE TABLE IF NOT EXISTS _migrations (
@@ -334,4 +339,26 @@ CREATE TRIGGER IF NOT EXISTS trg_channel_apps_updated_at AFTER UPDATE ON tenant_
   FOR EACH ROW BEGIN
     UPDATE tenant_channel_apps SET updated_at = datetime('now') WHERE id = NEW.id;
   END;
+
+-- Seed: Platform admin tenant + user (password: Aa123456!)
+INSERT OR IGNORE INTO tenants (id, name, slug, plan, status, quotas)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'EnClaws Platform',
+  '_platform',
+  'enterprise',
+  'active',
+  '{"maxUsers":10,"maxAgents":0,"maxChannels":0,"maxTokensPerMonth":0}'
+);
+
+INSERT OR IGNORE INTO users (id, tenant_id, email, password_hash, display_name, role, status)
+VALUES (
+  '00000000-0000-0000-0000-000000000002',
+  '00000000-0000-0000-0000-000000000001',
+  'admin@enclaws.local',
+  '$2b$12$KIBNGrqC9DmrXbPeutbl5.IebhcHmsWEld9jeS3XvSQk07NV3EPB.',
+  'Platform Admin',
+  'platform-admin',
+  'active'
+);
 `;

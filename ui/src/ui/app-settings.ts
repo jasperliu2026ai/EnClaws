@@ -35,6 +35,7 @@ import {
   tabFromPath,
   type Tab,
 } from "./navigation.ts";
+import { loadAuth } from "./auth-store.ts";
 import { saveSettings, type UiSettings } from "./storage.ts";
 import { startThemeTransition, type ThemeTransitionContext } from "./theme-transition.ts";
 import { resolveTheme, type ResolvedTheme, type ThemeMode } from "./theme.ts";
@@ -354,7 +355,10 @@ export function syncTabWithLocation(host: SettingsHost, replace: boolean) {
   if (typeof window === "undefined") {
     return;
   }
-  const resolved = tabFromPath(window.location.pathname, host.basePath) ?? "tenant-users";
+  const auth = loadAuth();
+  if (!auth) return; // Don't sync URL before login
+  const defaultTab: Tab = auth.user?.role === "platform-admin" ? "overview" : "tenant-users";
+  const resolved = tabFromPath(window.location.pathname, host.basePath) ?? defaultTab;
   setTabFromRoute(host, resolved);
   syncUrlWithTab(host, resolved, replace);
 }

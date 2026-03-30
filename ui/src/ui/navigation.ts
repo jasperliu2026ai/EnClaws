@@ -2,16 +2,18 @@ import {t} from "../i18n/index.ts";
 import type {IconName} from "./icons.js";
 
 export const TAB_GROUPS = [
-    // { label: "chat", tabs: ["chat"] },
-    // { label: "control", tabs: ["overview", "channels", "instances", "sessions", "sandbox", "usage", "cron"] },
-    // { label: "agent", tabs: ["agents", "skills", "nodes"] },
+    {
+        label: "control",
+        tabs: ["overview"],
+    },
     {
         label: "tenant",
-        // tabs: ["tenant-users", "tenant-models", "tenant-channels", "tenant-traces", "tenant-usage"],
         tabs: ["tenant-settings", "tenant-users", "tenant-models", "tenant-channels", "tenant-skills", "tenant-traces"],
     },
-    // {label: "settings", tabs: ["config", "debug", "logs"]},
-    {label: "settings", tabs: ["logs"]},
+    {
+        label: "settings",
+        tabs: ["logs"]
+    },
 ] as const;
 
 export type Tab =
@@ -115,7 +117,7 @@ export function tabFromPath(pathname: string, basePath = ""): Tab | null {
         normalized = "/";
     }
     if (normalized === "/") {
-        return "tenant-users";
+        return null;
     }
     return PATH_TO_TAB.get(normalized) ?? null;
 }

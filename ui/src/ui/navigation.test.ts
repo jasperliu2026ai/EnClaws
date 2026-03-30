@@ -128,7 +128,7 @@ describe("pathForTab", () => {
 describe("tabFromPath", () => {
   it("returns tab for valid path", () => {
     expect(tabFromPath("/chat")).toBe("chat");
-    expect(tabFromPath("/overview")).toBe("overview");
+    expect(tabFromPath("/platform-overview")).toBe("overview");
     expect(tabFromPath("/sessions")).toBe("sessions");
   });
 

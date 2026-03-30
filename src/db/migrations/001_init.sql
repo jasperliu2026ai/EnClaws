@@ -407,3 +407,38 @@ CREATE TRIGGER trg_channel_apps_updated_at BEFORE UPDATE ON tenant_channel_apps
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER trg_tenant_models_updated_at BEFORE UPDATE ON tenant_models
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- Platform overview indexes (cross-tenant aggregation)
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_usage_recorded_at ON usage_records (recorded_at);
+CREATE INDEX IF NOT EXISTS idx_usage_model_time ON usage_records (model, recorded_at);
+CREATE INDEX IF NOT EXISTS idx_usage_agent_time ON usage_records (agent_id, recorded_at);
+CREATE INDEX IF NOT EXISTS idx_traces_created_at ON llm_interaction_traces (created_at);
+CREATE INDEX IF NOT EXISTS idx_traces_model_time ON llm_interaction_traces (model, created_at);
+
+-- ============================================================
+-- Seed: Platform admin tenant + user (password: Aa123456!)
+-- ============================================================
+INSERT INTO tenants (id, name, slug, plan, status, quotas)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'EnClaws Platform',
+  '_platform',
+  'enterprise',
+  'active',
+  '{"maxUsers":10,"maxAgents":0,"maxChannels":0,"maxTokensPerMonth":0}'
+)
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO users (id, tenant_id, email, password_hash, display_name, role, status)
+VALUES (
+  '00000000-0000-0000-0000-000000000002',
+  '00000000-0000-0000-0000-000000000001',
+  'admin@enclaws.local',
+  '$2b$12$KIBNGrqC9DmrXbPeutbl5.IebhcHmsWEld9jeS3XvSQk07NV3EPB.',
+  'Platform Admin',
+  'platform-admin',
+  'active'
+)
+ON CONFLICT DO NOTHING;

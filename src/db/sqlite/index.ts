@@ -54,7 +54,7 @@ export function initSqliteDb(url: string): void {
   db.exec("PRAGMA journal_mode = WAL");
   db.exec("PRAGMA foreign_keys = ON");
 
-  // Initialize schema (inlined as TS constant to survive bundling)
+  // Initialize schema + seed data (inlined as TS constant to survive bundling)
   db.exec(SQLITE_SCHEMA_SQL);
 
   console.log(`[sqlite] Database initialized at ${dbPath}`);
@@ -295,3 +295,4 @@ export function withSqliteTransaction<T>(
 export function generateUUID(): string {
   return crypto.randomUUID();
 }
+

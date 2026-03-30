@@ -37,6 +37,7 @@ import { tenantModelsHandlers } from "./server-methods/tenant-models-api.js";
 import { tenantSettingsHandlers } from "./server-methods/tenant-settings-api.js";
 import { tenantTracesHandlers } from "./server-methods/tenant-traces-api.js";
 import { tenantUsageHandlers } from "./server-methods/tenant-usage-api.js";
+import { platformOverviewHandlers } from "./server-methods/platform-overview-api.js";
 import { ttsHandlers } from "./server-methods/tts.js";
 import type { GatewayRequestHandlers, GatewayRequestOptions } from "./server-methods/types.js";
 import { authorizeTenantMethod, type TenantContext } from "../auth/middleware.js";
@@ -126,6 +127,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...tenantSessionsHandlers,
   ...tenantTracesHandlers,
   ...tenantUsageHandlers,
+  ...platformOverviewHandlers,
 };
 
 export async function handleGatewayRequest(

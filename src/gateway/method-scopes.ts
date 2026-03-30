@@ -66,6 +66,13 @@ export const SCOPE_BYPASS_METHODS = new Set([
   // Tenant usage
   "tenant.usage.summary",
   "tenant.usage.quota",
+  // Platform overview (handled by platform-admin RBAC)
+  "platform.overview.summary",
+  "platform.overview.tokenTrend",
+  "platform.overview.tokenRank",
+  "platform.overview.llmStats",
+  "platform.overview.channelDistribution",
+  "platform.overview.userActivity",
 ]);
 
 const METHOD_SCOPE_GROUPS: Record<OperatorScope, readonly string[]> = {

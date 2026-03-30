@@ -42,6 +42,14 @@ export function getPermissionsForRole(role: UserRole): Permission[] {
  */
 export function mapRoleToGatewayScopes(role: UserRole): string[] {
   switch (role) {
+    case "platform-admin":
+      return [
+        "operator.admin",
+        "operator.read",
+        "operator.write",
+        "operator.approvals",
+        "operator.pairing",
+      ];
     case "owner":
       return [
         "operator.admin",
@@ -95,6 +103,9 @@ export function mapMethodToPermission(method: string): Permission | null {
   if (method === "skills.status") return "skill.list";
   if (method === "skills.update") return "skill.update";
   if (method === "skills.install") return "skill.install";
+
+  // Platform methods
+  if (method.startsWith("platform.")) return "platform.overview";
 
   // Default: allow if authenticated (no specific permission required)
   return null;
