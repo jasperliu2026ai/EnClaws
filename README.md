@@ -263,18 +263,18 @@ Stay close to releases, operator feedback, and product discussion:
 - Discord server: [Join via invite](https://discord.gg/p4Kp5jKAsZ)
 
 <p align="center">
-  <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=1b6r1c67-a833-4d36-b748-5e6729d65045">
+  <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=2der9793-7a5d-452c-b575-1a1f6bbe540f">
     <img src="docs/assets/community-feishu-qr.jpg" alt="Feishu QR code for joining the EnClaws group" width="280" />
   </a>
-  <a href="https://discord.gg/p4Kp5jKAsZ">
+  <a href="https://discord.gg/ExT4MEnK4w">
     <img src="./docs/assets/community-discord-qr.jpg" alt="Discord QR code for joining the EnClaws server" width="280" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=1b6r1c67-a833-4d36-b748-5e6729d65045"><strong>Join on Feishu</strong></a>
+  <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=2der9793-7a5d-452c-b575-1a1f6bbe540f"><strong>Join on Feishu</strong></a>
   ·
-  <a href="https://discord.gg/p4Kp5jKAsZ"><strong>Join on Discord</strong></a>
+  <a href="https://discord.gg/ExT4MEnK4w"><strong>Join on Discord</strong></a>
 </p>
 
 ## License

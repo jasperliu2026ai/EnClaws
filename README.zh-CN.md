@@ -259,18 +259,18 @@ EnClaws 站在开源巨人的肩膀上。我们在此诚挚感谢：
 - Discord 社区: [点击加入](https://discord.gg/p4Kp5jKAsZ)
 
 <p align="center">
-  <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=1b6r1c67-a833-4d36-b748-5e6729d65045">
+  <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=2der9793-7a5d-452c-b575-1a1f6bbe540f">
     <img src="./docs/assets/community-feishu-qr.jpg" alt="加入 EnClaws 飞书群二维码" width="280" />
   </a>
-  <a href="https://discord.gg/p4Kp5jKAsZ">
+  <a href="https://discord.gg/ExT4MEnK4w">
     <img src="./docs/assets/community-discord-qr.jpg" alt="加入 EnClaws Discord 社区二维码" width="280" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=1b6r1c67-a833-4d36-b748-5e6729d65045"><strong>加入飞书群</strong></a>
+  <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=2der9793-7a5d-452c-b575-1a1f6bbe540f"><strong>加入飞书群</strong></a>
   ·
-  <a href="https://discord.gg/p4Kp5jKAsZ"><strong>加入 Discord 社区</strong></a>
+  <a href="https://discord.gg/ExT4MEnK4w"><strong>加入 Discord 社区</strong></a>
 </p>
 
 ## 许可证
