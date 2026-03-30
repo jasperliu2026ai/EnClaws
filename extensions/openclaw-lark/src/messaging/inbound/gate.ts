@@ -36,6 +36,7 @@ import {
   splitLegacyGroupAllowFrom,
 } from './policy';
 import { mentionedBot } from './mention';
+import { isLikelyAbortText } from '../../channel/abort-detect';
 import { sendPairingReply } from './gate-effects';
 
 /**
@@ -242,6 +243,12 @@ function checkGroupGate(params: {
   });
 
   if (requireMention && !mentionedBot(ctx)) {
+    // Abort commands bypass mention requirement
+    if (isLikelyAbortText(ctx.content?.trim() ?? '')) {
+      log(`feishu[${account.accountId}]: abort command in group ${ctx.chatId}, bypassing mention requirement`);
+      return { allowed: true };
+    }
+
     // Check if @all mention should bypass the mention requirement
     if (ctx.mentionAll) {
       const respondToAll = resolveRespondToMentionAll({

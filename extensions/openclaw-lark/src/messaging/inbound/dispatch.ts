@@ -24,6 +24,7 @@ import { ticketElapsed } from '../../core/lark-ticket';
 import { createFeishuReplyDispatcher } from '../../card/reply-dispatcher';
 import {
   buildQueueKey,
+  consumeAbortedCardMessageId,
   registerActiveDispatcher,
   threadScopedKey,
   unregisterActiveDispatcher,
@@ -76,9 +77,13 @@ async function dispatchNormalMessage(
   // plain-text system-command path so the SDK's abort handler can reply
   // without touching CardKit.
   if (isLikelyAbortText(dc.ctx.content?.trim() ?? '')) {
+    const abortIsGroup = dc.ctx.chatType === 'group';
+    const abortQueueKey = buildQueueKey(dc.account.accountId, dc.ctx.chatId, dc.ctx.threadId, abortIsGroup ? dc.ctx.senderId : undefined);
+    const abortedCardId = consumeAbortedCardMessageId(abortQueueKey);
+    const effectiveReplyToMessageId = abortedCardId ?? replyToMessageId;
     dc.log(`feishu[${dc.account.accountId}]: abort message detected, using plain-text dispatch`);
     log.info('abort message detected, using plain-text dispatch');
-    await dispatchSystemCommand(dc, ctxPayload, false, replyToMessageId);
+    await dispatchSystemCommand(dc, ctxPayload, false, effectiveReplyToMessageId);
     return;
   }
 
@@ -103,9 +108,20 @@ async function dispatchNormalMessage(
   const isGroup = dc.ctx.chatType === 'group';
   const senderQueueId = isGroup ? dc.ctx.senderId : undefined;
   const queueKey = buildQueueKey(dc.account.accountId, dc.ctx.chatId, dc.ctx.threadId, senderQueueId);
-  registerActiveDispatcher(queueKey, { abortCard, abortController });
-
   const effectiveSessionKey = dc.threadSessionKey ?? dc.route.sessionKey;
+  registerActiveDispatcher(queueKey, {
+    abortCard,
+    abortController,
+    steer: (text: string) => {
+      try {
+        dc.core.agent.steerMessage({ sessionKey: effectiveSessionKey, text });
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    getCardMessageId: () => undefined,
+  });
   dc.log(`feishu[${dc.account.accountId}]: dispatching to agent (session=${effectiveSessionKey})`);
   log.info(`dispatching to agent (session=${effectiveSessionKey})`);
 

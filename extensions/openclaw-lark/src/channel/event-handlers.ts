@@ -17,7 +17,7 @@ import { withTicket } from '../core/lark-ticket';
 import { larkLogger } from '../core/lark-logger';
 import { handleCardAction } from '../tools/auto-auth';
 import { handleAskUserAction } from '../tools/ask-user-question';
-import { buildQueueKey, enqueueFeishuChatTask, getActiveDispatcher, hasActiveTask } from './chat-queue';
+import { buildQueueKey, enqueueFeishuChatTask, getActiveDispatcher, hasActiveTask, setAbortedCardMessageId } from './chat-queue';
 import { extractRawTextFromEvent, isLikelyAbortText } from './abort-detect';
 import type { MonitorContext } from './types';
 
@@ -96,11 +96,29 @@ export async function handleMessageEvent(ctx: MonitorContext, data: unknown): Pr
       if (hasActiveTask(queueKey)) {
         const active = getActiveDispatcher(queueKey);
         if (active) {
+          // Capture card message ID before aborting for reply targeting
+          const cardMsgId = active.getCardMessageId?.();
+          if (cardMsgId) {
+            setAbortedCardMessageId(queueKey, cardMsgId);
+          }
           log(`feishu[${accountId}]: abort fast-path triggered for chat ${chatId} (text="${abortText}")`);
           active.abortController?.abort();
           active.abortCard().catch((err) => {
             error(`feishu[${accountId}]: abort fast-path abortCard failed: ${String(err)}`);
           });
+        }
+      }
+    }
+
+    // ---- /btw steer fast-path ----
+    if (abortText && /^\/btw\s+/i.test(abortText)) {
+      const queueKey = buildQueueKey(accountId, chatId, threadId, senderQueueId);
+      const active = getActiveDispatcher(queueKey);
+      if (active?.steer) {
+        const steerText = abortText.replace(/^\/btw\s+/i, '');
+        if (active.steer(steerText)) {
+          log(`feishu[${accountId}]: /btw steer injected for chat ${chatId}`);
+          return; // consumed — do not enqueue
         }
       }
     }

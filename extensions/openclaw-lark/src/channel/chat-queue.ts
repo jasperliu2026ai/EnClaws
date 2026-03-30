@@ -17,6 +17,8 @@ type QueueStatus = 'queued' | 'immediate';
 export interface ActiveDispatcherEntry {
   abortCard: () => Promise<void>;
   abortController?: AbortController;
+  steer?: (text: string) => boolean;
+  getCardMessageId?: () => string | undefined;
 }
 
 const chatQueues = new Map<string, Promise<void>>();
@@ -78,8 +80,22 @@ export function enqueueFeishuChatTask(params: {
   return { status, promise: taskPromise };
 }
 
+// ---- Aborted card message ID tracking ----
+const abortedCardMessageIds = new Map<string, string>();
+
+export function setAbortedCardMessageId(queueKey: string, messageId: string): void {
+  abortedCardMessageIds.set(queueKey, messageId);
+}
+
+export function consumeAbortedCardMessageId(queueKey: string): string | undefined {
+  const id = abortedCardMessageIds.get(queueKey);
+  if (id) abortedCardMessageIds.delete(queueKey);
+  return id;
+}
+
 /** @internal Test-only: reset all queue and dispatcher state. */
 export function _resetChatQueueState(): void {
   chatQueues.clear();
   activeDispatchers.clear();
+  abortedCardMessageIds.clear();
 }
