@@ -357,7 +357,7 @@ export function syncTabWithLocation(host: SettingsHost, replace: boolean) {
   }
   const auth = loadAuth();
   if (!auth) return; // Don't sync URL before login
-  const defaultTab: Tab = auth.user?.role === "platform-admin" ? "overview" : "tenant-users";
+  const defaultTab: Tab = auth.user?.role === "platform-admin" ? "overview" : "tenant-overview";
   const resolved = tabFromPath(window.location.pathname, host.basePath) ?? defaultTab;
   setTabFromRoute(host, resolved);
   syncUrlWithTab(host, resolved, replace);

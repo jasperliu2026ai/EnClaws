@@ -12,7 +12,7 @@ import { assertPermission, RbacError } from "../../auth/rbac.js";
 import type { TenantContext } from "../../auth/middleware.js";
 import { checkTenantQuota } from "../../db/models/tenant.js";
 import { createTenantChannel } from "../../db/models/tenant-channel.js";
-import { createChannelApp } from "../../db/models/tenant-channel-app.js";
+import { createChannelApp, updateChannelApp } from "../../db/models/tenant-channel-app.js";
 import { createTenantModel } from "../../db/models/tenant-model.js";
 import { createTenantAgent } from "../../db/models/tenant-agent.js";
 import { createAuditLog } from "../../db/models/audit-log.js";
@@ -151,10 +151,14 @@ export const tenantOnboardingHandlers: GatewayRequestHandlers = {
           agentId: agent.agentId,
           name: agent.name,
           config: agent.config ?? {},
-          channelAppId: channelAppResult?.id,
           modelConfig,
           createdBy: ctx.userId,
         });
+
+        // Bind agent to channel app if both were created
+        if (channelAppResult && agentResult) {
+          await updateChannelApp(channelAppResult.id, ctx.tenantId, { agentId: agent.agentId });
+        }
 
         return { channel: channelResult, channelApp: channelAppResult, model: modelResult, agent: agentResult };
       });

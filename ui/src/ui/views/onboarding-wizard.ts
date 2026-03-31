@@ -19,7 +19,7 @@ const CHANNEL_ICONS: Record<string, string> = {
   wechat: `<img src="/wechat-logo.svg" width="24" height="24" alt="WeChat" style="object-fit:contain;" />`,
   dingtalk: `<img src="/dingtalk-logo.svg" width="24" height="24" alt="DingTalk" style="object-fit:contain;" />`,
   slack: `<img src="/slack-logo.svg" width="24" height="24" alt="Slack" style="object-fit:contain;" />`,
-  webchat: `<img src="/webchat-logo.svg" width="24" height="24" alt="WebChat" style="object-fit:contain;" />`,
+  web: `<img src="/webchat-logo.svg" width="24" height="24" alt="WebChat" style="object-fit:contain;" />`,
 };
 
 const CHANNEL_OPTIONS = [
@@ -27,7 +27,7 @@ const CHANNEL_OPTIONS = [
   { type: "wechat", labelKey: "onboarding.channels.wechat" },
   { type: "dingtalk", labelKey: "onboarding.channels.dingtalk" },
   { type: "slack", labelKey: "onboarding.channels.slack" },
-  { type: "webchat", labelKey: "onboarding.channels.webchat" },
+  { type: "web", labelKey: "onboarding.channels.webchat" },
 ];
 
 const MODEL_PROVIDERS = [

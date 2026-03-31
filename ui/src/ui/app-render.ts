@@ -93,6 +93,7 @@ import { renderSandbox } from "./views/sandbox.ts";
 import { renderSessions } from "./views/sessions.ts";
 import { renderSkills } from "./views/skills.ts";
 import "./views/login.ts";
+import "./views/tenant/tenant-overview.ts";
 import "./views/tenant/tenant-settings.ts";
 import "./views/tenant/tenant-users.ts";
 import "./views/tenant/tenant-agents.ts";
@@ -262,6 +263,8 @@ export function renderApp(state: AppViewState) {
     : state.connected
       ? null
       : t("chat.disconnected");
+  const COMING_SOON_TABS = new Set(["overview", "tenant-overview", "chat", "sessions", "sandbox", "nodes", "usage", "tenant-usage", "instances", "cron", "config", "debug"]);
+  const isComingSoon = COMING_SOON_TABS.has(state.tab);
   const isChat = state.tab === "chat";
   const chatFocus = isChat && (state.settings.chatFocusMode || state.onboarding);
   const showThinking = state.onboarding ? false : state.settings.chatShowThinking;
@@ -341,7 +344,7 @@ export function renderApp(state: AppViewState) {
           void i18n.setLocale(loc);
         }
         const role = loadAuth()?.user?.role;
-        state.setTab(role === "platform-admin" ? "overview" : "tenant-users");
+        state.setTab(role === "platform-admin" ? "overview" : "tenant-overview");
         if (e.detail?.isNewRegistration) {
           state.showOnboarding = true;
         } else if (role === "platform-admin") {
@@ -401,6 +404,15 @@ export function renderApp(state: AppViewState) {
                     return !isPlatformAdmin; // platform-admin only sees overview
                   });
                   if (visibleTabs.length === 0) return nothing;
+                  if (!group.label) {
+                    return html`
+                      <div class="nav-group">
+                          <div class="nav-group__items">
+                              ${visibleTabs.map((tab) => renderTab(state, tab))}
+                          </div>
+                      </div>
+                    `;
+                  }
                   const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
                   const hasActiveTab = visibleTabs.some((tab) => tab === state.tab);
                   return html`
@@ -555,12 +567,17 @@ export function renderApp(state: AppViewState) {
                       <div class="page-meta">
                           ${state.lastError ? html`
                               <div class="pill danger">${state.lastError}</div>` : nothing}
-                          ${isChat ? renderChatControls(state, _cachedTenantAgents.length > 0 ? _cachedTenantAgents : undefined) : nothing}
+                          ${isChat && !isComingSoon ? renderChatControls(state, _cachedTenantAgents.length > 0 ? _cachedTenantAgents : undefined) : nothing}
                       </div>
                   </section>
 
+                  ${isComingSoon
+                          ? html`<section class="card"><div style="text-align:center;padding:4rem 2rem;color:var(--text-muted,#525252);font-family:var(--font-sans,system-ui,sans-serif);"><img src="/coming-soon.svg" alt="" style="width:64px;height:64px;margin-bottom:0.75rem;opacity:0.5;" /><p style="font-size:0.85rem;margin:0;">${t("common.comingSoon")}</p></div></section>`
+                          : nothing
+                  }
+
                   ${
-                          state.tab === "overview"
+                          !isComingSoon && state.tab === "overview"
                                   ? html`
                                       <platform-overview-view
                                               .gatewayUrl=${state.settings.gatewayUrl}></platform-overview-view>`
@@ -607,7 +624,7 @@ export function renderApp(state: AppViewState) {
                   }
 
                   ${
-                          state.tab === "instances"
+                          !isComingSoon && state.tab === "instances"
                                   ? renderInstances({
                                       loading: state.presenceLoading,
                                       entries: state.presenceEntries,
@@ -619,7 +636,7 @@ export function renderApp(state: AppViewState) {
                   }
 
                   ${
-                          state.tab === "sessions"
+                          !isComingSoon && state.tab === "sessions"
                                   ? renderSessions({
                                       loading: state.sessionsLoading,
                                       result: state.sessionsResult,
@@ -643,7 +660,7 @@ export function renderApp(state: AppViewState) {
                   }
 
                   ${
-                          state.tab === "sandbox"
+                          !isComingSoon && state.tab === "sandbox"
                                   ? renderSandbox({
                                       sessionKey: state.sessionKey,
                                       loading: state.sessionsLoading,
@@ -662,10 +679,10 @@ export function renderApp(state: AppViewState) {
                                   : nothing
                   }
 
-                  ${renderUsageTab(state)}
+                  ${!isComingSoon ? renderUsageTab(state) : nothing}
 
                   ${
-                          state.tab === "cron"
+                          !isComingSoon && state.tab === "cron"
                                   ? renderCron({
                                       basePath: state.basePath,
                                       loading: state.cronLoading,
@@ -1213,7 +1230,7 @@ export function renderApp(state: AppViewState) {
                   }
 
                   ${
-                          state.tab === "nodes"
+                          !isComingSoon && state.tab === "nodes"
                                   ? renderNodes({
                                       loading: state.nodesLoading,
                                       nodes: state.nodes,
@@ -1290,7 +1307,7 @@ export function renderApp(state: AppViewState) {
                   }
 
                   ${
-                          state.tab === "chat"
+                          !isComingSoon && state.tab === "chat"
                                   ? (isAuthenticated() && !_tenantAgentsLoaded && void loadTenantAgentsForChat().then((agents) => redirectToFirstTenantAgent(state, agents)),
                                           renderChat({
                                               sessionKey: state.sessionKey,
@@ -1388,7 +1405,7 @@ export function renderApp(state: AppViewState) {
                   }
 
                   ${
-                          state.tab === "config"
+                          !isComingSoon && state.tab === "config"
                                   ? renderConfig({
                                       raw: state.configRaw,
                                       originalRaw: state.configRawOriginal,
@@ -1428,7 +1445,7 @@ export function renderApp(state: AppViewState) {
                   }
 
                   ${
-                          state.tab === "debug"
+                          !isComingSoon && state.tab === "debug"
                                   ? renderDebug({
                                       loading: state.debugLoading,
                                       status: state.debugStatus,
@@ -1449,7 +1466,7 @@ export function renderApp(state: AppViewState) {
                   }
 
                   ${
-                          state.tab === "tenant-settings" || state.tab === "tenant-users" || state.tab === "tenant-agents" || state.tab === "tenant-channels" || state.tab === "tenant-models" || state.tab === "tenant-skills" || state.tab === "tenant-traces" || state.tab === "tenant-usage"
+                          !isComingSoon && (state.tab === "tenant-settings" || state.tab === "tenant-users" || state.tab === "tenant-agents" || state.tab === "tenant-channels" || state.tab === "tenant-models" || state.tab === "tenant-skills" || state.tab === "tenant-traces" || state.tab === "tenant-usage")
                                   ? html`
                                       <section class="card">
                                           ${state.tab === "tenant-settings" ? html`
@@ -1473,7 +1490,7 @@ export function renderApp(state: AppViewState) {
                                           ${state.tab === "tenant-traces" ? html`
                                               <tenant-traces-view
                                                       .gatewayUrl=${state.settings.gatewayUrl}></tenant-traces-view>` : nothing}
-                                          ${state.tab === "tenant-usage" ? html`
+                                          ${!isComingSoon && state.tab === "tenant-usage" ? html`
                                               <tenant-usage-view
                                                       .gatewayUrl=${state.settings.gatewayUrl}></tenant-usage-view>` : nothing}
                                       </section>`

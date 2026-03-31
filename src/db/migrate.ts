@@ -91,6 +91,14 @@ async function runMigrations(): Promise<void> {
       db.exec("CREATE INDEX IF NOT EXISTS idx_users_channel ON users (channel_id)");
       console.log("[migrate]   ✓ SQLite: added channel_id column to users");
     }
+
+    // Inline SQLite migration: add agent_id to tenant_channel_apps if missing
+    const appCols = db.prepare("PRAGMA table_info(tenant_channel_apps)").all() as { name: string }[];
+    if (!appCols.some((c) => c.name === "agent_id")) {
+      db.exec("ALTER TABLE tenant_channel_apps ADD COLUMN agent_id TEXT");
+      db.exec("CREATE INDEX IF NOT EXISTS idx_channel_apps_agent ON tenant_channel_apps (agent_id)");
+      console.log("[migrate]   ✓ SQLite: added agent_id column to tenant_channel_apps");
+    }
   }
 
   if (pending.length === 0) {

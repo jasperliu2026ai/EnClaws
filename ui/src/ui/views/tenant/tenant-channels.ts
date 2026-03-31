@@ -566,7 +566,8 @@ export class TenantChannelsView extends LitElement {
 
     // Validate apps
     const appIds = new Set<string>();
-    for (const app of this.formApps) {
+    for (let i = 0; i < this.formApps.length; i++) {
+      const app = this.formApps[i];
       if (!app.appId) {
         this.showError("tenantChannels.appIdRequired");
         return;
@@ -576,6 +577,10 @@ export class TenantChannelsView extends LitElement {
         return;
       }
       appIds.add(app.appId);
+      if (!app.formAgentBinding) {
+        this.showError("tenantChannels.agentRequired", { name: app.botName || app.appId });
+        return;
+      }
     }
 
     this.saving = true;
@@ -613,7 +618,7 @@ export class TenantChannelsView extends LitElement {
               appSecret: app.appSecret,
               botName: app.botName,
               groupPolicy: app.groupPolicy,
-              ...(app.formAgentBinding ? { agentId: app.formAgentBinding } : {}),
+              agentId: app.formAgentBinding || null,
             });
           } else {
             await this.rpc("tenant.channels.apps.add", {
@@ -622,7 +627,7 @@ export class TenantChannelsView extends LitElement {
               appSecret: app.appSecret,
               botName: app.botName,
               groupPolicy: app.groupPolicy,
-              ...(app.formAgentBinding ? { agentId: app.formAgentBinding } : {}),
+              agentId: app.formAgentBinding || null,
             });
           }
         }
@@ -639,7 +644,7 @@ export class TenantChannelsView extends LitElement {
             appSecret: a.appSecret,
             botName: a.botName,
             groupPolicy: a.groupPolicy,
-            ...(a.formAgentBinding ? { agentId: a.formAgentBinding } : {}),
+            agentId: a.formAgentBinding || null,
           })),
         });
         this.showSuccess("tenantChannels.channelCreated", { name: this.formChannelName });
@@ -651,6 +656,8 @@ export class TenantChannelsView extends LitElement {
       this.clearAllFeishuTimers();
       this.showForm = false;
       await this.loadChannels();
+      // Refresh again after delay to pick up connection status from runtime
+      setTimeout(() => this.loadChannels(), 3000);
       if (scannedAppId) {
         this.feishuAuthGuideAppId = scannedAppId;
       }

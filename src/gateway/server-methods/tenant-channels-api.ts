@@ -104,8 +104,10 @@ export const tenantChannelsHandlers: GatewayRequestHandlers = {
           createdAt: ch.createdAt,
           updatedAt: ch.updatedAt,
           apps: apps.map((a) => {
-            // Find the agent linked to this specific app
-            const linkedAgent = allAgents.find((ag) => ag.channelAppId === a.id);
+            // Find the agent linked to this app via app.agentId
+            const linkedAgent = a.agentId
+              ? allAgents.find((ag) => ag.agentId === a.agentId)
+              : null;
             // Resolve connection status from runtime snapshot
             const accountSnapshot =
               runtimeSnapshot.channelAccounts[ch.channelType as ChannelId]?.[a.appId];
@@ -284,7 +286,7 @@ export const tenantChannelsHandlers: GatewayRequestHandlers = {
         // If agentId is provided, bind existing agent
         if (appInput.agentId) {
           try {
-            await updateTenantAgent(ctx.tenantId, appInput.agentId, { channelAppId: app.id });
+            await updateChannelApp(app.id, ctx.tenantId, { agentId: appInput.agentId });
             createdAgents.push({ agentId: appInput.agentId, name: null });
           } catch (bindErr: unknown) {
             console.warn(`[tenant.channels.create] Bind agent ${appInput.agentId} failed: ${bindErr instanceof Error ? bindErr.message : "unknown"}`);
@@ -313,7 +315,6 @@ export const tenantChannelsHandlers: GatewayRequestHandlers = {
             tenantId: ctx.tenantId,
             agentId: finalAgentId,
             name: displayName,
-            channelAppId: app.id,
             config: {
               displayName,
               ...(agentConfig?.systemPrompt ? { systemPrompt: agentConfig.systemPrompt } : {}),
@@ -554,20 +555,8 @@ export const tenantChannelsHandlers: GatewayRequestHandlers = {
         await context.stopChannel(channel.channelType as ChannelId, app.appId);
       }
 
-      // Clean up linked agents (by channel_app_id)
-      const allAgents = await listTenantAgents(ctx.tenantId, { activeOnly: false });
-      const appIds = new Set(apps.map((a) => a.id));
-      for (const agent of allAgents) {
-        if (agent.channelAppId && appIds.has(agent.channelAppId)) {
-          try {
-            await deleteTenantAgent(ctx.tenantId, agent.agentId);
-            const agentDir = resolveTenantAgentDir(ctx.tenantId, agent.agentId);
-            await fs.rm(agentDir, { recursive: true, force: true });
-          } catch (err: unknown) {
-            console.warn(`[tenant.channels.delete] Agent cleanup failed for ${agent.agentId}: ${err instanceof Error ? err.message : "unknown"}`);
-          }
-        }
-      }
+      // Agent bindings are on the app side (agent_id column) and will be
+      // cleaned up automatically when apps are cascade-deleted with the channel.
     }
 
     const deleted = await deleteTenantChannel(ctx.tenantId, channelId);
@@ -700,7 +689,7 @@ export const tenantChannelsHandlers: GatewayRequestHandlers = {
       let createdAgent: { agentId: string; name: string | null } | null = null;
       if (bindAgentId) {
         try {
-          await updateTenantAgent(ctx.tenantId, bindAgentId, { channelAppId: app.id });
+          await updateChannelApp(app.id, ctx.tenantId, { agentId: bindAgentId });
           createdAgent = { agentId: bindAgentId, name: null };
         } catch (bindErr: unknown) {
           console.warn(`[apps.add] Bind agent ${bindAgentId} failed: ${bindErr instanceof Error ? bindErr.message : "unknown"}`);
@@ -723,7 +712,6 @@ export const tenantChannelsHandlers: GatewayRequestHandlers = {
             tenantId: ctx.tenantId,
             agentId: finalAgentId,
             name: displayName,
-            channelAppId: app.id,
             config: {
               displayName,
               ...(agentConfig.systemPrompt ? { systemPrompt: agentConfig.systemPrompt } : {}),
@@ -901,17 +889,10 @@ export const tenantChannelsHandlers: GatewayRequestHandlers = {
       }
     }
 
-    // Bind existing agent if agentId provided
-    if (bindAgentId) {
+    // Bind/unbind agent
+    if (bindAgentId !== undefined) {
       try {
-        // Unbind old agent from this app
-        const allAgents = await listTenantAgents(ctx.tenantId, { activeOnly: false });
-        const oldLinked = allAgents.find((ag) => ag.channelAppId === appDbId);
-        if (oldLinked && oldLinked.agentId !== bindAgentId) {
-          await updateTenantAgent(ctx.tenantId, oldLinked.agentId, { channelAppId: null });
-        }
-        // Bind new agent
-        await updateTenantAgent(ctx.tenantId, bindAgentId, { channelAppId: appDbId });
+        await updateChannelApp(appDbId, ctx.tenantId, { agentId: bindAgentId || null });
         invalidateTenantConfigCache(ctx.tenantId);
         await context.reloadDbChannels();
       } catch (bindErr: unknown) {
@@ -919,8 +900,9 @@ export const tenantChannelsHandlers: GatewayRequestHandlers = {
       }
     } else if (agentConfig) {
       // Legacy: Update linked agent if agentConfig provided (backward compat)
+      const currentApp = (await listChannelApps(channelForApp.id)).find((a) => a.id === appDbId);
       const allAgents = await listTenantAgents(ctx.tenantId, { activeOnly: false });
-      const linkedAgent = allAgents.find((ag) => ag.channelAppId === appDbId);
+      const linkedAgent = currentApp?.agentId ? allAgents.find((ag) => ag.agentId === currentApp.agentId) : null;
       if (linkedAgent) {
         try {
           await updateTenantAgent(ctx.tenantId, linkedAgent.agentId, {
@@ -1005,19 +987,7 @@ export const tenantChannelsHandlers: GatewayRequestHandlers = {
       await context.stopChannel(appToDelete.channelType as ChannelId, appToDelete.appId);
     }
 
-    // Clean up linked agent
-    const allAgents = await listTenantAgents(ctx.tenantId, { activeOnly: false });
-    const linkedAgent = allAgents.find((ag) => ag.channelAppId === appDbId);
-    if (linkedAgent) {
-      try {
-        await deleteTenantAgent(ctx.tenantId, linkedAgent.agentId);
-        const agentDir = resolveTenantAgentDir(ctx.tenantId, linkedAgent.agentId);
-        await fs.rm(agentDir, { recursive: true, force: true });
-      } catch (err: unknown) {
-        console.warn(`[apps.delete] Agent cleanup failed for ${linkedAgent.agentId}: ${err instanceof Error ? err.message : "unknown"}`);
-      }
-    }
-
+    // Agent binding is on the app side — deleting the app clears the binding automatically.
     const deleted = await deleteChannelApp(appDbId, ctx.tenantId);
 
     invalidateTenantConfigCache(ctx.tenantId);

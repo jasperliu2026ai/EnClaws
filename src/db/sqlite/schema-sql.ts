@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS tenant_channel_apps (
   app_secret   TEXT NOT NULL DEFAULT '',
   bot_name     TEXT NOT NULL DEFAULT '',
   group_policy TEXT NOT NULL DEFAULT 'open',
+  agent_id     TEXT,
   is_active    INTEGER NOT NULL DEFAULT 1,
   created_at   TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at   TEXT NOT NULL DEFAULT (datetime('now')),
@@ -98,6 +99,7 @@ CREATE TABLE IF NOT EXISTS tenant_channel_apps (
 );
 CREATE INDEX IF NOT EXISTS idx_channel_apps_channel ON tenant_channel_apps (channel_id);
 CREATE INDEX IF NOT EXISTS idx_channel_apps_tenant ON tenant_channel_apps (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_channel_apps_agent ON tenant_channel_apps (agent_id);
 
 -- 6. Tenant Models
 CREATE TABLE IF NOT EXISTS tenant_models (
@@ -126,7 +128,6 @@ CREATE TABLE IF NOT EXISTS tenant_agents (
   agent_id       TEXT NOT NULL,
   name           TEXT NOT NULL,
   config         TEXT NOT NULL DEFAULT '{}',
-  channel_app_id TEXT REFERENCES tenant_channel_apps(id) ON DELETE SET NULL,
   model_config   TEXT NOT NULL DEFAULT '[]',
   is_active      INTEGER NOT NULL DEFAULT 1,
   created_by     TEXT REFERENCES users(id) ON DELETE SET NULL,
@@ -135,7 +136,6 @@ CREATE TABLE IF NOT EXISTS tenant_agents (
   UNIQUE(tenant_id, agent_id)
 );
 CREATE INDEX IF NOT EXISTS idx_agents_tenant ON tenant_agents (tenant_id);
-CREATE INDEX IF NOT EXISTS idx_agents_channel_app ON tenant_agents (channel_app_id);
 
 -- 8. Refresh Tokens
 CREATE TABLE IF NOT EXISTS refresh_tokens (
