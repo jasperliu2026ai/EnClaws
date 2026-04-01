@@ -100,17 +100,32 @@ export const tenantOnboardingHandlers: GatewayRequestHandlers = {
           if (!channelQuota.allowed) {
             throw new Error(`Channel quota reached (${channelQuota.current}/${channelQuota.max})`);
           }
+          const userConfig = (channel.config ?? {}) as Record<string, unknown>;
+          const appId = (userConfig.appId as string) ?? "";
+          const appSecret = (userConfig.appSecret as string) ?? "";
+          const defaultConfig = {
+            enabled: true,
+            appId,
+            appSecret,
+            domain: channel.channelType,
+            connectionMode: "websocket",
+            requireMention: true,
+            dmPolicy: "open",
+            groupPolicy: "open",
+            allowFrom: ["*"],
+            groupAllowFrom: [],
+            replyMode: { group: "streaming", direct: "streaming", default: "auto" },
+            uat: { ownerOnly: false, appRoleAuth: true, accessLevel: 1, autoOnboarding: true },
+            streaming: true,
+            ...userConfig,
+          };
           channelResult = await createTenantChannel({
             tenantId: ctx.tenantId,
             channelType: channel.channelType,
-            channelName: channel.channelName,
-            config: channel.config as any,
+            channelName: channel.channelName ?? channel.channelType,
+            config: defaultConfig as any,
             createdBy: ctx.userId,
           });
-
-          // Create channel app with appId/appSecret
-          const appId = (channel.config as Record<string, unknown>)?.appId as string | undefined;
-          const appSecret = (channel.config as Record<string, unknown>)?.appSecret as string | undefined;
           if (appId) {
             channelAppResult = await createChannelApp({
               channelId: channelResult.id,
