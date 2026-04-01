@@ -12,12 +12,39 @@ import crypto from "node:crypto";
 import type { JwtPayload, JwtTokenPair } from "../db/types.js";
 import { query, getDbType, DB_SQLITE } from "../db/index.js";
 
+/**
+ * Per-boot ephemeral secret: generated once on startup so that all
+ * previously issued JWTs are automatically invalidated on restart.
+ * Only used when OPENCLAW_JWT_SECRET is not explicitly configured.
+ */
+let ephemeralSecret: string | null = null;
+
 function getSecret(): string {
   const secret = process.env.OPENCLAW_JWT_SECRET;
-  if (!secret) {
-    throw new Error("[auth] OPENCLAW_JWT_SECRET environment variable is required");
+  if (secret) {
+    return secret;
   }
-  return secret;
+  if (!ephemeralSecret) {
+    ephemeralSecret = crypto.randomBytes(64).toString("hex");
+    console.log("[auth] No OPENCLAW_JWT_SECRET set — using ephemeral secret (JWTs invalidated on restart)");
+    // Revoke all refresh tokens so that old sessions cannot silently re-authenticate
+    void revokeAllRefreshTokensOnBoot();
+  }
+  return ephemeralSecret;
+}
+
+async function revokeAllRefreshTokensOnBoot(): Promise<void> {
+  try {
+    const result = await query(
+      "UPDATE refresh_tokens SET revoked = true WHERE revoked = false",
+    );
+    const count = result.rowCount ?? 0;
+    if (count > 0) {
+      console.log(`[auth] Revoked ${count} refresh token(s) on boot (ephemeral secret mode)`);
+    }
+  } catch {
+    // DB may not be initialized yet; ignore — tokens will fail verification anyway
+  }
 }
 
 function getAccessExpires(): string {

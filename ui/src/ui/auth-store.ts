@@ -9,7 +9,7 @@
 import { loadSettings } from "./storage.ts";
 import { generateUUID } from "./uuid.ts";
 
-const AUTH_KEY = "openclaw.auth.v1";
+const AUTH_KEY = "enclaws.auth.v1";
 
 // ── Shared gateway client for token refresh ──────────────────
 // Set by app-gateway.ts when the main connection is established.
@@ -23,7 +23,7 @@ export function setRefreshClient(client: RpcClient | null): void {
 }
 
 /** Minimum interval between refresh attempts (throttle). */
-const REFRESH_THROTTLE_MS = 60_000;
+const REFRESH_THROTTLE_MS = 300_000;
 
 export interface AuthUser {
   id: string;
@@ -131,7 +131,14 @@ async function onUserActivity(): Promise<void> {
   lastRefreshAttempt = now;
   refreshing = true;
   try {
-    await refreshAccessToken();
+    const result = await refreshAccessToken();
+    if (!result && auth?.refreshToken) {
+      // Refresh token was rejected (revoked or expired) — force re-login
+      clearAuth();
+      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
   } catch {
     // silent — will retry on next user activity
   } finally {
