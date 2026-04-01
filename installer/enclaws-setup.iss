@@ -68,7 +68,7 @@ Name: "{userprograms}\EnClaws\Uninstall EnClaws"; Filename: "{uninstallexe}"
 
 [Run]
 ; Run postinstall to create ~/.enclaws/.env (if not exists)
-Filename: "{app}\node\node.exe"; Parameters: """{app}\app\scripts\postinstall.js"""; StatusMsg: "Configuring EnClaws..."; Flags: runhidden waituntilterminated
+Filename: "{app}\node\node.exe"; Parameters: """{app}\app\scripts\postinstall.js"""; StatusMsg: "正在配置 EnClaws（解压依赖中，请稍候）..."; Flags: runhidden waituntilterminated
 ; Option to launch EnClaws after install
 Filename: "{app}\enclaws-gateway.vbs"; Description: "立即启动 EnClaws"; Flags: nowait postinstall shellexec skipifsilent
 
