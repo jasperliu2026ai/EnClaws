@@ -25,26 +25,26 @@ describe("resolveTaskScriptPath", () => {
     {
       name: "uses default path when OPENCLAW_PROFILE is unset",
       env: { USERPROFILE: "C:\\Users\\test" },
-      expected: path.join("C:\\Users\\test", ".openclaw", "gateway.cmd"),
+      expected: path.join("C:\\Users\\test", ".enclaws", "gateway.cmd"),
     },
     {
       name: "uses profile-specific path when OPENCLAW_PROFILE is set to a custom value",
       env: { USERPROFILE: "C:\\Users\\test", OPENCLAW_PROFILE: "jbphoenix" },
-      expected: path.join("C:\\Users\\test", ".openclaw-jbphoenix", "gateway.cmd"),
+      expected: path.join("C:\\Users\\test", ".enclaws-jbphoenix", "gateway.cmd"),
     },
     {
       name: "prefers OPENCLAW_STATE_DIR over profile-derived defaults",
       env: {
         USERPROFILE: "C:\\Users\\test",
         OPENCLAW_PROFILE: "rescue",
-        OPENCLAW_STATE_DIR: "C:\\State\\openclaw",
+        OPENCLAW_STATE_DIR: "C:\\State.enclaws",
       },
-      expected: path.join("C:\\State\\openclaw", "gateway.cmd"),
+      expected: path.join("C:\\State.enclaws", "gateway.cmd"),
     },
     {
       name: "falls back to HOME when USERPROFILE is not set",
       env: { HOME: "/home/test", OPENCLAW_PROFILE: "default" },
-      expected: path.join("/home/test", ".openclaw", "gateway.cmd"),
+      expected: path.join("/home/test", ".enclaws", "gateway.cmd"),
     },
   ])("$name", ({ env, expected }) => {
     expect(resolveTaskScriptPath(env)).toBe(expected);
@@ -118,7 +118,7 @@ describe("readScheduledTaskCommand", () => {
         scriptLines: [
           "@echo off",
           "rem OpenClaw Gateway",
-          "cd /d C:\\Projects\\openclaw",
+          "cd /d C:\\Projects.enclaws",
           "set NODE_ENV=production",
           "set OPENCLAW_PORT=18789",
           "node gateway.js --verbose",
@@ -128,7 +128,7 @@ describe("readScheduledTaskCommand", () => {
         const result = await readScheduledTaskCommand(env);
         expect(result).toEqual({
           programArguments: ["node", "gateway.js", "--verbose"],
-          workingDirectory: "C:\\Projects\\openclaw",
+          workingDirectory: "C:\\Projects.enclaws",
           environment: {
             NODE_ENV: "production",
             OPENCLAW_PORT: "18789",
@@ -143,7 +143,7 @@ describe("readScheduledTaskCommand", () => {
       {
         scriptLines: [
           "@echo off",
-          '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js gateway --port 18789',
+          '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules.enclaws\\dist\\index.js gateway --port 18789',
         ],
       },
       async (env) => {
@@ -151,7 +151,7 @@ describe("readScheduledTaskCommand", () => {
         expect(result).toEqual({
           programArguments: [
             "C:\\Program Files\\nodejs\\node.exe",
-            "C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+            "C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules.enclaws\\dist\\index.js",
             "gateway",
             "--port",
             "18789",

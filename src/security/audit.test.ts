@@ -626,7 +626,7 @@ describe("security audit", () => {
     const execDockerRawFn = (async (args: string[]) => {
       if (args[0] === "ps") {
         return {
-          stdout: Buffer.from("openclaw-sbx-browser-old\nopenclaw-sbx-browser-missing-hash\n"),
+          stdout: Buffer.from("openclaw-sbx-browser-old.enclaws-sbx-browser-missing-hash\n"),
           stderr: Buffer.alloc(0),
           code: 0,
         };
@@ -1633,7 +1633,7 @@ describe("security audit", () => {
         "channels.discord.guilds.123.channels.general.users:security-team",
       );
       expect(finding?.detail).toContain(
-        "~/.openclaw/credentials/discord-allowFrom.json:team.owner",
+        "~/.enclaws/credentials/discord-allowFrom.json:team.owner",
       );
       expect(finding?.detail).not.toContain("<@123456789012345678>");
     });
@@ -2205,8 +2205,8 @@ describe("security audit", () => {
     const cfg: OpenClawConfig = {};
 
     const res = await audit(cfg, {
-      stateDir: "/Users/test/Dropbox/.openclaw",
-      configPath: "/Users/test/Dropbox/.openclaw/openclaw.json",
+      stateDir: "/Users/test/Dropbox/.enclaws",
+      configPath: "/Users/test/Dropbox/.enclaws/openclaw.json",
     });
 
     expectFinding(res, "fs.synced_dir", "warn");

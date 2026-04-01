@@ -72,11 +72,11 @@ describe("acp prompt cwd prefix", () => {
   });
 
   it("keeps backslash separators when cwd uses them", async () => {
-    const requestSpy = await runPromptWithCwd(`${os.homedir()}\\openclaw-test`);
+    const requestSpy = await runPromptWithCwd(`${os.homedir()}.enclaws-test`);
     expect(requestSpy).toHaveBeenCalledWith(
       "chat.send",
       expect.objectContaining({
-        message: expect.stringContaining("[Working directory: ~\\openclaw-test]"),
+        message: expect.stringContaining("[Working directory: ~.enclaws-test]"),
       }),
       { expectFinal: true },
     );
