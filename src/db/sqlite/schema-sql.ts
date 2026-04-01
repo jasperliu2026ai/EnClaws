@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS tenants (
   status      TEXT NOT NULL DEFAULT 'active',
   settings    TEXT NOT NULL DEFAULT '{}',
   quotas      TEXT NOT NULL DEFAULT '{"maxUsers":5,"maxAgents":3,"maxChannels":5,"maxTokensPerMonth":1000000}',
-  trace_enabled    INTEGER NOT NULL DEFAULT 0,
+  trace_enabled    INTEGER NOT NULL DEFAULT 1,
   identity_prompt  TEXT NOT NULL DEFAULT '',
   created_at  TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
