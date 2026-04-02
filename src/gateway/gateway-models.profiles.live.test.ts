@@ -800,10 +800,10 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
                 sessionKey,
                 idempotencyKey: `idem-${runIdTool}-tool-${toolReadAttempt + 1}`,
                 message: strictReply
-                  ? "OpenClaw live tool probe (local, safe): " +
+                  ? "EnClaws live tool probe (local, safe): " +
                     `use the tool named \`read\` (or \`Read\`) with JSON arguments {"path":"${toolProbePath}"}. ` +
                     `Then reply with exactly: ${nonceA} ${nonceB}. No extra text.`
-                  : "OpenClaw live tool probe (local, safe): " +
+                  : "EnClaws live tool probe (local, safe): " +
                     `use the tool named \`read\` (or \`Read\`) with JSON arguments {"path":"${toolProbePath}"}. ` +
                     "Then reply with the two nonce values you read (include both).",
                 thinking: params.thinkingLevel,
@@ -869,7 +869,7 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
                 sessionKey,
                 idempotencyKey: `idem-${runIdTool}-exec-read`,
                 message:
-                  "OpenClaw live tool probe (local, safe): " +
+                  "EnClaws live tool probe (local, safe): " +
                   "use the tool named `exec` (or `Exec`) to run this command: " +
                   `mkdir -p "${tempDir}" && printf '%s' '${nonceC}' > "${toolWritePath}". ` +
                   `Then use the tool named \`read\` (or \`Read\`) with JSON arguments {"path":"${toolWritePath}"}. ` +

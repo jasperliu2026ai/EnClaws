@@ -50,7 +50,7 @@ describe.runIf(process.platform !== "win32")("findGatewayPidsOnPortSync", () => 
         "p4200",
         "cnode",
         "p4300",
-        "cOpenClaw",
+        "cEnClaws",
       ].join("\n"),
     });
 

@@ -424,7 +424,7 @@ export async function statusCommand(
     },
   ];
 
-  runtime.log(theme.heading("OpenClaw status"));
+  runtime.log(theme.heading("EnClaws status"));
   runtime.log("");
   runtime.log(theme.heading("Overview"));
   runtime.log(

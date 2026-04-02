@@ -219,7 +219,7 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/agent", "docs.openclaw.ai/cli/age
         `
 ${theme.heading("Examples:")}
 ${formatHelpExamples([
-  ['enclaws agents set-identity --agent main --name "OpenClaw" --emoji "🦞"', "Set name + emoji."],
+  ['enclaws agents set-identity --agent main --name "EnClaws" --emoji "🦞"', "Set name + emoji."],
   ["enclaws agents set-identity --agent main --avatar avatars/openclaw.png", "Set avatar path."],
   [
     "enclaws agents set-identity --workspace ~/.enclaws/workspace --from-identity",

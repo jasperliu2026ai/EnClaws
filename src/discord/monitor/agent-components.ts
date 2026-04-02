@@ -1583,7 +1583,7 @@ class DiscordComponentChannelSelect extends ChannelSelectMenu {
 }
 
 class DiscordComponentModal extends Modal {
-  title = "OpenClaw form";
+  title = "EnClaws form";
   customId = "*";
   components = [];
   customIdParser = parseDiscordModalCustomIdForCarbon;

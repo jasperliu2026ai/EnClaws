@@ -89,8 +89,8 @@ describe("restart-helper", () => {
       });
       expect(scriptPath.endsWith(".bat")).toBe(true);
       expect(content).toContain("@echo off");
-      expect(content).toContain('schtasks /End /TN "OpenClaw Gateway"');
-      expect(content).toContain('schtasks /Run /TN "OpenClaw Gateway"');
+      expect(content).toContain('schtasks /End /TN "EnClaws Gateway"');
+      expect(content).toContain('schtasks /Run /TN "EnClaws Gateway"');
       // Batch self-cleanup
       expect(content).toContain('del "%~f0"');
       await cleanupScript(scriptPath);
@@ -101,10 +101,10 @@ describe("restart-helper", () => {
 
       const { scriptPath, content } = await prepareAndReadScript({
         ENCLAWS_PROFILE: "default",
-        ENCLAWS_WINDOWS_TASK_NAME: "OpenClaw Gateway (custom)",
+        ENCLAWS_WINDOWS_TASK_NAME: "EnClaws Gateway (custom)",
       });
-      expect(content).toContain('schtasks /End /TN "OpenClaw Gateway (custom)"');
-      expect(content).toContain('schtasks /Run /TN "OpenClaw Gateway (custom)"');
+      expect(content).toContain('schtasks /End /TN "EnClaws Gateway (custom)"');
+      expect(content).toContain('schtasks /Run /TN "EnClaws Gateway (custom)"');
       await cleanupScript(scriptPath);
     });
 
@@ -134,7 +134,7 @@ describe("restart-helper", () => {
       const { scriptPath, content } = await prepareAndReadScript({
         ENCLAWS_PROFILE: "production",
       });
-      expect(content).toContain('schtasks /End /TN "OpenClaw Gateway (production)"');
+      expect(content).toContain('schtasks /End /TN "EnClaws Gateway (production)"');
       await cleanupScript(scriptPath);
     });
 

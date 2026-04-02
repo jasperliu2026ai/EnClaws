@@ -356,7 +356,7 @@ describe("web_search kimi provider", () => {
               },
             ],
             search_results: [
-              { title: "OpenClaw", url: "https://openclaw.ai/docs", content: "docs" },
+              { title: "EnClaws", url: "https://openclaw.ai/docs", content: "docs" },
             ],
           }),
           { status: 200, headers: { "content-type": "application/json" } },
