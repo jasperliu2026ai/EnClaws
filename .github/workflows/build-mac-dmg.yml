@@ -92,7 +92,7 @@ jobs:
 
           echo ""
           echo "=== Testing gateway startup (5 second smoke test) ==="
-          "$NODE" "$APP/Contents/Resources/enclaws.mjs" gateway --port 19999 &
+          "$NODE" "$APP/Contents/Resources/enclaws.mjs" gateway --port 19999 --no-open &
           PID=$!
           sleep 5
           if curl -s -o /dev/null -w "%{http_code}" "http://localhost:19999" | grep -q "200"; then

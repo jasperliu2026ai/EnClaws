@@ -44,7 +44,7 @@ fi
 
 if [[ "$SKIP_BUILD" != "1" ]]; then
   echo "[*] Installing dependencies..."
-  (cd "$ROOT_DIR" && pnpm install --config.node-linker=hoisted)
+  (cd "$ROOT_DIR" && pnpm install --frozen-lockfile --config.node-linker=hoisted)
 
   echo "[*] Building JS..."
   (cd "$ROOT_DIR" && pnpm build)
@@ -149,24 +149,31 @@ if curl -s -o /dev/null "http://localhost:$PORT" 2>/dev/null; then
 fi
 
 # Show loading page immediately (gateway not ready yet)
-open "$LOADING"
+open "file://${LOADING}?port=${PORT}"
+
+# Create symlink to /usr/local/bin so "enclaws" works in terminal
+CLI="$DIR/enclaws"
+if [ ! -L /usr/local/bin/enclaws ] || [ "$(readlink /usr/local/bin/enclaws)" != "$CLI" ]; then
+  if ln -sf "$CLI" /usr/local/bin/enclaws 2>/dev/null; then
+    true
+  else
+    # No permission — ask user to authorize via macOS password dialog
+    ESCAPED_CLI=$(printf '%s' "$CLI" | sed "s/'/'\\\\''/g")
+    osascript -e "do shell script \"mkdir -p /usr/local/bin && ln -sf '${ESCAPED_CLI}' /usr/local/bin/enclaws\" with administrator privileges" 2>/dev/null || true
+  fi
+fi
 
 # Run postinstall if first launch
 if [ ! -f "$HOME/.enclaws/.env" ]; then
   "$NODE" "$DIR/scripts/postinstall.js" 2>/dev/null || true
 fi
 
-# Start gateway (--no-open: loading.html handles the redirect)
+# Start gateway as detached background process
+# Launcher exits immediately so clicking the icon again works
 mkdir -p "$HOME/.enclaws"
-"$NODE" "$ENTRY" gateway --port "$PORT" --no-open &
+nohup "$NODE" "$ENTRY" gateway --port "$PORT" --no-open </dev/null >"$HOME/.enclaws/gateway.log" 2>&1 &
 GATEWAY_PID=$!
 echo "$GATEWAY_PID" > "$PID_FILE"
-
-# Clean up PID file on exit
-trap 'rm -f "$PID_FILE"' EXIT
-
-# Keep running until gateway exits
-wait $GATEWAY_PID
 LAUNCHER
 
 chmod +x "$APP_MACOS/enclaws-launcher"
@@ -213,7 +220,8 @@ cat > "$APP_RESOURCES/loading.html" << 'LOADING'
   <p>网关启动后将自动跳转控制面板</p>
   <div class="status" id="status">正在连接...</div>
 <script>
-  const port = 18888;
+  const params = new URLSearchParams(window.location.search);
+  const port = params.get('port') || 18888;
   const url = `http://localhost:${port}`;
   let attempts = 0;
   function check() {
@@ -346,8 +354,9 @@ SYSTEM_NODE="$(command -v node)"
 SYSTEM_NPM="$(command -v npm)"
 
 "$SYSTEM_NODE" --input-type=commonjs -e "
-  const pkg = JSON.parse(require('fs').readFileSync('$ROOT_DIR/package.json', 'utf-8'));
-  const prod = {
+  var fs = require('fs');
+  var pkg = JSON.parse(fs.readFileSync(process.argv[1], 'utf-8'));
+  var prod = {
     name: pkg.name,
     version: pkg.version,
     type: pkg.type,
@@ -356,8 +365,8 @@ SYSTEM_NPM="$(command -v npm)"
     dependencies: pkg.dependencies
   };
   if (pkg.optionalDependencies) prod.optionalDependencies = pkg.optionalDependencies;
-  require('fs').writeFileSync('$APP_RESOURCES/package.json', JSON.stringify(prod, null, 2));
-"
+  fs.writeFileSync(process.argv[2], JSON.stringify(prod, null, 2));
+" "$ROOT_DIR/package.json" "$APP_RESOURCES/package.json"
 
 echo "[*] Installing production dependencies (this may take a few minutes)..."
 # Set target architecture for native modules (sharp, koffi, node-pty etc.)
