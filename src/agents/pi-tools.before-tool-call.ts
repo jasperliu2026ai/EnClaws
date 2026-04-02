@@ -19,7 +19,7 @@ export type HookContext = {
  * Uses globalThis to survive Vite code-splitting (module may be duplicated across chunks).
  * Entries have a TTL to pick up role changes (e.g., admin demoting a user).
  */
-const GLOBAL_KEY = "__openclaw_tenant_user_roles__";
+const GLOBAL_KEY = "__enclaws_tenant_user_roles__";
 const MAX_TENANT_ROLE_ENTRIES = 1024;
 const ROLE_TTL_MS = 10 * 60 * 1000; // 10 minutes, aligned with auto-provision cache
 

@@ -258,7 +258,7 @@ function resolveBrowserBaseUrl(params: {
   }
   if (!resolved.enabled) {
     throw new Error(
-      "Browser control is disabled. Set browser.enabled=true in ~/.enclaws/openclaw.json.",
+      "Browser control is disabled. Set browser.enabled=true in ~/.enclaws/enclaws.json.",
     );
   }
   return undefined;
@@ -276,7 +276,7 @@ export function createBrowserTool(opts?: {
     name: "browser",
     description: [
       "Control the browser via EnClaws's browser control server (status/start/stop/profiles/tabs/open/snapshot/screenshot/actions).",
-      'Profiles: use profile="openclaw" for the isolated openclaw-managed standalone browser (default). Use profile="chrome" for Chrome extension relay takeover (your existing Chrome tabs).',
+      'Profiles: use profile="enclaws" for the isolated enclaws-managed standalone browser (default). Use profile="chrome" for Chrome extension relay takeover (your existing Chrome tabs).',
       'If the user mentions the Chrome extension / Browser Relay / toolbar button / "attach tab", ALWAYS use profile="chrome" (do not ask which profile).',
       'When a node-hosted browser proxy is available, the tool may auto-route to it. Pin a node with node=<id|name> or target="node".',
       "Chrome extension relay needs an attached tab: user must click the EnClaws Browser Relay toolbar icon on the tab (badge ON). If no tab is connected, ask them to attach it.",
@@ -363,17 +363,17 @@ export function createBrowserTool(opts?: {
         requestedProfile: string | undefined,
         fn: (p: string) => Promise<T>,
       ): Promise<T> => {
-        const p = requestedProfile || "openclaw";
+        const p = requestedProfile || "enclaws";
         try {
           return await fn(p);
         } catch (err) {
           const msg = String(err);
           if (p === "chrome" && (msg.includes("no tab is connected") || msg.includes("404:"))) {
             // Attempt auto-failover to enclaws if chrome fails due to no tab or connection
-            console.warn(`[BrowserTool] Auto-failover from chrome to openclaw due to: ${msg}`);
-            const result = await fn("openclaw");
+            console.warn(`[BrowserTool] Auto-failover from chrome to enclaws due to: ${msg}`);
+            const result = await fn("enclaws");
             const hint =
-              "\n> [NOTE: Automatic failover from 'chrome' to 'openclaw' profile occurred because the extension was disconnected. Staying with profile='openclaw' for subsequent calls.]\n";
+              "\n> [NOTE: Automatic failover from 'chrome' to 'enclaws' profile occurred because the extension was disconnected. Staying with profile='enclaws' for subsequent calls.]\n";
             if (
               result &&
               typeof result === "object" &&

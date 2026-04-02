@@ -103,7 +103,7 @@ export function registerBrowserExtensionCommands(
             `- “Load unpacked” → select: ${displayPath}`,
             `- Pin “EnClaws Browser Relay”, then click it on the tab (badge shows ON)`,
             "",
-            `${theme.muted("Docs:")} ${formatDocsLink("/tools/chrome-extension", "docs.openclaw.ai/tools/chrome-extension")}`,
+            `${theme.muted("Docs:")} ${formatDocsLink("/tools/chrome-extension", "docs.enclaws.ai/tools/chrome-extension")}`,
           ].join("\n"),
         ),
       );
@@ -120,7 +120,7 @@ export function registerBrowserExtensionCommands(
           danger(
             [
               `Chrome extension is not installed. Run: "${formatCliCommand("enclaws browser extension install")}"`,
-              `Docs: ${formatDocsLink("/tools/chrome-extension", "docs.openclaw.ai/tools/chrome-extension")}`,
+              `Docs: ${formatDocsLink("/tools/chrome-extension", "docs.enclaws.ai/tools/chrome-extension")}`,
             ].join("\n"),
           ),
         );

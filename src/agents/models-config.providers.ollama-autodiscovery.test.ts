@@ -46,7 +46,7 @@ describe("Ollama auto-discovery", () => {
       throw new Error(`Unexpected fetch: ${url}`);
     }) as unknown as typeof fetch;
 
-    const agentDir = mkdtempSync(join(tmpdir(), "openclaw-test-"));
+    const agentDir = mkdtempSync(join(tmpdir(), "enclaws-test-"));
     const providers = await resolveImplicitProviders({ agentDir });
 
     expect(providers?.ollama).toBeDefined();
@@ -68,7 +68,7 @@ describe("Ollama auto-discovery", () => {
         new Error("connect ECONNREFUSED 127.0.0.1:11434"),
       ) as unknown as typeof fetch;
 
-    const agentDir = mkdtempSync(join(tmpdir(), "openclaw-test-"));
+    const agentDir = mkdtempSync(join(tmpdir(), "enclaws-test-"));
     const providers = await resolveImplicitProviders({ agentDir });
 
     expect(providers?.ollama).toBeUndefined();
@@ -88,7 +88,7 @@ describe("Ollama auto-discovery", () => {
         new Error("connect ECONNREFUSED 127.0.0.1:11434"),
       ) as unknown as typeof fetch;
 
-    const agentDir = mkdtempSync(join(tmpdir(), "openclaw-test-"));
+    const agentDir = mkdtempSync(join(tmpdir(), "enclaws-test-"));
     await resolveImplicitProviders({
       agentDir,
       explicitProviders: {

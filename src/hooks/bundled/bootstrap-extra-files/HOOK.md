@@ -1,10 +1,10 @@
 ---
 name: bootstrap-extra-files
 description: "Inject additional workspace bootstrap files via glob/path patterns"
-homepage: https://docs.openclaw.ai/automation/hooks#bootstrap-extra-files
+homepage: https://docs.enclaws.ai/automation/hooks#bootstrap-extra-files
 metadata:
   {
-    "openclaw":
+    "enclaws":
       {
         "emoji": "📎",
         "events": ["agent:bootstrap"],

@@ -119,7 +119,7 @@ const resolvePluginSdkSubpathAliases = (): Record<string, string> => {
       distFile: `${subpath}.js`,
     });
     if (resolved) {
-      aliases[`openclaw/plugin-sdk/${subpath}`] = resolved;
+      aliases[`enclaws/plugin-sdk/${subpath}`] = resolved;
     }
   }
   return aliases;
@@ -467,10 +467,10 @@ export function loadOpenClawPlugins(options: PluginLoadOptions = {}): PluginRegi
     const subpathAliases = resolvePluginSdkSubpathAliases();
     const allAliases: Record<string, string> = {
       ...(pluginSdkAccountIdAlias
-        ? { "openclaw/plugin-sdk/account-id": pluginSdkAccountIdAlias }
+        ? { "enclaws/plugin-sdk/account-id": pluginSdkAccountIdAlias }
         : {}),
       ...subpathAliases,
-      ...(pluginSdkAlias ? { "openclaw/plugin-sdk": pluginSdkAlias } : {}),
+      ...(pluginSdkAlias ? { "enclaws/plugin-sdk": pluginSdkAlias } : {}),
     };
     jitiLoader = createJiti(import.meta.url, {
       interopDefault: true,

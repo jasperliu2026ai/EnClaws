@@ -89,7 +89,7 @@ describe("promptDefaultModel", () => {
       includeManual: false,
       includeVllm: true,
       ignoreAllowlist: true,
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/enclaws-agent",
     });
 
     expect(upsertAuthProfileWithLock).toHaveBeenCalledWith(

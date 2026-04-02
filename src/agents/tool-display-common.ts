@@ -888,7 +888,7 @@ function summarizeKnownExec(words: string[]): string {
     return `run ${bin} ${script}`;
   }
 
-  if (bin === "openclaw") {
+  if (bin === "enclaws") {
     const sub = firstPositional(words, 1);
     return sub ? `run enclaws ${sub}` : "run enclaws";
   }

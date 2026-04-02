@@ -24,26 +24,26 @@ describe("bundled plugin sources", () => {
         {
           origin: "global",
           rootDir: "/global/feishu",
-          packageName: "@openclaw/feishu",
-          packageManifest: { install: { npmSpec: "@openclaw/feishu" } },
+          packageName: "@enclaws/feishu",
+          packageManifest: { install: { npmSpec: "@enclaws/feishu" } },
         },
         {
           origin: "bundled",
           rootDir: "/app/extensions/feishu",
-          packageName: "@openclaw/feishu",
-          packageManifest: { install: { npmSpec: "@openclaw/feishu" } },
+          packageName: "@enclaws/feishu",
+          packageManifest: { install: { npmSpec: "@enclaws/feishu" } },
         },
         {
           origin: "bundled",
           rootDir: "/app/extensions/feishu-dup",
-          packageName: "@openclaw/feishu",
-          packageManifest: { install: { npmSpec: "@openclaw/feishu" } },
+          packageName: "@enclaws/feishu",
+          packageManifest: { install: { npmSpec: "@enclaws/feishu" } },
         },
         {
           origin: "bundled",
           rootDir: "/app/extensions/msteams",
-          packageName: "@openclaw/msteams",
-          packageManifest: { install: { npmSpec: "@openclaw/msteams" } },
+          packageName: "@enclaws/msteams",
+          packageManifest: { install: { npmSpec: "@enclaws/msteams" } },
         },
       ],
       diagnostics: [],
@@ -69,7 +69,7 @@ describe("bundled plugin sources", () => {
     expect(map.get("feishu")).toEqual({
       pluginId: "feishu",
       localPath: "/app/extensions/feishu",
-      npmSpec: "@openclaw/feishu",
+      npmSpec: "@enclaws/feishu",
     });
   });
 
@@ -79,16 +79,16 @@ describe("bundled plugin sources", () => {
         {
           origin: "bundled",
           rootDir: "/app/extensions/feishu",
-          packageName: "@openclaw/feishu",
-          packageManifest: { install: { npmSpec: "@openclaw/feishu" } },
+          packageName: "@enclaws/feishu",
+          packageManifest: { install: { npmSpec: "@enclaws/feishu" } },
         },
       ],
       diagnostics: [],
     });
     loadPluginManifestMock.mockReturnValue({ ok: true, manifest: { id: "feishu" } });
 
-    const resolved = findBundledPluginByNpmSpec({ spec: "@openclaw/feishu" });
-    const missing = findBundledPluginByNpmSpec({ spec: "@openclaw/not-found" });
+    const resolved = findBundledPluginByNpmSpec({ spec: "@enclaws/feishu" });
+    const missing = findBundledPluginByNpmSpec({ spec: "@enclaws/not-found" });
 
     expect(resolved?.pluginId).toBe("feishu");
     expect(resolved?.localPath).toBe("/app/extensions/feishu");

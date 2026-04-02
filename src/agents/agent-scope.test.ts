@@ -29,7 +29,7 @@ describe("resolveAgentConfig", () => {
   it("should return undefined when agent id does not exist", () => {
     const cfg: OpenClawConfig = {
       agents: {
-        list: [{ id: "main", workspace: "~/openclaw" }],
+        list: [{ id: "main", workspace: "~/enclaws" }],
       },
     };
     const result = resolveAgentConfig(cfg, "nonexistent");
@@ -43,7 +43,7 @@ describe("resolveAgentConfig", () => {
           {
             id: "main",
             name: "Main Agent",
-            workspace: "~/openclaw",
+            workspace: "~/enclaws",
             agentDir: "~/.enclaws/agents/main",
             model: "anthropic/claude-opus-4",
           },
@@ -53,7 +53,7 @@ describe("resolveAgentConfig", () => {
     const result = resolveAgentConfig(cfg, "main");
     expect(result).toEqual({
       name: "Main Agent",
-      workspace: "~/openclaw",
+      workspace: "~/enclaws",
       agentDir: "~/.enclaws/agents/main",
       model: "anthropic/claude-opus-4",
       identity: undefined,
@@ -322,7 +322,7 @@ describe("resolveAgentConfig", () => {
         list: [
           {
             id: "work",
-            workspace: "~/openclaw-work",
+            workspace: "~/enclaws-work",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -350,7 +350,7 @@ describe("resolveAgentConfig", () => {
         list: [
           {
             id: "restricted",
-            workspace: "~/openclaw-restricted",
+            workspace: "~/enclaws-restricted",
             tools: {
               allow: ["read"],
               deny: ["exec", "write", "edit"],
@@ -380,7 +380,7 @@ describe("resolveAgentConfig", () => {
         list: [
           {
             id: "family",
-            workspace: "~/openclaw-family",
+            workspace: "~/enclaws-family",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -401,17 +401,17 @@ describe("resolveAgentConfig", () => {
   it("should normalize agent id", () => {
     const cfg: OpenClawConfig = {
       agents: {
-        list: [{ id: "main", workspace: "~/openclaw" }],
+        list: [{ id: "main", workspace: "~/enclaws" }],
       },
     };
     // Should normalize to "main" (default)
     const result = resolveAgentConfig(cfg, "");
     expect(result).toBeDefined();
-    expect(result?.workspace).toBe("~/openclaw");
+    expect(result?.workspace).toBe("~/enclaws");
   });
 
   it("uses ENCLAWS_HOME for default agent workspace", () => {
-    const home = path.join(path.sep, "srv", "openclaw-home");
+    const home = path.join(path.sep, "srv", "enclaws-home");
     vi.stubEnv("ENCLAWS_HOME", home);
 
     const workspace = resolveAgentWorkspaceDir({} as OpenClawConfig, "main");
@@ -419,7 +419,7 @@ describe("resolveAgentConfig", () => {
   });
 
   it("uses ENCLAWS_HOME for default agentDir", () => {
-    const home = path.join(path.sep, "srv", "openclaw-home");
+    const home = path.join(path.sep, "srv", "enclaws-home");
     vi.stubEnv("ENCLAWS_HOME", home);
     // Clear state dir so it falls back to ENCLAWS_HOME
     vi.stubEnv("ENCLAWS_STATE_DIR", "");

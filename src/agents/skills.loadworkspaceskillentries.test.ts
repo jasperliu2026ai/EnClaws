@@ -7,7 +7,7 @@ import { loadWorkspaceSkillEntries } from "./skills.js";
 const tempDirs: string[] = [];
 
 async function createTempWorkspaceDir() {
-  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-"));
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "enclaws-"));
   tempDirs.push(workspaceDir);
   return workspaceDir;
 }

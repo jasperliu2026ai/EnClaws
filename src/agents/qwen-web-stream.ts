@@ -93,7 +93,7 @@ export function createQwenWebStreamFn(
             "❌ Wrong: \"I will now execute sessions_spawn three times...\"\n" +
             "✅ Correct: Output the actual <tool_call> XML tags as shown above.\n\n" +
             "### Browser Tool\n" +
-            "- Profile 'openclaw' (Recommended): Independent browser window.\n" +
+            "- Profile 'enclaws' (Recommended): Independent browser window.\n" +
             "- Profile 'chrome': Uses existing Chrome tabs (requires extension).\n" +
             "- Once started with a profile, STAY with it.\n" +
             "- Do NOT install Playwright/Selenium/Puppeteer via exec.\n\n" +

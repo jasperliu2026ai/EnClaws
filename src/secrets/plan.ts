@@ -9,7 +9,7 @@ export type SecretsPlanTargetType =
 export type SecretsPlanTarget = {
   type: SecretsPlanTargetType;
   /**
-   * Dot path in openclaw.json for operator readability.
+   * Dot path in enclaws.json for operator readability.
    * Example: "models.providers.openai.apiKey"
    */
   path: string;

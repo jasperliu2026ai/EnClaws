@@ -6,10 +6,10 @@ describe("formatPluginSourceForTable", () => {
     const out = formatPluginSourceForTable(
       {
         origin: "bundled",
-        source: "/opt/homebrew/lib/node_modules/openclaw/extensions/bluebubbles/index.ts",
+        source: "/opt/homebrew/lib/node_modules/enclaws/extensions/bluebubbles/index.ts",
       },
       {
-        stock: "/opt/homebrew/lib/node_modules/openclaw/extensions",
+        stock: "/opt/homebrew/lib/node_modules/enclaws/extensions",
         global: "/Users/x/.enclaws/extensions",
         workspace: "/Users/x/ws/.enclaws/extensions",
       },
@@ -25,7 +25,7 @@ describe("formatPluginSourceForTable", () => {
         source: "/Users/x/ws/.enclaws/extensions/matrix/index.ts",
       },
       {
-        stock: "/opt/homebrew/lib/node_modules/openclaw/extensions",
+        stock: "/opt/homebrew/lib/node_modules/enclaws/extensions",
         global: "/Users/x/.enclaws/extensions",
         workspace: "/Users/x/ws/.enclaws/extensions",
       },
@@ -41,7 +41,7 @@ describe("formatPluginSourceForTable", () => {
         source: "/Users/x/.enclaws/extensions/zalo/index.js",
       },
       {
-        stock: "/opt/homebrew/lib/node_modules/openclaw/extensions",
+        stock: "/opt/homebrew/lib/node_modules/enclaws/extensions",
         global: "/Users/x/.enclaws/extensions",
         workspace: "/Users/x/ws/.enclaws/extensions",
       },

@@ -21,8 +21,8 @@ const serviceReadRuntime = vi.fn(async (_env?: NodeJS.ProcessEnv) => ({ status: 
 const serviceReadCommand = vi.fn(async (_env?: NodeJS.ProcessEnv) => ({
   programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
   environment: {
-    ENCLAWS_STATE_DIR: "/tmp/openclaw-daemon",
-    ENCLAWS_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
+    ENCLAWS_STATE_DIR: "/tmp/enclaws-daemon",
+    ENCLAWS_CONFIG_PATH: "/tmp/enclaws-daemon/enclaws.json",
   },
 }));
 const resolveGatewayBindHost = vi.fn(
@@ -31,15 +31,15 @@ const resolveGatewayBindHost = vi.fn(
 const pickPrimaryTailnetIPv4 = vi.fn(() => "100.64.0.9");
 const resolveGatewayPort = vi.fn((_cfg?: unknown, _env?: unknown) => 18789);
 const resolveStateDir = vi.fn(
-  (env: NodeJS.ProcessEnv) => env.ENCLAWS_STATE_DIR ?? "/tmp/openclaw-cli",
+  (env: NodeJS.ProcessEnv) => env.ENCLAWS_STATE_DIR ?? "/tmp/enclaws-cli",
 );
 const resolveConfigPath = vi.fn((env: NodeJS.ProcessEnv, stateDir: string) => {
-  return env.ENCLAWS_CONFIG_PATH ?? `${stateDir}/openclaw.json`;
+  return env.ENCLAWS_CONFIG_PATH ?? `${stateDir}/enclaws.json`;
 });
 
 vi.mock("../../config/config.js", () => ({
   createConfigIO: ({ configPath }: { configPath: string }) => {
-    const isDaemon = configPath.includes("/openclaw-daemon/");
+    const isDaemon = configPath.includes("/enclaws-daemon/");
     return {
       readConfigFileSnapshot: async () => ({
         path: configPath,
@@ -125,8 +125,8 @@ describe("gatherDaemonStatus", () => {
       "ENCLAWS_GATEWAY_TOKEN",
       "ENCLAWS_GATEWAY_PASSWORD",
     ]);
-    process.env.ENCLAWS_STATE_DIR = "/tmp/openclaw-cli";
-    process.env.ENCLAWS_CONFIG_PATH = "/tmp/openclaw-cli/openclaw.json";
+    process.env.ENCLAWS_STATE_DIR = "/tmp/enclaws-cli";
+    process.env.ENCLAWS_CONFIG_PATH = "/tmp/enclaws-cli/enclaws.json";
     delete process.env.ENCLAWS_GATEWAY_TOKEN;
     delete process.env.ENCLAWS_GATEWAY_PASSWORD;
     callGatewayStatusProbe.mockClear();

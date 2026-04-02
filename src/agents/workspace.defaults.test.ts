@@ -8,7 +8,7 @@ afterEach(() => {
 
 describe("DEFAULT_AGENT_WORKSPACE_DIR", () => {
   it("uses ENCLAWS_HOME when resolving the default workspace dir", () => {
-    const home = path.join(path.sep, "srv", "openclaw-home");
+    const home = path.join(path.sep, "srv", "enclaws-home");
     vi.stubEnv("ENCLAWS_HOME", home);
     vi.stubEnv("HOME", path.join(path.sep, "home", "other"));
 

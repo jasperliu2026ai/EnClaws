@@ -364,7 +364,7 @@ function loadSkillEntries(
   const bundledSkills = bundledSkillsDir
     ? loadSkills({
         dir: bundledSkillsDir,
-        source: "openclaw-bundled",
+        source: "enclaws-bundled",
       })
     : [];
   const extraSkills = hasTenantSkillsDir
@@ -373,14 +373,14 @@ function loadSkillEntries(
         const resolved = resolveUserPath(dir);
         return loadSkills({
           dir: resolved,
-          source: "openclaw-extra",
+          source: "enclaws-extra",
         });
       });
   const managedSkills = hasTenantSkillsDir
     ? []
     : loadSkills({
         dir: managedSkillsDir,
-        source: "openclaw-managed",
+        source: "enclaws-managed",
       });
 
   // Multi-tenant mode: skills live in tenantDir/skills/, NOT workspace/skills/
@@ -388,7 +388,7 @@ function loadSkillEntries(
   const tenantSkills = opts?.tenantSkillsDir
     ? loadSkills({
         dir: opts.tenantSkillsDir,
-        source: "openclaw-tenant",
+        source: "enclaws-tenant",
       })
     : [];
   const personalAgentsSkillsDir = path.resolve(os.homedir(), ".agents", "skills");
@@ -410,7 +410,7 @@ function loadSkillEntries(
     ? []
     : loadSkills({
         dir: workspaceSkillsDir,
-        source: "openclaw-workspace",
+        source: "enclaws-workspace",
       });
 
   const merged = new Map<string, Skill>();

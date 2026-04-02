@@ -54,7 +54,7 @@ describe("onboard-hooks", () => {
     eligible: boolean,
   ) => ({
     ...params,
-    source: "openclaw-bundled" as const,
+    source: "enclaws-bundled" as const,
     pluginId: undefined,
     homepage: undefined,
     always: false,
@@ -230,7 +230,7 @@ describe("onboard-hooks", () => {
 
       // Second note should confirm configuration
       expect(noteCalls[1][0]).toContain("Enabled 1 hook: session-memory");
-      expect(noteCalls[1][0]).toMatch(/(?:openclaw|openclaw)( --profile isolated)? hooks list/);
+      expect(noteCalls[1][0]).toMatch(/(?:enclaws|enclaws)( --profile isolated)? hooks list/);
     });
   });
 });

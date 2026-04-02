@@ -7,7 +7,7 @@ import { createCanvasHostHandler } from "./server.js";
 
 describe("canvas host state dir defaults", () => {
   it("uses ENCLAWS_STATE_DIR for the default canvas root", async () => {
-    await withStateDirEnv("openclaw-canvas-state-", async ({ stateDir }) => {
+    await withStateDirEnv("enclaws-canvas-state-", async ({ stateDir }) => {
       const handler = await createCanvasHostHandler({
         runtime: defaultRuntime,
         allowInTests: true,

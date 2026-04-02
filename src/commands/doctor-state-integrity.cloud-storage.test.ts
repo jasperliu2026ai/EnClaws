@@ -42,7 +42,7 @@ describe("detectMacCloudSyncedStateDir", () => {
   });
 
   it("detects cloud-synced target when state dir resolves via symlink", () => {
-    const symlinkPath = "/tmp/openclaw-state";
+    const symlinkPath = "/tmp/enclaws-state";
     const resolvedCloudPath = path.join(
       home,
       "Library",
@@ -87,7 +87,7 @@ describe("detectMacCloudSyncedStateDir", () => {
   it("anchors cloud detection to OS homedir when ENCLAWS_HOME is overridden", () => {
     const stateDir = path.join(home, "Library", "CloudStorage", "iCloud Drive", ".enclaws");
     const originalOpenClawHome = process.env.ENCLAWS_HOME;
-    process.env.ENCLAWS_HOME = "/tmp/openclaw-home-override";
+    process.env.ENCLAWS_HOME = "/tmp/enclaws-home-override";
     const homedirSpy = vi.spyOn(os, "homedir").mockReturnValue(home);
     try {
       const result = detectMacCloudSyncedStateDir(stateDir, {

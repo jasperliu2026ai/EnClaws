@@ -183,7 +183,7 @@ describe("sandbox fs bridge shell compatibility", () => {
   });
 
   it("allows mkdirp for existing in-boundary subdirectories", async () => {
-    await withTempDir("openclaw-fs-bridge-mkdirp-", async (stateDir) => {
+    await withTempDir("enclaws-fs-bridge-mkdirp-", async (stateDir) => {
       const workspaceDir = path.join(stateDir, "workspace");
       const nestedDir = path.join(workspaceDir, "memory", "kemik");
       await fs.mkdir(nestedDir, { recursive: true });
@@ -205,7 +205,7 @@ describe("sandbox fs bridge shell compatibility", () => {
   });
 
   it("rejects mkdirp when target exists as a file", async () => {
-    await withTempDir("openclaw-fs-bridge-mkdirp-file-", async (stateDir) => {
+    await withTempDir("enclaws-fs-bridge-mkdirp-file-", async (stateDir) => {
       const workspaceDir = path.join(stateDir, "workspace");
       const filePath = path.join(workspaceDir, "memory", "kemik");
       await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -226,7 +226,7 @@ describe("sandbox fs bridge shell compatibility", () => {
   });
 
   it("rejects pre-existing host symlink escapes before docker exec", async () => {
-    await withTempDir("openclaw-fs-bridge-", async (stateDir) => {
+    await withTempDir("enclaws-fs-bridge-", async (stateDir) => {
       const workspaceDir = path.join(stateDir, "workspace");
       const outsideDir = path.join(stateDir, "outside");
       const outsideFile = path.join(outsideDir, "secret.txt");
@@ -251,7 +251,7 @@ describe("sandbox fs bridge shell compatibility", () => {
     if (process.platform === "win32") {
       return;
     }
-    await withTempDir("openclaw-fs-bridge-hardlink-", async (stateDir) => {
+    await withTempDir("enclaws-fs-bridge-hardlink-", async (stateDir) => {
       const workspaceDir = path.join(stateDir, "workspace");
       const outsideDir = path.join(stateDir, "outside");
       const outsideFile = path.join(outsideDir, "secret.txt");

@@ -22,7 +22,7 @@ describe("installScheduledTask", () => {
   async function withUserProfileDir(
     run: (tmpDir: string, env: Record<string, string>) => Promise<void>,
   ) {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-schtasks-install-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "enclaws-schtasks-install-"));
     const env = {
       USERPROFILE: tmpDir,
       ENCLAWS_PROFILE: "default",

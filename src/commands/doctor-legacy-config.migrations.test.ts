@@ -24,7 +24,7 @@ describe("normalizeCompatibilityConfigValues", () => {
 
   beforeEach(() => {
     previousOauthDir = process.env.ENCLAWS_OAUTH_DIR;
-    tempOauthDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-oauth-"));
+    tempOauthDir = fs.mkdtempSync(path.join(os.tmpdir(), "enclaws-oauth-"));
     process.env.ENCLAWS_OAUTH_DIR = tempOauthDir;
   });
 
@@ -87,7 +87,7 @@ describe("normalizeCompatibilityConfigValues", () => {
   });
 
   it("copies legacy ack reaction when authDir override exists", () => {
-    const customDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-wa-auth-"));
+    const customDir = fs.mkdtempSync(path.join(os.tmpdir(), "enclaws-wa-auth-"));
     try {
       writeCreds(customDir);
 

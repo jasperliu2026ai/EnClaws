@@ -15,7 +15,7 @@ Automatically saves session context to memory when you issue `/new` or `/reset`.
 **Enable**:
 
 ```bash
-openclaw hooks enable session-memory
+enclaws hooks enable session-memory
 ```
 
 ### 📎 bootstrap-extra-files
@@ -29,7 +29,7 @@ Injects extra bootstrap files (for example monorepo `AGENTS.md`/`TOOLS.md`) duri
 **Enable**:
 
 ```bash
-openclaw hooks enable bootstrap-extra-files
+enclaws hooks enable bootstrap-extra-files
 ```
 
 ### 📝 command-logger
@@ -43,7 +43,7 @@ Logs all command events to a centralized audit file.
 **Enable**:
 
 ```bash
-openclaw hooks enable command-logger
+enclaws hooks enable command-logger
 ```
 
 ### 🚀 boot-md
@@ -57,7 +57,7 @@ Runs `BOOT.md` whenever the gateway starts (after channels start).
 **Enable**:
 
 ```bash
-openclaw hooks enable boot-md
+enclaws hooks enable boot-md
 ```
 
 ## Hook Structure
@@ -81,9 +81,9 @@ session-memory/
 ---
 name: my-hook
 description: "Short description"
-homepage: https://docs.openclaw.ai/automation/hooks#my-hook
+homepage: https://docs.enclaws.ai/automation/hooks#my-hook
 metadata:
-  { "openclaw": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
+  { "enclaws": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
 ---
 # Hook Title
 
@@ -116,31 +116,31 @@ Custom hooks follow the same structure as bundled hooks.
 List all hooks:
 
 ```bash
-openclaw hooks list
+enclaws hooks list
 ```
 
 Show hook details:
 
 ```bash
-openclaw hooks info session-memory
+enclaws hooks info session-memory
 ```
 
 Check hook status:
 
 ```bash
-openclaw hooks check
+enclaws hooks check
 ```
 
 Enable/disable:
 
 ```bash
-openclaw hooks enable session-memory
-openclaw hooks disable command-logger
+enclaws hooks enable session-memory
+enclaws hooks disable command-logger
 ```
 
 ## Configuration
 
-Hooks can be configured in `~/.enclaws/openclaw.json`:
+Hooks can be configured in `~/.enclaws/enclaws.json`:
 
 ```json
 {
@@ -213,11 +213,11 @@ export default myHandler;
 Test your hooks by:
 
 1. Place hook in workspace hooks directory
-2. Restart gateway: `pkill -9 -f 'openclaw.*gateway' && pnpm openclaw gateway`
-3. Enable the hook: `openclaw hooks enable my-hook`
+2. Restart gateway: `pkill -9 -f 'enclaws.*gateway' && pnpm enclaws gateway`
+3. Enable the hook: `enclaws hooks enable my-hook`
 4. Trigger the event (e.g., send `/new` command)
 5. Check gateway logs for hook execution
 
 ## Documentation
 
-Full documentation: https://docs.openclaw.ai/automation/hooks
+Full documentation: https://docs.enclaws.ai/automation/hooks

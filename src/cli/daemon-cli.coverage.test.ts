@@ -102,8 +102,8 @@ describe("daemon-cli coverage", () => {
       "ENCLAWS_GATEWAY_PORT",
       "ENCLAWS_PROFILE",
     ]);
-    process.env.ENCLAWS_STATE_DIR = "/tmp/openclaw-cli-state";
-    process.env.ENCLAWS_CONFIG_PATH = "/tmp/openclaw-cli-state/openclaw.json";
+    process.env.ENCLAWS_STATE_DIR = "/tmp/enclaws-cli-state";
+    process.env.ENCLAWS_CONFIG_PATH = "/tmp/enclaws-cli-state/enclaws.json";
     delete process.env.ENCLAWS_GATEWAY_PORT;
     delete process.env.ENCLAWS_PROFILE;
     serviceReadCommand.mockResolvedValue(null);
@@ -134,11 +134,11 @@ describe("daemon-cli coverage", () => {
       programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
       environment: {
         ENCLAWS_PROFILE: "dev",
-        ENCLAWS_STATE_DIR: "/tmp/openclaw-daemon-state",
-        ENCLAWS_CONFIG_PATH: "/tmp/openclaw-daemon-state/openclaw.json",
+        ENCLAWS_STATE_DIR: "/tmp/enclaws-daemon-state",
+        ENCLAWS_CONFIG_PATH: "/tmp/enclaws-daemon-state/enclaws.json",
         ENCLAWS_GATEWAY_PORT: "19001",
       },
-      sourcePath: "/tmp/ai.openclaw.gateway.plist",
+      sourcePath: "/tmp/ai.enclaws.gateway.plist",
     });
 
     await runDaemonCommand(["daemon", "status", "--json"]);

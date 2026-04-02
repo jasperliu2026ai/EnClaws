@@ -14,11 +14,11 @@ import { OpenClawSchema } from "./zod-schema.js";
 describe("$schema key in config (#14998)", () => {
   it("accepts config with $schema string", () => {
     const result = OpenClawSchema.safeParse({
-      $schema: "https://openclaw.ai/config.json",
+      $schema: "https://enclaws.ai/config.json",
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.$schema).toBe("https://openclaw.ai/config.json");
+      expect(result.data.$schema).toBe("https://enclaws.ai/config.json");
     }
   });
 
@@ -307,7 +307,7 @@ describe("config strict validation", () => {
       const configDir = path.join(home, ".enclaws");
       await fs.mkdir(configDir, { recursive: true });
       await fs.writeFile(
-        path.join(configDir, "openclaw.json"),
+        path.join(configDir, "enclaws.json"),
         JSON.stringify({
           agents: { list: [{ id: "pi" }] },
           routing: { allowFrom: ["+15555550123"] },

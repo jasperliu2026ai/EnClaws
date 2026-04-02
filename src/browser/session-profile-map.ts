@@ -28,7 +28,7 @@ const MAP_FILE = path.join(os.homedir(), ".enclaws", "session-profiles.json");
  */
 const SESSION_PROFILE_PREFIX = "sess-";
 
-/** Maximum profile name length (openclaw enforces no specific limit, but keep sane). */
+/** Maximum profile name length (enclaws enforces no specific limit, but keep sane). */
 const MAX_PROFILE_NAME_LENGTH = 48;
 
 // ─── In-memory cache ──────────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ function enqueueWrite(map: Record<string, string>): void {
 // ─── Session key normalisation ────────────────────────────────────────────────
 
 /**
- * Convert an arbitrary session key into a valid openclaw profile name.
+ * Convert an arbitrary session key into a valid enclaws profile name.
  * Profile names: lowercase letters, numbers, hyphens only; max length.
  *
  * Examples:

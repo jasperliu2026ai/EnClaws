@@ -58,7 +58,7 @@ export function buildInboundMetaSystemPrompt(ctx: TemplateContext): string {
   }
 
   const payload = {
-    schema: "openclaw.inbound_meta.v1",
+    schema: "enclaws.inbound_meta.v1",
     chat_id: safeTrim(ctx.OriginatingTo),
     channel: channelValue,
     provider: safeTrim(ctx.Provider),

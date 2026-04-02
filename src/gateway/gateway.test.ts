@@ -41,7 +41,7 @@ describe("gateway e2e", () => {
 
       const { baseUrl: openaiBaseUrl, restore } = installOpenAiResponsesMock();
 
-      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-mock-home-"));
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "enclaws-gw-mock-home-"));
       process.env.HOME = tempHome;
       process.env.ENCLAWS_SKIP_CHANNELS = "1";
       process.env.ENCLAWS_SKIP_GMAIL_WATCHER = "1";
@@ -52,7 +52,7 @@ describe("gateway e2e", () => {
       const token = `test-${randomUUID()}`;
       process.env.ENCLAWS_GATEWAY_TOKEN = token;
 
-      const workspaceDir = path.join(tempHome, "openclaw");
+      const workspaceDir = path.join(tempHome, "enclaws");
       await fs.mkdir(workspaceDir, { recursive: true });
 
       const nonceA = randomUUID();
@@ -62,7 +62,7 @@ describe("gateway e2e", () => {
 
       const configDir = path.join(tempHome, ".enclaws");
       await fs.mkdir(configDir, { recursive: true });
-      const configPath = path.join(configDir, "openclaw.json");
+      const configPath = path.join(configDir, "enclaws.json");
 
       const cfg = {
         agents: { defaults: { workspace: workspaceDir } },
@@ -144,7 +144,7 @@ describe("gateway e2e", () => {
       process.env.ENCLAWS_SKIP_BROWSER_CONTROL_SERVER = "1";
       delete process.env.ENCLAWS_GATEWAY_TOKEN;
 
-      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-wizard-home-"));
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "enclaws-wizard-home-"));
       process.env.HOME = tempHome;
       delete process.env.ENCLAWS_STATE_DIR;
       delete process.env.ENCLAWS_CONFIG_PATH;

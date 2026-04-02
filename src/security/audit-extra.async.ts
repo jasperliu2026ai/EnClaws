@@ -263,7 +263,7 @@ async function listSandboxBrowserContainers(
 ): Promise<string[] | null> {
   try {
     const result = await execDockerRawFn(
-      ["ps", "-a", "--filter", "label=openclaw.sandboxBrowser=1", "--format", "{{.Names}}"],
+      ["ps", "-a", "--filter", "label=enclaws.sandboxBrowser=1", "--format", "{{.Names}}"],
       { allowFailure: true },
     );
     if (result.code !== 0) {
@@ -288,7 +288,7 @@ async function readSandboxBrowserHashLabels(params: {
       [
         "inspect",
         "-f",
-        '{{ index .Config.Labels "openclaw.configHash" }}\t{{ index .Config.Labels "openclaw.browserConfigEpoch" }}',
+        '{{ index .Config.Labels "enclaws.configHash" }}\t{{ index .Config.Labels "enclaws.browserConfigEpoch" }}',
         params.containerName,
       ],
       { allowFailure: true },
@@ -409,7 +409,7 @@ export async function collectSandboxBrowserHashLabelFindings(params?: {
       title: "Sandbox browser container hash epoch is stale",
       detail:
         `Containers: ${staleEpoch.join(", ")}. ` +
-        `Expected openclaw.browserConfigEpoch=${SANDBOX_BROWSER_SECURITY_HASH_EPOCH}.`,
+        `Expected enclaws.browserConfigEpoch=${SANDBOX_BROWSER_SECURITY_HASH_EPOCH}.`,
       remediation: `${formatCliCommand("enclaws sandbox recreate --browser --all")} (add --force to skip prompt).`,
     });
   }
@@ -550,7 +550,7 @@ export async function collectPluginsTrustFindings(params: {
           sandboxMode,
           agentId: context.agentId,
         });
-        const broadPolicy = isToolAllowedByPolicies("__openclaw_plugin_probe__", policies);
+        const broadPolicy = isToolAllowedByPolicies("__enclaws_plugin_probe__", policies);
         const explicitPluginAllow =
           !restrictiveProfile &&
           (hasExplicitPluginAllow({
@@ -1012,7 +1012,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: `Plugin "${pluginName}" has extension entry path traversal`,
         detail: `Found extension entries that escape the plugin directory:\n${escapedEntries.map((entry) => `  - ${entry}`).join("\n")}`,
         remediation:
-          "Update the plugin manifest so all openclaw.extensions entries stay inside the plugin directory.",
+          "Update the plugin manifest so all enclaws.extensions entries stay inside the plugin directory.",
       });
     }
 
@@ -1076,7 +1076,7 @@ export async function collectInstalledSkillsCodeSafetyFindings(params: {
   for (const workspaceDir of workspaceDirs) {
     const entries = loadWorkspaceSkillEntries(workspaceDir, { config: params.cfg });
     for (const entry of entries) {
-      if (entry.skill.source === "openclaw-bundled") {
+      if (entry.skill.source === "enclaws-bundled") {
         continue;
       }
 

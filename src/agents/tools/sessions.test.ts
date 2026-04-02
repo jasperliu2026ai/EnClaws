@@ -231,7 +231,7 @@ describe("sessions_list transcriptPath resolution", () => {
   });
 
   it("resolves cross-agent transcript paths from agent defaults when gateway store path is relative", async () => {
-    const stateDir = path.join(os.tmpdir(), "openclaw-state-relative");
+    const stateDir = path.join(os.tmpdir(), "enclaws-state-relative");
     vi.stubEnv("ENCLAWS_STATE_DIR", stateDir);
 
     try {
@@ -263,7 +263,7 @@ describe("sessions_list transcriptPath resolution", () => {
   });
 
   it("resolves transcriptPath even when sessions.list does not return a store path", async () => {
-    const stateDir = path.join(os.tmpdir(), "openclaw-state-no-path");
+    const stateDir = path.join(os.tmpdir(), "enclaws-state-no-path");
     vi.stubEnv("ENCLAWS_STATE_DIR", stateDir);
 
     try {
@@ -294,7 +294,7 @@ describe("sessions_list transcriptPath resolution", () => {
   });
 
   it("falls back to agent defaults when gateway path is non-string", async () => {
-    const stateDir = path.join(os.tmpdir(), "openclaw-state-non-string-path");
+    const stateDir = path.join(os.tmpdir(), "enclaws-state-non-string-path");
     vi.stubEnv("ENCLAWS_STATE_DIR", stateDir);
 
     try {
@@ -326,7 +326,7 @@ describe("sessions_list transcriptPath resolution", () => {
   });
 
   it("falls back to agent defaults when gateway path is '(multiple)'", async () => {
-    const stateDir = path.join(os.tmpdir(), "openclaw-state-multiple");
+    const stateDir = path.join(os.tmpdir(), "enclaws-state-multiple");
     vi.stubEnv("ENCLAWS_STATE_DIR", stateDir);
 
     try {
@@ -360,7 +360,7 @@ describe("sessions_list transcriptPath resolution", () => {
   });
 
   it("resolves absolute {agentId} template paths per session agent", async () => {
-    const templateStorePath = "/tmp/openclaw/agents/{agentId}/sessions/sessions.json";
+    const templateStorePath = "/tmp/enclaws/agents/{agentId}/sessions/sessions.json";
 
     callGatewayMock.mockResolvedValueOnce({
       path: templateStorePath,

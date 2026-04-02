@@ -14,9 +14,9 @@ describe("secrets audit", () => {
   let env: NodeJS.ProcessEnv;
 
   beforeEach(async () => {
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-secrets-audit-"));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "enclaws-secrets-audit-"));
     stateDir = path.join(rootDir, ".enclaws");
-    configPath = path.join(stateDir, "openclaw.json");
+    configPath = path.join(stateDir, "enclaws.json");
     authStorePath = path.join(stateDir, "agents", "main", "agent", "auth-profiles.json");
     authJsonPath = path.join(stateDir, "agents", "main", "agent", "auth.json");
     envPath = path.join(stateDir, ".env");

@@ -53,7 +53,7 @@ async function requireRiskAcknowledgement(params: {
       "enclaws security audit --deep",
       "enclaws security audit --fix",
       "",
-      "必读指南: https://docs.openclaw.ai/gateway/security",
+      "必读指南: https://docs.enclaws.ai/gateway/security",
     ].join("\n"),
     "安全警告 (Security)",
   );
@@ -90,7 +90,7 @@ export async function runOnboardingWizard(
         [
           ...snapshot.issues.map((iss) => `- ${iss.path}: ${iss.message}`),
           "",
-          "Docs: https://docs.openclaw.ai/gateway/configuration",
+          "Docs: https://docs.enclaws.ai/gateway/configuration",
         ].join("\n"),
         "配置问题 (Config issues)",
       );

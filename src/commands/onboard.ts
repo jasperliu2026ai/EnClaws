@@ -57,7 +57,7 @@ export async function onboardCommand(opts: OnboardOptions, runtime: RuntimeEnv =
     runtime.error(
       [
         "Non-interactive onboarding requires explicit risk acknowledgement.",
-        "Read: https://docs.openclaw.ai/security",
+        "Read: https://docs.enclaws.ai/security",
         `Re-run with: ${formatCliCommand("enclaws onboard --non-interactive --accept-risk ...")}`,
       ].join("\n"),
     );
@@ -80,7 +80,7 @@ export async function onboardCommand(opts: OnboardOptions, runtime: RuntimeEnv =
         "检测到 Windows 系统 — EnClaws 在 WSL2 上的运行效果最佳！",
         "原生的 Windows 支持可能还会遇到一些问题。",
         "推荐的快速安装方式：使用 wsl --install (只需一条命令并重启一次)",
-        "参考指南：https://docs.openclaw.ai/windows",
+        "参考指南：https://docs.enclaws.ai/windows",
       ].join("\n"),
     );
   }

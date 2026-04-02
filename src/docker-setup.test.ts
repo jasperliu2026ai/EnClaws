@@ -39,7 +39,7 @@ exit 0
 }
 
 async function createDockerSetupSandbox(): Promise<DockerSetupSandbox> {
-  const rootDir = await mkdtemp(join(tmpdir(), "openclaw-docker-setup-"));
+  const rootDir = await mkdtemp(join(tmpdir(), "enclaws-docker-setup-"));
   const scriptPath = join(rootDir, "docker-setup.sh");
   const dockerfilePath = join(rootDir, "Dockerfile");
   const composePath = join(rootDir, "docker-compose.yml");
@@ -51,7 +51,7 @@ async function createDockerSetupSandbox(): Promise<DockerSetupSandbox> {
   await writeFile(dockerfilePath, "FROM scratch\n");
   await writeFile(
     composePath,
-    "services:\n  openclaw-gateway:\n    image: noop\n  openclaw-cli:\n    image: noop\n",
+    "services:\n  enclaws-gateway:\n    image: noop\n  enclaws-cli:\n    image: noop\n",
   );
   await writeDockerStub(binDir, logPath);
 
@@ -71,7 +71,7 @@ function createEnv(
     DOCKER_STUB_LOG: sandbox.logPath,
     ENCLAWS_GATEWAY_TOKEN: "test-token",
     ENCLAWS_CONFIG_DIR: join(sandbox.rootDir, "config"),
-    ENCLAWS_WORKSPACE_DIR: join(sandbox.rootDir, "openclaw"),
+    ENCLAWS_WORKSPACE_DIR: join(sandbox.rootDir, "enclaws"),
   };
 
   for (const [key, value] of Object.entries(overrides)) {
@@ -135,25 +135,25 @@ describe("docker-setup.sh", () => {
     const result = runDockerSetup(activeSandbox, {
       ENCLAWS_DOCKER_APT_PACKAGES: "ffmpeg build-essential",
       ENCLAWS_EXTRA_MOUNTS: undefined,
-      ENCLAWS_HOME_VOLUME: "openclaw-home",
+      ENCLAWS_HOME_VOLUME: "enclaws-home",
     });
     expect(result.status).toBe(0);
     const envFile = await readFile(join(activeSandbox.rootDir, ".env"), "utf8");
     expect(envFile).toContain("ENCLAWS_DOCKER_APT_PACKAGES=ffmpeg build-essential");
     expect(envFile).toContain("ENCLAWS_EXTRA_MOUNTS=");
-    expect(envFile).toContain("ENCLAWS_HOME_VOLUME=openclaw-home");
+    expect(envFile).toContain("ENCLAWS_HOME_VOLUME=enclaws-home");
     const extraCompose = await readFile(
       join(activeSandbox.rootDir, "docker-compose.extra.yml"),
       "utf8",
     );
-    expect(extraCompose).toContain("openclaw-home:/home/node");
+    expect(extraCompose).toContain("enclaws-home:/home/node");
     expect(extraCompose).toContain("volumes:");
-    expect(extraCompose).toContain("openclaw-home:");
+    expect(extraCompose).toContain("enclaws-home:");
     const log = await readFile(activeSandbox.logPath, "utf8");
     expect(log).toContain("--build-arg ENCLAWS_DOCKER_APT_PACKAGES=ffmpeg build-essential");
-    expect(log).toContain("run --rm openclaw-cli onboard --mode local --no-install-daemon");
-    expect(log).toContain("run --rm openclaw-cli config set gateway.mode local");
-    expect(log).toContain("run --rm openclaw-cli config set gateway.bind lan");
+    expect(log).toContain("run --rm enclaws-cli onboard --mode local --no-install-daemon");
+    expect(log).toContain("run --rm enclaws-cli config set gateway.mode local");
+    expect(log).toContain("run --rm enclaws-cli config set gateway.bind lan");
   });
 
   it("precreates config identity dir for CLI device auth writes", async () => {
@@ -177,7 +177,7 @@ describe("docker-setup.sh", () => {
     const workspaceDir = join(activeSandbox.rootDir, "workspace-token-reuse");
     await mkdir(configDir, { recursive: true });
     await writeFile(
-      join(configDir, "openclaw.json"),
+      join(configDir, "enclaws.json"),
       JSON.stringify({ gateway: { auth: { mode: "token", token: "config-token-123" } } }),
     );
 
@@ -259,7 +259,7 @@ describe("docker-setup.sh", () => {
 
   it("keeps docker-compose CLI network namespace settings in sync", async () => {
     const compose = await readFile(join(repoRoot, "docker-compose.yml"), "utf8");
-    expect(compose).toContain('network_mode: "service:openclaw-gateway"');
-    expect(compose).toContain("depends_on:\n      - openclaw-gateway");
+    expect(compose).toContain('network_mode: "service:enclaws-gateway"');
+    expect(compose).toContain("depends_on:\n      - enclaws-gateway");
   });
 });

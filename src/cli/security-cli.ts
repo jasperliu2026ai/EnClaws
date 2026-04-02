@@ -39,7 +39,7 @@ export function registerSecurityCli(program: Command) {
           ["enclaws security audit --deep", "Include best-effort live Gateway probe checks."],
           ["enclaws security audit --fix", "Apply safe remediations and file-permission fixes."],
           ["enclaws security audit --json", "Output machine-readable JSON."],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/security", "docs.openclaw.ai/cli/security")}\n`,
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/security", "docs.enclaws.ai/cli/security")}\n`,
     );
 
   security

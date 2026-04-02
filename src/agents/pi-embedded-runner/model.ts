@@ -135,17 +135,17 @@ export function resolveModel(
  * error.  This detects known providers that require opt-in auth and adds
  * a hint.
  *
- * See: https://github.com/openclaw/openclaw/issues/17328
+ * See: https://github.com/enclaws/enclaws/issues/17328
  */
 const LOCAL_PROVIDER_HINTS: Record<string, string> = {
   ollama:
     "Ollama requires authentication to be registered as a provider. " +
     'Set OLLAMA_API_KEY="ollama-local" (any value works) or run "enclaws configure". ' +
-    "See: https://docs.openclaw.ai/providers/ollama",
+    "See: https://docs.enclaws.ai/providers/ollama",
   vllm:
     "vLLM requires authentication to be registered as a provider. " +
     'Set VLLM_API_KEY (any value works) or run "enclaws configure". ' +
-    "See: https://docs.openclaw.ai/providers/vllm",
+    "See: https://docs.enclaws.ai/providers/vllm",
 };
 
 function buildUnknownModelError(provider: string, modelId: string): string {

@@ -249,8 +249,8 @@ function buildDocsSection(params: { docsPath?: string; isMinimal: boolean; readT
   return [
     "## Documentation",
     `EnClaws docs: ${docsPath}`,
-    "Mirror: https://docs.openclaw.ai",
-    "Source: https://github.com/openclaw/openclaw",
+    "Mirror: https://docs.enclaws.ai",
+    "Source: https://github.com/enclaws/enclaws",
     "Community: https://discord.com/invite/clawd",
     "Find new skills: https://clawhub.com",
     "For EnClaws behavior, commands, config, or architecture: consult local docs first.",

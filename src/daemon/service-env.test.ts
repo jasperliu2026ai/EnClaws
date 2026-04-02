@@ -274,12 +274,12 @@ describe("buildServiceEnvironment", () => {
     }
     expect(env.ENCLAWS_GATEWAY_PORT).toBe("18789");
     expect(env.ENCLAWS_GATEWAY_TOKEN).toBe("secret");
-    expect(env.ENCLAWS_SERVICE_MARKER).toBe("openclaw");
+    expect(env.ENCLAWS_SERVICE_MARKER).toBe("enclaws");
     expect(env.ENCLAWS_SERVICE_KIND).toBe("gateway");
     expect(typeof env.ENCLAWS_SERVICE_VERSION).toBe("string");
-    expect(env.ENCLAWS_SYSTEMD_UNIT).toBe("openclaw-gateway.service");
+    expect(env.ENCLAWS_SYSTEMD_UNIT).toBe("enclaws-gateway.service");
     if (process.platform === "darwin") {
-      expect(env.ENCLAWS_LAUNCHD_LABEL).toBe("ai.openclaw.gateway");
+      expect(env.ENCLAWS_LAUNCHD_LABEL).toBe("ai.enclaws.gateway");
     }
   });
 
@@ -304,9 +304,9 @@ describe("buildServiceEnvironment", () => {
       env: { HOME: "/home/user", ENCLAWS_PROFILE: "work" },
       port: 18789,
     });
-    expect(env.ENCLAWS_SYSTEMD_UNIT).toBe("openclaw-gateway-work.service");
+    expect(env.ENCLAWS_SYSTEMD_UNIT).toBe("enclaws-gateway-work.service");
     if (process.platform === "darwin") {
-      expect(env.ENCLAWS_LAUNCHD_LABEL).toBe("ai.openclaw.work");
+      expect(env.ENCLAWS_LAUNCHD_LABEL).toBe("ai.enclaws.work");
     }
   });
 
@@ -382,11 +382,11 @@ describe("buildNodeServiceEnvironment", () => {
     const env = buildNodeServiceEnvironment({
       env: {
         HOME: "/home/user",
-        ENCLAWS_GATEWAY_TOKEN: "openclaw-token",
+        ENCLAWS_GATEWAY_TOKEN: "enclaws-token",
         CLAWDBOT_GATEWAY_TOKEN: "legacy-token",
       },
     });
-    expect(env.ENCLAWS_GATEWAY_TOKEN).toBe("openclaw-token");
+    expect(env.ENCLAWS_GATEWAY_TOKEN).toBe("enclaws-token");
   });
 
   it("omits ENCLAWS_GATEWAY_TOKEN when both token env vars are empty", () => {
@@ -468,13 +468,13 @@ describe("resolveGatewayStateDir", () => {
   });
 
   it("uses ENCLAWS_STATE_DIR when provided", () => {
-    const env = { HOME: "/Users/test", ENCLAWS_STATE_DIR: "/var/lib/openclaw" };
-    expect(resolveGatewayStateDir(env)).toBe(path.resolve("/var/lib/openclaw"));
+    const env = { HOME: "/Users/test", ENCLAWS_STATE_DIR: "/var/lib/enclaws" };
+    expect(resolveGatewayStateDir(env)).toBe(path.resolve("/var/lib/enclaws"));
   });
 
   it("expands ~ in ENCLAWS_STATE_DIR", () => {
-    const env = { HOME: "/Users/test", ENCLAWS_STATE_DIR: "~/openclaw-state" };
-    expect(resolveGatewayStateDir(env)).toBe(path.resolve("/Users/test/openclaw-state"));
+    const env = { HOME: "/Users/test", ENCLAWS_STATE_DIR: "~/enclaws-state" };
+    expect(resolveGatewayStateDir(env)).toBe(path.resolve("/Users/test/enclaws-state"));
   });
 
   it("preserves Windows absolute paths without HOME", () => {

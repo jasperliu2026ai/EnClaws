@@ -54,9 +54,9 @@ afterEach(async () => {
 
 describe("resolvePluginSkillDirs", () => {
   it("keeps acpx plugin skills when ACP is enabled", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-");
-    const acpxRoot = await tempDirs.make("openclaw-acpx-plugin-");
-    const helperRoot = await tempDirs.make("openclaw-helper-plugin-");
+    const workspaceDir = await tempDirs.make("enclaws-");
+    const acpxRoot = await tempDirs.make("enclaws-acpx-plugin-");
+    const helperRoot = await tempDirs.make("enclaws-helper-plugin-");
     await fs.mkdir(path.join(acpxRoot, "skills"), { recursive: true });
     await fs.mkdir(path.join(helperRoot, "skills"), { recursive: true });
 
@@ -78,9 +78,9 @@ describe("resolvePluginSkillDirs", () => {
   });
 
   it("skips acpx plugin skills when ACP is disabled", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-");
-    const acpxRoot = await tempDirs.make("openclaw-acpx-plugin-");
-    const helperRoot = await tempDirs.make("openclaw-helper-plugin-");
+    const workspaceDir = await tempDirs.make("enclaws-");
+    const acpxRoot = await tempDirs.make("enclaws-acpx-plugin-");
+    const helperRoot = await tempDirs.make("enclaws-helper-plugin-");
     await fs.mkdir(path.join(acpxRoot, "skills"), { recursive: true });
     await fs.mkdir(path.join(helperRoot, "skills"), { recursive: true });
 
@@ -102,9 +102,9 @@ describe("resolvePluginSkillDirs", () => {
   });
 
   it("rejects plugin skill paths that escape the plugin root", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-");
-    const pluginRoot = await tempDirs.make("openclaw-plugin-");
-    const outsideDir = await tempDirs.make("openclaw-outside-");
+    const workspaceDir = await tempDirs.make("enclaws-");
+    const pluginRoot = await tempDirs.make("enclaws-plugin-");
+    const outsideDir = await tempDirs.make("enclaws-outside-");
     const outsideSkills = path.join(outsideDir, "skills");
     await fs.mkdir(path.join(pluginRoot, "skills"), { recursive: true });
     await fs.mkdir(outsideSkills, { recursive: true });
@@ -136,9 +136,9 @@ describe("resolvePluginSkillDirs", () => {
   });
 
   it("rejects plugin skill symlinks that resolve outside plugin root", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-");
-    const pluginRoot = await tempDirs.make("openclaw-plugin-");
-    const outsideDir = await tempDirs.make("openclaw-outside-");
+    const workspaceDir = await tempDirs.make("enclaws-");
+    const pluginRoot = await tempDirs.make("enclaws-plugin-");
+    const outsideDir = await tempDirs.make("enclaws-outside-");
     const outsideSkills = path.join(outsideDir, "skills");
     const linkPath = path.join(pluginRoot, "skills-link");
     await fs.mkdir(outsideSkills, { recursive: true });

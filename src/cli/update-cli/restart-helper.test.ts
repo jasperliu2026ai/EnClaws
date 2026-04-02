@@ -39,7 +39,7 @@ describe("restart-helper", () => {
       });
       expect(scriptPath.endsWith(".sh")).toBe(true);
       expect(content).toContain("#!/bin/sh");
-      expect(content).toContain("systemctl --user restart 'openclaw-gateway.service'");
+      expect(content).toContain("systemctl --user restart 'enclaws-gateway.service'");
       // Script should self-cleanup
       expect(content).toContain('rm -f "$0"');
       await cleanupScript(scriptPath);
@@ -64,7 +64,7 @@ describe("restart-helper", () => {
       });
       expect(scriptPath.endsWith(".sh")).toBe(true);
       expect(content).toContain("#!/bin/sh");
-      expect(content).toContain("launchctl kickstart -k 'gui/501/ai.openclaw.gateway'");
+      expect(content).toContain("launchctl kickstart -k 'gui/501/ai.enclaws.gateway'");
       expect(content).toContain('rm -f "$0"');
       await cleanupScript(scriptPath);
     });
@@ -75,9 +75,9 @@ describe("restart-helper", () => {
 
       const { scriptPath, content } = await prepareAndReadScript({
         ENCLAWS_PROFILE: "default",
-        ENCLAWS_LAUNCHD_LABEL: "com.custom.openclaw",
+        ENCLAWS_LAUNCHD_LABEL: "com.custom.enclaws",
       });
-      expect(content).toContain("launchctl kickstart -k 'gui/501/com.custom.openclaw'");
+      expect(content).toContain("launchctl kickstart -k 'gui/501/com.custom.enclaws'");
       await cleanupScript(scriptPath);
     });
 
@@ -113,7 +113,7 @@ describe("restart-helper", () => {
       const { scriptPath, content } = await prepareAndReadScript({
         ENCLAWS_PROFILE: "production",
       });
-      expect(content).toContain("openclaw-gateway-production.service");
+      expect(content).toContain("enclaws-gateway-production.service");
       await cleanupScript(scriptPath);
     });
 
@@ -124,7 +124,7 @@ describe("restart-helper", () => {
       const { scriptPath, content } = await prepareAndReadScript({
         ENCLAWS_PROFILE: "staging",
       });
-      expect(content).toContain("gui/502/ai.openclaw.staging");
+      expect(content).toContain("gui/502/ai.enclaws.staging");
       await cleanupScript(scriptPath);
     });
 

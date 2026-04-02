@@ -270,7 +270,7 @@ function buildCoreToolGroupMap() {
     (tool) => tool.id,
   );
   return {
-    "group:openclaw": openclawTools,
+    "group:enclaws": openclawTools,
     ...Object.fromEntries(sectionToolMap.entries()),
   };
 }
