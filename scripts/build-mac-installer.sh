@@ -134,30 +134,100 @@ DIR="$(cd "$(dirname "$0")/../Resources" && pwd)"
 NODE="$DIR/node/bin/node"
 ENTRY="$DIR/enclaws.mjs"
 PORT="${ENCLAWS_GATEWAY_PORT:-18888}"
+PID_FILE="$HOME/.enclaws/gateway.pid"
+
+LOADING="$DIR/loading.html"
+
+# If gateway is already running, just open dashboard and exit
+if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+  open "http://localhost:$PORT"
+  exit 0
+fi
+if curl -s -o /dev/null "http://localhost:$PORT" 2>/dev/null; then
+  open "http://localhost:$PORT"
+  exit 0
+fi
+
+# Show loading page immediately (gateway not ready yet)
+open "$LOADING"
 
 # Run postinstall if first launch
 if [ ! -f "$HOME/.enclaws/.env" ]; then
   "$NODE" "$DIR/scripts/postinstall.js" 2>/dev/null || true
 fi
 
-# Start gateway in background
-"$NODE" "$ENTRY" gateway --port "$PORT" &
+# Start gateway (--no-open: loading.html handles the redirect)
+mkdir -p "$HOME/.enclaws"
+"$NODE" "$ENTRY" gateway --port "$PORT" --no-open &
 GATEWAY_PID=$!
+echo "$GATEWAY_PID" > "$PID_FILE"
 
-# Wait for gateway to be ready, then open browser
-for i in $(seq 1 30); do
-  if curl -s "http://localhost:$PORT" >/dev/null 2>&1; then
-    open "http://localhost:$PORT"
-    break
-  fi
-  sleep 1
-done
+# Clean up PID file on exit
+trap 'rm -f "$PID_FILE"' EXIT
 
 # Keep running until gateway exits
 wait $GATEWAY_PID
 LAUNCHER
 
 chmod +x "$APP_MACOS/enclaws-launcher"
+
+# ---------------------------------------------------------------------------
+# Step 3b-2: Write loading.html (shown while gateway starts)
+# ---------------------------------------------------------------------------
+
+cat > "$APP_RESOURCES/loading.html" << 'LOADING'
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>EnClaws</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1040 50%, #0d1b3e 100%);
+    color: #fff;
+    font-family: -apple-system, "PingFang SC", sans-serif;
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 4px solid rgba(255,255,255,0.15);
+    border-top-color: #a78bfa;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 28px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  h1 { font-size: 22px; font-weight: 500; margin-bottom: 10px; }
+  p { font-size: 14px; color: rgba(255,255,255,0.5); }
+  .status { margin-top: 24px; font-size: 13px; color: rgba(255,255,255,0.35); }
+</style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <h1>EnClaws 正在启动...</h1>
+  <p>网关启动后将自动跳转控制面板</p>
+  <div class="status" id="status">正在连接...</div>
+<script>
+  const port = 18888;
+  const url = `http://localhost:${port}`;
+  let attempts = 0;
+  function check() {
+    attempts++;
+    document.getElementById('status').textContent = `第 ${attempts} 次检测...`;
+    fetch(url, { mode: 'no-cors' })
+      .then(() => { window.location.href = url; })
+      .catch(() => { setTimeout(check, 1500); });
+  }
+  check();
+</script>
+</body>
+</html>
+LOADING
 
 # ---------------------------------------------------------------------------
 # Step 3c: Write CLI wrapper (for terminal: enclaws gateway)
