@@ -7,7 +7,7 @@ set -euo pipefail
 #   scripts/create-dmg.sh <app_path> [output_dmg]
 #
 # Env:
-#   DMG_VOLUME_NAME        default: CFBundleName (or "OpenClaw")
+#   DMG_VOLUME_NAME        default: CFBundleName (or "EnClaws")
 #   DMG_BACKGROUND_PATH    default: assets/dmg-background.png
 #   DMG_BACKGROUND_SMALL   default: assets/dmg-background-small.png (recommended)
 #   DMG_WINDOW_BOUNDS      default: "400 100 900 420" (500x320)

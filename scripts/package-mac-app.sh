@@ -271,6 +271,134 @@ else
   fi
 fi
 
+# ---------------------------------------------------------------------------
+# Bundle Node.js runtime into the .app
+# ---------------------------------------------------------------------------
+
+NODE_VERSION="${NODE_VERSION:-22.16.0}"
+BUNDLE_NODE_ARCH="${BUILD_ARCHS[0]}"
+if [[ "$BUNDLE_NODE_ARCH" == "x86_64" ]]; then
+  NODE_PLATFORM="darwin-x64"
+else
+  NODE_PLATFORM="darwin-arm64"
+fi
+
+NODE_TAR_NAME="node-v${NODE_VERSION}-${NODE_PLATFORM}.tar.gz"
+NODE_URL="https://nodejs.org/dist/v${NODE_VERSION}/${NODE_TAR_NAME}"
+NODE_CACHE_DIR="$ROOT_DIR/.node-cache"
+NODE_TAR_PATH="$NODE_CACHE_DIR/$NODE_TAR_NAME"
+NODE_DEST="$APP_ROOT/Contents/Resources/node"
+
+mkdir -p "$NODE_CACHE_DIR"
+if [ ! -f "$NODE_TAR_PATH" ]; then
+  echo "📦 Downloading Node.js v${NODE_VERSION} (${NODE_PLATFORM})..."
+  curl -fsSL "$NODE_URL" -o "$NODE_TAR_PATH"
+fi
+
+echo "📦 Bundling Node.js into app..."
+mkdir -p "$NODE_DEST"
+tar -xzf "$NODE_TAR_PATH" --strip-components=1 -C "$NODE_DEST"
+rm -rf "$NODE_DEST/include" "$NODE_DEST/share" "$NODE_DEST/lib/node_modules/npm/docs" \
+       "$NODE_DEST/lib/node_modules/npm/man" "$NODE_DEST/CHANGELOG.md" "$NODE_DEST/README.md"
+echo "[OK] Bundled Node.js v${NODE_VERSION} (${NODE_PLATFORM})"
+
+# ---------------------------------------------------------------------------
+# Bundle JS application code into the .app
+# ---------------------------------------------------------------------------
+
+RESOURCES="$APP_ROOT/Contents/Resources"
+
+echo "📦 Bundling JS application code..."
+
+cp "$ROOT_DIR/enclaws.mjs" "$RESOURCES/enclaws.mjs"
+
+for dir in dist extensions skills assets; do
+  if [ -d "$ROOT_DIR/$dir" ]; then
+    cp -R "$ROOT_DIR/$dir" "$RESOURCES/$dir"
+    echo "    Copied $dir/"
+  else
+    echo "WARN: Missing directory: $dir/" >&2
+  fi
+done
+
+if [ -d "$ROOT_DIR/scripts" ]; then
+  cp -R "$ROOT_DIR/scripts" "$RESOURCES/scripts"
+  echo "    Copied scripts/"
+fi
+
+TEMPLATES_SRC="$ROOT_DIR/docs/reference/templates"
+TEMPLATES_DEST="$RESOURCES/docs/reference/templates"
+if [ -d "$TEMPLATES_SRC" ]; then
+  mkdir -p "$(dirname "$TEMPLATES_DEST")"
+  cp -R "$TEMPLATES_SRC" "$TEMPLATES_DEST"
+  echo "    Copied docs/reference/templates/"
+else
+  echo "WARN: Missing directory: docs/reference/templates/ (agent bootstrap will fail)" >&2
+fi
+
+# ---------------------------------------------------------------------------
+# Bundle skills-pack
+# ---------------------------------------------------------------------------
+
+SKILL_PACK_DIR="$RESOURCES/skills-pack"
+SKILL_PACK_GIT_URL="https://github.com/hashSTACS-Global/feishu-skills.git"
+
+if [ -d "$ROOT_DIR/skills-pack/.git" ]; then
+  echo "📦 Copying existing skills-pack..."
+  cp -R "$ROOT_DIR/skills-pack" "$SKILL_PACK_DIR"
+else
+  echo "📦 Cloning skills-pack..."
+  git clone --depth 1 "$SKILL_PACK_GIT_URL" "$SKILL_PACK_DIR"
+fi
+rm -rf "$SKILL_PACK_DIR/.git"
+echo "[OK] Skills-pack bundled"
+
+# ---------------------------------------------------------------------------
+# Install production dependencies into the bundle
+# ---------------------------------------------------------------------------
+
+echo "📦 Generating production package.json..."
+NODE_BIN="$NODE_DEST/bin/node"
+NPM_CLI="$NODE_DEST/lib/node_modules/npm/bin/npm-cli.js"
+
+"$NODE_BIN" -e "
+  const pkg = require('$ROOT_DIR/package.json');
+  const prod = {
+    name: pkg.name,
+    version: pkg.version,
+    type: pkg.type,
+    main: pkg.main,
+    bin: pkg.bin,
+    dependencies: pkg.dependencies
+  };
+  if (pkg.optionalDependencies) prod.optionalDependencies = pkg.optionalDependencies;
+  require('fs').writeFileSync('$RESOURCES/package.json', JSON.stringify(prod, null, 2));
+"
+
+echo "📦 Installing production dependencies (this may take a few minutes)..."
+(cd "$RESOURCES" && "$NODE_BIN" "$NPM_CLI" install --omit=dev --no-audit --no-fund --no-update-notifier)
+echo "[OK] Dependencies installed"
+
+echo "📦 Cleaning up bundle..."
+CLEAN_NAMES=("*.md" "CHANGELOG*" "HISTORY*" ".github" "test" "tests" "__tests__" \
+  "example" "examples" ".travis.yml" ".eslintrc*" ".prettierrc*" "tsconfig.json" "*.map" "doc" "docs")
+for name in "${CLEAN_NAMES[@]}"; do
+  find "$RESOURCES/node_modules" -maxdepth 3 -name "$name" -exec rm -rf {} + 2>/dev/null || true
+done
+
+KOFFI_BUILD="$RESOURCES/node_modules/koffi/build/koffi"
+if [ -d "$KOFFI_BUILD" ]; then
+  find "$KOFFI_BUILD" -maxdepth 1 -type d ! -name "darwin_*" ! -name "koffi" -exec rm -rf {} +
+  rm -rf "$RESOURCES/node_modules/koffi/src"
+  echo "[OK] Removed non-macOS koffi binaries"
+fi
+
+rm -rf "$RESOURCES/node_modules/pdfjs-dist/legacy"
+rm -rf "$RESOURCES/node_modules/echarts/dist"
+
+BUNDLE_SIZE=$(du -sm "$RESOURCES" | awk '{print $1}')
+echo "[OK] Bundle size: ${BUNDLE_SIZE} MB"
+
 echo "⏹  Stopping any running EnClaws"
 killall -q EnClaws 2>/dev/null || true
 
