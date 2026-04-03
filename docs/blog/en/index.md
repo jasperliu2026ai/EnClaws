@@ -5,7 +5,7 @@ title: EnClaws Blog
 
 # EnClaws Blog
 
-[简体中文]({{ "/zh-CN/" | relative_url }})
+[简体中文]({{ "/zh-cn/" | relative_url }})
 
 {% for post in site.posts %}
   {% if post.path contains 'en/_posts' %}
