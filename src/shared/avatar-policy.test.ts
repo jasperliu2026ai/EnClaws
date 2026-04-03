@@ -10,7 +10,7 @@ import {
 
 describe("avatar policy", () => {
   it("accepts workspace-relative avatar paths and rejects URI schemes", () => {
-    expect(isWorkspaceRelativeAvatarPath("avatars/openclaw.png")).toBe(true);
+    expect(isWorkspaceRelativeAvatarPath("avatars/enclaws.png")).toBe(true);
     expect(isWorkspaceRelativeAvatarPath("C:\\\\avatars\\.enclaws.png")).toBe(true);
     expect(isWorkspaceRelativeAvatarPath("https://example.com/avatar.png")).toBe(false);
     expect(isWorkspaceRelativeAvatarPath("data:image/png;base64,AAAA")).toBe(false);
@@ -24,8 +24,8 @@ describe("avatar policy", () => {
   });
 
   it("detects avatar-like path strings", () => {
-    expect(looksLikeAvatarPath("avatars/openclaw.svg")).toBe(true);
-    expect(looksLikeAvatarPath("openclaw.webp")).toBe(true);
+    expect(looksLikeAvatarPath("avatars/enclaws.svg")).toBe(true);
+    expect(looksLikeAvatarPath("enclaws.webp")).toBe(true);
     expect(looksLikeAvatarPath("A")).toBe(false);
   });
 

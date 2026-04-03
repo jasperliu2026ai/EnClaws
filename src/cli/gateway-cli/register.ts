@@ -99,7 +99,7 @@ export function registerGatewayCli(program: Command) {
             ["enclaws gateway status", "Show service status and probe reachability."],
             ["enclaws gateway discover", "Find local and wide-area gateway beacons."],
             ["enclaws gateway call health", "Call a gateway RPC method directly."],
-          ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/gateway", "docs.openclaw.ai/cli/gateway")}\n`,
+          ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/gateway", "docs.enclaws.ai/cli/gateway")}\n`,
       ),
   );
 

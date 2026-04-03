@@ -20,7 +20,7 @@ import { runEmbeddedPiAgent } from "../agents/pi-embedded.js";
 import { runCronIsolatedAgentTurn } from "./isolated-agent.js";
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
-  return withTempHomeBase(fn, { prefix: "openclaw-cron-submodel-" });
+  return withTempHomeBase(fn, { prefix: "enclaws-cron-submodel-" });
 }
 
 async function writeSessionStore(home: string) {
@@ -55,7 +55,7 @@ function makeCfg(
     agents: {
       defaults: {
         model: "anthropic/claude-sonnet-4-5",
-        workspace: path.join(home, "openclaw"),
+        workspace: path.join(home, "enclaws"),
       },
     },
     session: { store: storePath, mainKey: "main" },
@@ -116,7 +116,7 @@ describe("runCronIsolatedAgentTurn: subagent model resolution (#11461)", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-sonnet-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "enclaws"),
               subagents: { model: "ollama/llama3.2:3b" },
             },
           },
@@ -147,7 +147,7 @@ describe("runCronIsolatedAgentTurn: subagent model resolution (#11461)", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-sonnet-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "enclaws"),
               subagents: { model: "ollama/llama3.2:3b" },
             },
           },
@@ -195,7 +195,7 @@ describe("runCronIsolatedAgentTurn: subagent model resolution (#11461)", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-sonnet-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "enclaws"),
               subagents: { model: { primary: "google/gemini-2.5-flash" } },
             },
           },

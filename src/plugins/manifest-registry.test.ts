@@ -9,7 +9,7 @@ import { loadPluginManifestRegistry } from "./manifest-registry.js";
 const tempDirs: string[] = [];
 
 function makeTempDir() {
-  const dir = path.join(os.tmpdir(), `openclaw-manifest-registry-${randomUUID()}`);
+  const dir = path.join(os.tmpdir(), `enclaws-manifest-registry-${randomUUID()}`);
   fs.mkdirSync(dir, { recursive: true });
   tempDirs.push(dir);
   return dir;

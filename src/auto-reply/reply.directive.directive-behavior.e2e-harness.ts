@@ -60,7 +60,7 @@ export async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise
         ENCLAWS_AGENT_DIR: (home) => path.join(home, ".enclaws", "agent"),
         PI_CODING_AGENT_DIR: (home) => path.join(home, ".enclaws", "agent"),
       },
-      prefix: "openclaw-reply-",
+      prefix: "enclaws-reply-",
     },
   );
 }
@@ -77,7 +77,7 @@ export function makeWhatsAppDirectiveConfig(
   return {
     agents: {
       defaults: {
-        workspace: path.join(home, "openclaw"),
+        workspace: path.join(home, "enclaws"),
         ...defaults,
       },
     },
@@ -148,7 +148,7 @@ export function makeRestrictedElevatedDisabledConfig(home: string) {
     agents: {
       defaults: {
         model: "anthropic/claude-opus-4-5",
-        workspace: path.join(home, "openclaw"),
+        workspace: path.join(home, "enclaws"),
       },
       list: [
         {

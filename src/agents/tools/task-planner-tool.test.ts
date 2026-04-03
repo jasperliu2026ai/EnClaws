@@ -5,7 +5,7 @@ import { expect, test } from "vitest";
 import { createTaskPlannerTool } from "./task-planner-tool.js";
 
 test("task planner tool manages plan and todos", async () => {
-  const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-test-planner-"));
+  const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), "enclaws-test-planner-"));
   const tool = createTaskPlannerTool({ workspaceDir: tmpdir, agentSessionKey: "test:session" });
 
   expect(tool).toBeDefined();

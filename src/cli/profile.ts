@@ -118,7 +118,7 @@ export function applyCliProfileEnv(params: {
   }
 
   if (!env.ENCLAWS_CONFIG_PATH?.trim()) {
-    env.ENCLAWS_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+    env.ENCLAWS_CONFIG_PATH = path.join(stateDir, "enclaws.json");
   }
 
   if (profile === "dev" && !env.ENCLAWS_GATEWAY_PORT?.trim()) {

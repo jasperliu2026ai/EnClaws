@@ -1,4 +1,4 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 6.1
 // Package manifest for the OpenClaw macOS companion (menu bar app + IPC library).
 
 import PackageDescription
@@ -59,7 +59,7 @@ let package = Package(
                 "Resources/Info.plist",
             ],
             resources: [
-                .copy("Resources/OpenClaw.icns"),
+                .copy("Resources/EnClaws.icns"),
                 .copy("Resources/DeviceModels"),
             ],
             swiftSettings: [

@@ -105,7 +105,7 @@ export function registerDnsCli(program: Command) {
     .description("DNS helpers for wide-area discovery (Tailscale + CoreDNS)")
     .addHelpText(
       "after",
-      () => `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/dns", "docs.openclaw.ai/cli/dns")}\n`,
+      () => `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/dns", "docs.enclaws.ai/cli/dns")}\n`,
     );
 
   dns
@@ -113,7 +113,7 @@ export function registerDnsCli(program: Command) {
     .description(
       "Set up CoreDNS to serve your discovery domain for unicast DNS-SD (Wide-Area Bonjour)",
     )
-    .option("--domain <domain>", "Wide-area discovery domain (e.g. openclaw.internal)")
+    .option("--domain <domain>", "Wide-area discovery domain (e.g. enclaws.internal)")
     .option(
       "--apply",
       "Install/update CoreDNS config and (re)start the service (requires sudo)",
@@ -153,7 +153,7 @@ export function registerDnsCli(program: Command) {
         }).trimEnd(),
       );
       defaultRuntime.log("");
-      defaultRuntime.log(theme.heading("Recommended ~/.enclaws/openclaw.json:"));
+      defaultRuntime.log(theme.heading("Recommended ~/.enclaws/enclaws.json:"));
       defaultRuntime.log(
         JSON.stringify(
           {
@@ -254,7 +254,7 @@ export function registerDnsCli(program: Command) {
         defaultRuntime.log("");
         defaultRuntime.log(
           theme.muted(
-            "Note: enable discovery.wideArea.enabled in ~/.enclaws/openclaw.json on the gateway and restart the gateway so it writes the DNS-SD zone.",
+            "Note: enable discovery.wideArea.enabled in ~/.enclaws/enclaws.json on the gateway and restart the gateway so it writes the DNS-SD zone.",
           ),
         );
       }

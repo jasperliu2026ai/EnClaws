@@ -14,23 +14,23 @@ describe("buildCleanupPlan", () => {
     const tmpRoot = path.join(path.parse(process.cwd()).root, "tmp");
     const cfg = {
       agents: {
-        defaults: { workspace: path.join(tmpRoot, "openclaw-workspace-1") },
-        list: [{ workspace: path.join(tmpRoot, "openclaw-workspace-2") }],
+        defaults: { workspace: path.join(tmpRoot, "enclaws-workspace-1") },
+        list: [{ workspace: path.join(tmpRoot, "enclaws-workspace-2") }],
       },
     };
     const plan = buildCleanupPlan({
       cfg: cfg as unknown as OpenClawConfig,
-      stateDir: path.join(tmpRoot, "openclaw-state"),
-      configPath: path.join(tmpRoot, "openclaw-state", "openclaw.json"),
-      oauthDir: path.join(tmpRoot, "openclaw-oauth"),
+      stateDir: path.join(tmpRoot, "enclaws-state"),
+      configPath: path.join(tmpRoot, "enclaws-state", "enclaws.json"),
+      oauthDir: path.join(tmpRoot, "enclaws-oauth"),
     });
 
     expect(plan.configInsideState).toBe(true);
     expect(plan.oauthInsideState).toBe(false);
     expect(new Set(plan.workspaceDirs)).toEqual(
       new Set([
-        path.join(tmpRoot, "openclaw-workspace-1"),
-        path.join(tmpRoot, "openclaw-workspace-2"),
+        path.join(tmpRoot, "enclaws-workspace-1"),
+        path.join(tmpRoot, "enclaws-workspace-2"),
       ]),
     );
   });
@@ -69,11 +69,11 @@ describe("cleanup path removals", () => {
 
   it("removes state and only linked paths outside state", async () => {
     const runtime = createRuntimeMock();
-    const tmpRoot = path.join(path.parse(process.cwd()).root, "tmp", "openclaw-cleanup");
+    const tmpRoot = path.join(path.parse(process.cwd()).root, "tmp", "enclaws-cleanup");
     await removeStateAndLinkedPaths(
       {
         stateDir: path.join(tmpRoot, "state"),
-        configPath: path.join(tmpRoot, "state", "openclaw.json"),
+        configPath: path.join(tmpRoot, "state", "enclaws.json"),
         oauthDir: path.join(tmpRoot, "oauth"),
         configInsideState: true,
         oauthInsideState: false,
@@ -85,19 +85,19 @@ describe("cleanup path removals", () => {
     const joinedLogs = runtime.log.mock.calls
       .map(([line]) => line.replaceAll("\\", "/"))
       .join("\n");
-    expect(joinedLogs).toContain("/tmp/openclaw-cleanup/state");
-    expect(joinedLogs).toContain("/tmp/openclaw-cleanup/oauth");
-    expect(joinedLogs).not.toContain("openclaw.json");
+    expect(joinedLogs).toContain("/tmp/enclaws-cleanup/state");
+    expect(joinedLogs).toContain("/tmp/enclaws-cleanup/oauth");
+    expect(joinedLogs).not.toContain("enclaws.json");
   });
 
   it("removes every workspace directory", async () => {
     const runtime = createRuntimeMock();
-    const workspaces = ["/tmp/openclaw-workspace-1", "/tmp/openclaw-workspace-2"];
+    const workspaces = ["/tmp/enclaws-workspace-1", "/tmp/enclaws-workspace-2"];
 
     await removeWorkspaceDirs(workspaces, runtime, { dryRun: true });
 
     const logs = runtime.log.mock.calls.map(([line]) => line);
-    expect(logs).toContain("[dry-run] remove /tmp/openclaw-workspace-1");
-    expect(logs).toContain("[dry-run] remove /tmp/openclaw-workspace-2");
+    expect(logs).toContain("[dry-run] remove /tmp/enclaws-workspace-1");
+    expect(logs).toContain("[dry-run] remove /tmp/enclaws-workspace-2");
   });
 });

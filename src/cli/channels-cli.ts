@@ -84,7 +84,7 @@ export function registerChannelsCli(program: Command) {
           ["enclaws channels login --channel whatsapp", "Link a WhatsApp Web account."],
         ])}\n\n${theme.muted("Docs:")} ${formatDocsLink(
           "/cli/channels",
-          "docs.openclaw.ai/cli/channels",
+          "docs.enclaws.ai/cli/channels",
         )}\n`,
     );
 

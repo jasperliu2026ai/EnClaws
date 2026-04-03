@@ -49,7 +49,7 @@ function normalizeAllowlist(input: unknown): string[] | undefined {
   return normalized.length > 0 ? normalized : undefined;
 }
 
-const BUNDLED_SOURCES = new Set(["openclaw-bundled"]);
+const BUNDLED_SOURCES = new Set(["enclaws-bundled"]);
 
 function isBundledSkill(entry: SkillEntry): boolean {
   return BUNDLED_SOURCES.has(entry.skill.source);
@@ -81,11 +81,9 @@ export function shouldIncludeSkill(params: {
   const allowBundled = normalizeAllowlist(config?.skills?.allowBundled);
 
   if (skillConfig?.enabled === false) {
-    debugLog.info(`[DEBUG-SKILL] excluded ${entry.skill.name}: enabled=false`);
     return false;
   }
   if (!isBundledSkillAllowed(entry, allowBundled)) {
-    debugLog.info(`[DEBUG-SKILL] excluded ${entry.skill.name}: bundled not allowed`);
     return false;
   }
   const eligible = evaluateRuntimeEligibility({

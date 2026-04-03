@@ -83,12 +83,12 @@ export function createDeepseekWebStreamFn(cookieOrJson: string): StreamFn {
               "3. Output the tool call tag ONLY inside a <final> section if you are in reasoning mode.\n" +
               "4. Wait for the tool result before proceeding with further analysis.\n\n" +
               "### Special Instructions for Browser Tool\n" +
-              "- **Profile 'openclaw' (Independent/Recommended)**: Opens a SEPARATE independent browser window. Use this for consistent, isolated sessions. Highly recommended for complex automation.\n" +
+              "- **Profile 'enclaws' (Independent/Recommended)**: Opens a SEPARATE independent browser window. Use this for consistent, isolated sessions. Highly recommended for complex automation.\n" +
               "- Profile 'chrome' (Shared): Uses your existing Chrome tabs (requires extension). Use this if you need to access personal logins or already open tabs.\n" +
-              "- **CONSISTENCY RULE**: Once you have started using a profile (or if you are switched to 'openclaw' due to connection errors), STAY with that profile for the remainder of the session. Do NOT switch back and forth as it will open redundant browser instances.\n\n" +
+              "- **CONSISTENCY RULE**: Once you have started using a profile (or if you are switched to 'enclaws' due to connection errors), STAY with that profile for the remainder of the session. Do NOT switch back and forth as it will open redundant browser instances.\n\n" +
               "### Automation Policy\n" +
               "- DO NOT use the 'exec' tool to install secondary automation libraries like Playwright, Selenium, or Puppeteer if the 'browser' tool fails.\n" +
-              "- Instead, inform the user about the connection issue or try the alternative browser profile ('openclaw').\n" +
+              "- Instead, inform the user about the connection issue or try the alternative browser profile ('enclaws').\n" +
               "- Installing automation tools via 'exec' is slow and redundant; the 'browser' tool is the primary way to interact with web content.\n\n" +
               "### Multi-Agent Orchestration Protocol (三阶段 FSM)\n" +
               "When the user gives a COMPLEX multi-step task, follow this 3-phase workflow:\n\n" +

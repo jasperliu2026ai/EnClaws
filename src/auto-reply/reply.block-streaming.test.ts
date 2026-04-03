@@ -52,7 +52,7 @@ function createReplyConfig(home: string, streamMode?: "block"): OpenClawConfig {
     agents: {
       defaults: {
         model: { primary: "anthropic/claude-opus-4-5" },
-        workspace: path.join(home, "openclaw"),
+        workspace: path.join(home, "enclaws"),
       },
     },
     channels: { telegram: { allowFrom: ["*"], streamMode } },
@@ -80,7 +80,7 @@ async function runTelegramReply(params: {
 }
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
-  return withTempHomeHarness("openclaw-stream-", async (home) => {
+  return withTempHomeHarness("enclaws-stream-", async (home) => {
     await fs.mkdir(path.join(home, ".enclaws", "agents", "main", "sessions"), { recursive: true });
     return fn(home);
   });

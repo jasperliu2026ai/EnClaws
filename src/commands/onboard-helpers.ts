@@ -224,8 +224,8 @@ export function formatControlUiSshHint(params: {
     localUrl,
     authedUrl,
     "相关文档 (Docs)：",
-    "https://docs.openclaw.ai/gateway/remote",
-    "https://docs.openclaw.ai/web/control-ui",
+    "https://docs.enclaws.ai/gateway/remote",
+    "https://docs.enclaws.ai/web/control-ui",
   ]
     .filter(Boolean)
     .join("\n");

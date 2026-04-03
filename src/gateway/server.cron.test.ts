@@ -120,7 +120,7 @@ describe("gateway server cron", () => {
 
   test("handles cron CRUD, normalization, and patch semantics", { timeout: 20_000 }, async () => {
     const { prevSkipCron, dir } = await setupCronTestRun({
-      tempPrefix: "openclaw-gw-cron-",
+      tempPrefix: "enclaws-gw-cron-",
       sessionConfig: { mainKey: "primary" },
       cronEnabled: false,
     });
@@ -393,7 +393,7 @@ describe("gateway server cron", () => {
 
   test("writes cron run history and auto-runs due jobs", async () => {
     const { prevSkipCron, dir } = await setupCronTestRun({
-      tempPrefix: "openclaw-gw-cron-log-",
+      tempPrefix: "enclaws-gw-cron-log-",
     });
 
     const { server, ws } = await startServerWithClient();
@@ -514,7 +514,7 @@ describe("gateway server cron", () => {
       state: {},
     };
     const { prevSkipCron, dir } = await setupCronTestRun({
-      tempPrefix: "openclaw-gw-cron-webhook-",
+      tempPrefix: "enclaws-gw-cron-webhook-",
       cronEnabled: false,
       jobs: [legacyNotifyJob],
     });

@@ -2,7 +2,6 @@ node_modules
 **/node_modules/
 docker-compose.extra.yml
 dist
-pnpm-lock.yaml
 bun.lock
 bun.lockb
 coverage
@@ -57,6 +56,9 @@ apps/ios/*.xcfilelist
 # Vendor build artifacts
 vendor/a2ui/renderers/lit/dist/
 src/canvas-host/a2ui/*.bundle.js
+
+# Skill pack (cloned at build time, bundled into installers)
+skills-pack/
 src/canvas-host/a2ui/*.map
 .bundle.hash
 
@@ -138,3 +140,6 @@ installer/node-portable/
 installer/app-bundle/
 installer/Output/
 installer/*.zip
+
+# Node.js download cache for macOS app bundling
+.node-cache

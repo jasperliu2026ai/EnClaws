@@ -30,7 +30,7 @@ function sanitizeFileNameTail(fileName: string): string {
 function buildSiblingTempPath(targetPath: string): string {
   const id = crypto.randomUUID();
   const safeTail = sanitizeFileNameTail(path.basename(targetPath));
-  return path.join(path.dirname(targetPath), `.openclaw-output-${id}-${safeTail}.part`);
+  return path.join(path.dirname(targetPath), `.enclaws-output-${id}-${safeTail}.part`);
 }
 
 export async function writeViaSiblingTempPath(params: {

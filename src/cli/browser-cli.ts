@@ -19,7 +19,7 @@ import { formatHelpExamples } from "./help-format.js";
 export function registerBrowserCli(program: Command) {
   const browser = program
     .command("browser")
-    .description("Manage OpenClaw's dedicated browser (Chrome/Chromium)")
+    .description("Manage EnClaws's dedicated browser (Chrome/Chromium)")
     .option("--browser-profile <name>", "Browser profile name (default from config)")
     .option("--json", "Output machine-readable JSON", false)
     .addHelpText(
@@ -30,7 +30,7 @@ export function registerBrowserCli(program: Command) {
           true,
         )}\n\n${theme.muted("Docs:")} ${formatDocsLink(
           "/cli/browser",
-          "docs.openclaw.ai/cli/browser",
+          "docs.enclaws.ai/cli/browser",
         )}\n`,
     )
     .action(() => {

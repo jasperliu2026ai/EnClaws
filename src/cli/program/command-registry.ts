@@ -150,7 +150,7 @@ const coreEntries: CoreCliEntry[] = [
     commands: [
       {
         name: "start",
-        description: "Start the OpenClaw Gateway service",
+        description: "Start the EnClaws Gateway service",
         hasSubcommands: false,
       },
     ],
@@ -158,7 +158,7 @@ const coreEntries: CoreCliEntry[] = [
       const { runDaemonStart } = await import("../daemon-cli.js");
       program
         .command("start")
-        .description("Start the OpenClaw Gateway service")
+        .description("Start the EnClaws Gateway service")
         .option("--json", "Output JSON", false)
         .action(async (opts) => {
           await runDaemonStart(opts);
@@ -169,14 +169,14 @@ const coreEntries: CoreCliEntry[] = [
     commands: [
       {
         name: "run",
-        description: "Run the OpenClaw Gateway in the foreground",
+        description: "Run the EnClaws Gateway in the foreground",
         hasSubcommands: false,
       },
     ],
     register: async ({ program }) => {
       const { addGatewayRunCommand } = await import("../gateway-cli/run.js");
       addGatewayRunCommand(
-        program.command("run").description("Run the OpenClaw Gateway in the foreground"),
+        program.command("run").description("Run the EnClaws Gateway in the foreground"),
       );
     },
   },
@@ -240,7 +240,7 @@ const coreEntries: CoreCliEntry[] = [
     commands: [
       {
         name: "browser",
-        description: "Manage OpenClaw's dedicated browser (Chrome/Chromium)",
+        description: "Manage EnClaws's dedicated browser (Chrome/Chromium)",
         hasSubcommands: true,
       },
     ],

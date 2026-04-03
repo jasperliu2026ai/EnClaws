@@ -70,7 +70,7 @@ describe("Nix integration (U3, U5, U9)", () => {
       ).toBe(path.join(path.resolve(customHome), ".enclaws"));
     });
 
-    it("CONFIG_PATH defaults to ENCLAWS_HOME/.enclaws/openclaw.json", () => {
+    it("CONFIG_PATH defaults to ENCLAWS_HOME/.enclaws/enclaws.json", () => {
       const customHome = path.join(path.sep, "custom", "home");
       expect(
         resolveConfigPathCandidate(
@@ -80,23 +80,23 @@ describe("Nix integration (U3, U5, U9)", () => {
             ENCLAWS_STATE_DIR: undefined,
           }),
         ),
-      ).toBe(path.join(path.resolve(customHome), ".enclaws", "openclaw.json"));
+      ).toBe(path.join(path.resolve(customHome), ".enclaws", "enclaws.json"));
     });
 
-    it("CONFIG_PATH defaults to ~/.enclaws/openclaw.json when env not set", () => {
+    it("CONFIG_PATH defaults to ~/.enclaws/enclaws.json when env not set", () => {
       expect(
         resolveConfigPathCandidate(
           envWith({ ENCLAWS_CONFIG_PATH: undefined, ENCLAWS_STATE_DIR: undefined }),
         ),
-      ).toMatch(/.enclaws[\\/]openclaw\.json$/);
+      ).toMatch(/.enclaws[\\/]enclaws\.json$/);
     });
 
     it("CONFIG_PATH respects ENCLAWS_CONFIG_PATH override", () => {
       expect(
         resolveConfigPathCandidate(
-          envWith({ ENCLAWS_CONFIG_PATH: "/nix/store/abc/openclaw.json" }),
+          envWith({ ENCLAWS_CONFIG_PATH: "/nix/store/abc/enclaws.json" }),
         ),
-      ).toBe(path.resolve("/nix/store/abc/openclaw.json"));
+      ).toBe(path.resolve("/nix/store/abc/enclaws.json"));
     });
 
     it("CONFIG_PATH expands ~ in ENCLAWS_CONFIG_PATH override", async () => {
@@ -112,7 +112,7 @@ describe("Nix integration (U3, U5, U9)", () => {
 
     it("CONFIG_PATH uses STATE_DIR when only state dir is overridden", () => {
       expect(resolveConfigPathCandidate(envWith({ ENCLAWS_STATE_DIR: "/custom/state" }))).toBe(
-        path.join(path.resolve("/custom/state"), "openclaw.json"),
+        path.join(path.resolve("/custom/state"), "enclaws.json"),
       );
     });
   });
@@ -142,7 +142,7 @@ describe("Nix integration (U3, U5, U9)", () => {
           "utf-8",
         );
         await fs.writeFile(
-          path.join(configDir, "openclaw.json"),
+          path.join(configDir, "enclaws.json"),
           JSON.stringify(
             {
               plugins: {

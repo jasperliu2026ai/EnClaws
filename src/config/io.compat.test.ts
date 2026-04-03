@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { createConfigIO } from "./io.js";
 
 async function withTempHome(run: (home: string) => Promise<void>): Promise<void> {
-  const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-config-"));
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "enclaws-config-"));
   try {
     await run(home);
   } finally {
@@ -17,7 +17,7 @@ async function writeConfig(
   home: string,
   dirname: ".enclaws",
   port: number,
-  filename: string = "openclaw.json",
+  filename: string = "enclaws.json",
 ) {
   const dir = path.join(home, dirname);
   await fs.mkdir(dir, { recursive: true });
@@ -34,7 +34,7 @@ function createIoForHome(home: string, env: NodeJS.ProcessEnv = {} as NodeJS.Pro
 }
 
 describe("config io paths", () => {
-  it("uses ~/.enclaws/openclaw.json when config exists", async () => {
+  it("uses ~/.enclaws/enclaws.json when config exists", async () => {
     await withTempHome(async (home) => {
       const configPath = await writeConfig(home, ".enclaws", 19001);
       const io = createIoForHome(home);
@@ -43,10 +43,10 @@ describe("config io paths", () => {
     });
   });
 
-  it("defaults to ~/.enclaws/openclaw.json when config is missing", async () => {
+  it("defaults to ~/.enclaws/enclaws.json when config is missing", async () => {
     await withTempHome(async (home) => {
       const io = createIoForHome(home);
-      expect(io.configPath).toBe(path.join(home, ".enclaws", "openclaw.json"));
+      expect(io.configPath).toBe(path.join(home, ".enclaws", "enclaws.json"));
     });
   });
 
@@ -56,7 +56,7 @@ describe("config io paths", () => {
         env: { ENCLAWS_HOME: path.join(home, "svc-home") } as NodeJS.ProcessEnv,
         homedir: () => path.join(home, "ignored-home"),
       });
-      expect(io.configPath).toBe(path.join(home, "svc-home", ".enclaws", "openclaw.json"));
+      expect(io.configPath).toBe(path.join(home, "svc-home", ".enclaws", "enclaws.json"));
     });
   });
 
@@ -82,7 +82,7 @@ describe("config io paths", () => {
     await withTempHome(async (home) => {
       const configDir = path.join(home, ".enclaws");
       await fs.mkdir(configDir, { recursive: true });
-      const configPath = path.join(configDir, "openclaw.json");
+      const configPath = path.join(configDir, "enclaws.json");
       await fs.writeFile(
         configPath,
         JSON.stringify(

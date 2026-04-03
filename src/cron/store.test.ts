@@ -6,7 +6,7 @@ import { loadCronStore, resolveCronStorePath, saveCronStore } from "./store.js";
 import type { CronStoreFile } from "./types.js";
 
 async function makeStorePath() {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-store-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "enclaws-cron-store-"));
   return {
     dir,
     storePath: path.join(dir, "jobs.json"),
@@ -43,11 +43,11 @@ describe("resolveCronStorePath", () => {
   });
 
   it("uses ENCLAWS_HOME for tilde expansion", () => {
-    vi.stubEnv("ENCLAWS_HOME", "/srv/openclaw-home");
+    vi.stubEnv("ENCLAWS_HOME", "/srv/enclaws-home");
     vi.stubEnv("HOME", "/home/other");
 
     const result = resolveCronStorePath("~/cron/jobs.json");
-    expect(result).toBe(path.resolve("/srv/openclaw-home", "cron", "jobs.json"));
+    expect(result).toBe(path.resolve("/srv/enclaws-home", "cron", "jobs.json"));
   });
 });
 

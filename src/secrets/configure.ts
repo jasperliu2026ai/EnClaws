@@ -738,7 +738,7 @@ export async function runSecretsConfigureInteractive(
   if (!params.providersOnly) {
     const candidates = buildCandidates(stagedConfig);
     if (candidates.length === 0) {
-      throw new Error("No configurable secret-bearing fields found in openclaw.json.");
+      throw new Error("No configurable secret-bearing fields found in enclaws.json.");
     }
 
     const sourceChoices = toSourceChoices(stagedConfig);

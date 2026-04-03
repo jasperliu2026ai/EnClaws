@@ -210,8 +210,8 @@ export function noteStartupOptimizationHints(
 
   const suggestions = [
     "- Suggested env for low-power hosts:",
-    "  export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache",
-    "  mkdir -p /var/tmp/openclaw-compile-cache",
+    "  export NODE_COMPILE_CACHE=/var/tmp/enclaws-compile-cache",
+    "  mkdir -p /var/tmp/enclaws-compile-cache",
     "  export ENCLAWS_NO_RESPAWN=1",
     isTruthyEnvValue(disableCompileCache) ? "  unset NODE_DISABLE_COMPILE_CACHE" : undefined,
   ].filter((line): line is string => Boolean(line));

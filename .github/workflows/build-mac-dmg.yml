@@ -1,0 +1,119 @@
+name: Build macOS DMG
+
+# 手动触发
+on:
+  workflow_dispatch:
+
+jobs:
+  build-dmg:
+    name: Build macOS DMG (${{ matrix.arch }})
+    # macOS runner（纯 Node.js 打包，不需要 Xcode/Swift）
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout repository / 检出代码
+        uses: actions/checkout@v4
+
+      # 2. 安装 pnpm
+      - name: Setup pnpm / 安装 pnpm
+        uses: pnpm/action-setup@v4
+
+      # 3. 设置 Node.js 22（用于 pnpm build 和 npm install）
+      - name: Setup Node.js 22 / 配置 Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 4. 赋予脚本执行权限
+      - name: Make scripts executable / 赋予脚本执行权限
+        run: chmod +x scripts/*.sh
+
+      # 5. 构建自包含 macOS 安装包
+      #    - 纯 Node.js，不需要 Swift/Xcode
+      #    - 内部自动执行 pnpm install + pnpm build
+      #    - 下载对应架构的 Node.js 捆绑进 .app
+      #    - 打包 JS 代码 + 依赖 + skills-pack
+      #    - 生成 DMG 安装包
+      - name: Build macOS installer / 构建 macOS 安装包
+        env:
+          BUILD_ARCHS: ${{ matrix.arch }}
+        run: bash scripts/build-mac-installer.sh
+
+      # 6. 验证 .app 结构和功能（仅 arm64，x86_64 无法在 arm64 runner 上运行）
+      - name: Verify app bundle / 验证安装包
+        if: matrix.arch == 'arm64'
+        run: |
+          APP="dist/EnClaws.app"
+          echo "=== Checking app structure ==="
+          # 检查关键文件是否存在
+          for f in \
+            "$APP/Contents/Info.plist" \
+            "$APP/Contents/MacOS/enclaws-launcher" \
+            "$APP/Contents/Resources/enclaws" \
+            "$APP/Contents/Resources/enclaws.mjs" \
+            "$APP/Contents/Resources/node/bin/node" \
+            "$APP/Contents/Resources/dist/index.js" \
+            "$APP/Contents/Resources/package.json" \
+            "$APP/Contents/Resources/scripts/postinstall.js"
+          do
+            if [ -f "$f" ]; then
+              echo "  ✓ $f"
+            else
+              echo "  ✗ MISSING: $f" && exit 1
+            fi
+          done
+
+          # 检查关键目录
+          for d in \
+            "$APP/Contents/Resources/node_modules" \
+            "$APP/Contents/Resources/extensions" \
+            "$APP/Contents/Resources/skills" \
+            "$APP/Contents/Resources/skills-pack"
+          do
+            if [ -d "$d" ]; then
+              echo "  ✓ $d/"
+            else
+              echo "  ✗ MISSING DIR: $d/" && exit 1
+            fi
+          done
+
+          echo ""
+          echo "=== Testing bundled Node.js ==="
+          NODE="$APP/Contents/Resources/node/bin/node"
+          NODE_VER=$("$NODE" -v)
+          echo "  Node.js version: $NODE_VER"
+
+          echo ""
+          echo "=== Testing gateway startup (5 second smoke test) ==="
+          "$NODE" "$APP/Contents/Resources/enclaws.mjs" gateway --port 19999 --no-open &
+          PID=$!
+          sleep 5
+          if curl -s -o /dev/null -w "%{http_code}" "http://localhost:19999" | grep -q "200"; then
+            echo "  ✓ Gateway responded with 200 OK"
+          else
+            echo "  ✗ Gateway did not respond"
+          fi
+          kill $PID 2>/dev/null || true
+          wait $PID 2>/dev/null || true
+
+          echo ""
+          echo "=== Bundle size ==="
+          du -sh "$APP/Contents/Resources"
+          echo ""
+          echo "=== Verification complete ==="
+
+      # 7. 上传 DMG 产物，保留 7 天
+      - name: Upload DMG artifact / 上传 DMG 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: EnClaws-dmg-${{ matrix.arch }}
+          path: dist/EnClaws-*-${{ matrix.arch }}.dmg
+          if-no-files-found: error
+          retention-days: 7

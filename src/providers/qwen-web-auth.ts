@@ -12,9 +12,9 @@ export async function loginQwenWeb(params: {
   openUrl: (url: string) => Promise<boolean>;
 }) {
   const browserConfig = resolveBrowserConfig(undefined);
-  const profile = resolveProfile(browserConfig, "openclaw");
+  const profile = resolveProfile(browserConfig, "enclaws");
   if (!profile) {
-    throw new Error(`Could not resolve browser profile 'openclaw'`);
+    throw new Error(`Could not resolve browser profile 'enclaws'`);
   }
 
   params.onProgress("Launching browser...");

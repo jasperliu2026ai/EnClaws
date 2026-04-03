@@ -219,7 +219,7 @@ describeLive("gateway live (cli backend)", () => {
       );
     }
 
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-cli-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "enclaws-live-cli-"));
     const disableMcpConfig = process.env.ENCLAWS_LIVE_CLI_BACKEND_DISABLE_MCP_CONFIG !== "0";
     let cliArgs = baseCliArgs;
     if (providerId === "claude-cli" && disableMcpConfig) {
@@ -254,7 +254,7 @@ describeLive("gateway live (cli backend)", () => {
         },
       },
     };
-    const tempConfigPath = path.join(tempDir, "openclaw.json");
+    const tempConfigPath = path.join(tempDir, "enclaws.json");
     await fs.writeFile(tempConfigPath, `${JSON.stringify(nextCfg, null, 2)}\n`);
     process.env.ENCLAWS_CONFIG_PATH = tempConfigPath;
 

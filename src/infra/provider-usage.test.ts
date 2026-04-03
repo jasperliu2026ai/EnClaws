@@ -297,7 +297,7 @@ describe("provider usage loading", () => {
         env: {
           ENCLAWS_STATE_DIR: (home) => path.join(home, ".enclaws"),
         },
-        prefix: "openclaw-provider-usage-",
+        prefix: "enclaws-provider-usage-",
       },
     );
   });

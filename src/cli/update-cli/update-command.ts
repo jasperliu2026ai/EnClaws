@@ -717,7 +717,7 @@ export async function updateCommand(opts: UpdateCommandOptions): Promise<void> {
     } else if (updateInstallKind === "git") {
       actions.push(`Run git update flow on channel ${channel} (fetch/rebase/build/doctor)`);
     } else {
-      actions.push(`Run global package manager update with spec openclaw@${tag}`);
+      actions.push(`Run global package manager update with spec enclaws@${tag}`);
     }
     actions.push("Run plugin update sync after core update");
     actions.push("Refresh shell completion cache (if needed)");
@@ -809,7 +809,7 @@ export async function updateCommand(opts: UpdateCommandOptions): Promise<void> {
 
   const showProgress = !opts.json && process.stdout.isTTY;
   if (!opts.json) {
-    defaultRuntime.log(theme.heading("Updating OpenClaw..."));
+    defaultRuntime.log(theme.heading("Updating EnClaws..."));
     defaultRuntime.log("");
   }
 
@@ -872,12 +872,12 @@ export async function updateCommand(opts: UpdateCommandOptions): Promise<void> {
     if (result.reason === "not-git-install") {
       defaultRuntime.log(
         theme.warn(
-          `Skipped: this OpenClaw install isn't a git checkout, and the package manager couldn't be detected. Update via your package manager, then run \`${replaceCliName(formatCliCommand("enclaws doctor"), CLI_NAME)}\` and \`${replaceCliName(formatCliCommand("enclaws gateway restart"), CLI_NAME)}\`.`,
+          `Skipped: this EnClaws install isn't a git checkout, and the package manager couldn't be detected. Update via your package manager, then run \`${replaceCliName(formatCliCommand("enclaws doctor"), CLI_NAME)}\` and \`${replaceCliName(formatCliCommand("enclaws gateway restart"), CLI_NAME)}\`.`,
         ),
       );
       defaultRuntime.log(
         theme.muted(
-          `Examples: \`${replaceCliName("npm i -g openclaw@latest", CLI_NAME)}\` or \`${replaceCliName("pnpm add -g openclaw@latest", CLI_NAME)}\``,
+          `Examples: \`${replaceCliName("npm i -g enclaws@latest", CLI_NAME)}\` or \`${replaceCliName("pnpm add -g enclaws@latest", CLI_NAME)}\``,
         ),
       );
     }

@@ -9,7 +9,7 @@ import { discoverOpenClawPlugins } from "./discovery.js";
 const tempDirs: string[] = [];
 
 function makeTempDir() {
-  const dir = path.join(os.tmpdir(), `openclaw-plugins-${randomUUID()}`);
+  const dir = path.join(os.tmpdir(), `enclaws-plugins-${randomUUID()}`);
   fs.mkdirSync(dir, { recursive: true });
   tempDirs.push(dir);
   return dir;
@@ -99,7 +99,7 @@ describe("discoverOpenClawPlugins", () => {
       path.join(globalExt, "package.json"),
       JSON.stringify({
         name: "pack",
-        openclaw: { extensions: ["./src/one.ts", "./src/two.ts"] },
+        enclaws: { extensions: ["./src/one.ts", "./src/two.ts"] },
       }),
       "utf-8",
     );
@@ -131,8 +131,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(globalExt, "package.json"),
       JSON.stringify({
-        name: "@openclaw/voice-call",
-        openclaw: { extensions: ["./src/index.ts"] },
+        name: "@enclaws/voice-call",
+        enclaws: { extensions: ["./src/index.ts"] },
       }),
       "utf-8",
     );
@@ -158,8 +158,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(packDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/demo-plugin-dir",
-        openclaw: { extensions: ["./index.js"] },
+        name: "@enclaws/demo-plugin-dir",
+        enclaws: { extensions: ["./index.js"] },
       }),
       "utf-8",
     );
@@ -181,8 +181,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(globalExt, "package.json"),
       JSON.stringify({
-        name: "@openclaw/escape-pack",
-        openclaw: { extensions: ["../../outside.js"] },
+        name: "@enclaws/escape-pack",
+        enclaws: { extensions: ["../../outside.js"] },
       }),
       "utf-8",
     );
@@ -215,8 +215,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(globalExt, "package.json"),
       JSON.stringify({
-        name: "@openclaw/pack",
-        openclaw: { extensions: ["./linked/escape.ts"] },
+        name: "@enclaws/pack",
+        enclaws: { extensions: ["./linked/escape.ts"] },
       }),
       "utf-8",
     );
@@ -255,8 +255,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(globalExt, "package.json"),
       JSON.stringify({
-        name: "@openclaw/pack",
-        openclaw: { extensions: ["./escape.ts"] },
+        name: "@enclaws/pack",
+        enclaws: { extensions: ["./escape.ts"] },
       }),
       "utf-8",
     );
@@ -286,8 +286,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       outsideManifest,
       JSON.stringify({
-        name: "@openclaw/pack",
-        openclaw: { extensions: ["./entry.ts"] },
+        name: "@enclaws/pack",
+        enclaws: { extensions: ["./entry.ts"] },
       }),
       "utf-8",
     );

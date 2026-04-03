@@ -1,15 +1,15 @@
 ---
 name: session-memory
 description: "Save session context to memory when /new or /reset command is issued"
-homepage: https://docs.openclaw.ai/automation/hooks#session-memory
+homepage: https://docs.enclaws.ai/automation/hooks#session-memory
 metadata:
   {
-    "openclaw":
+    "enclaws":
       {
         "emoji": "💾",
         "events": ["command:new", "command:reset"],
         "requires": { "config": ["workspace.dir"] },
-        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with OpenClaw" }],
+        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with EnClaws" }],
       },
   }
 ---
@@ -91,7 +91,7 @@ The hook automatically:
 To disable this hook:
 
 ```bash
-openclaw hooks disable session-memory
+enclaws hooks disable session-memory
 ```
 
 Or remove it from your config:

@@ -9,7 +9,7 @@ async function writeConfigForTest(home: string, config: unknown): Promise<void> 
   const configDir = path.join(home, ".enclaws");
   await fs.mkdir(configDir, { recursive: true });
   await fs.writeFile(
-    path.join(configDir, "openclaw.json"),
+    path.join(configDir, "enclaws.json"),
     JSON.stringify(config, null, 2),
     "utf-8",
   );

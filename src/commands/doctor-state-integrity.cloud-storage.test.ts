@@ -12,7 +12,7 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "Mobile Documents",
       "com~apple~CloudDocs",
-      "OpenClaw",
+      "EnClaws",
       ".enclaws",
     );
 
@@ -28,7 +28,7 @@ describe("detectMacCloudSyncedStateDir", () => {
   });
 
   it("detects state dir under Library/CloudStorage", () => {
-    const stateDir = path.join(home, "Library", "CloudStorage", "Dropbox", "OpenClaw", ".enclaws");
+    const stateDir = path.join(home, "Library", "CloudStorage", "Dropbox", "EnClaws", ".enclaws");
 
     const result = detectMacCloudSyncedStateDir(stateDir, {
       platform: "darwin",
@@ -42,13 +42,13 @@ describe("detectMacCloudSyncedStateDir", () => {
   });
 
   it("detects cloud-synced target when state dir resolves via symlink", () => {
-    const symlinkPath = "/tmp/openclaw-state";
+    const symlinkPath = "/tmp/enclaws-state";
     const resolvedCloudPath = path.join(
       home,
       "Library",
       "CloudStorage",
       "OneDrive-Personal",
-      "OpenClaw",
+      "EnClaws",
       ".enclaws",
     );
 
@@ -70,7 +70,7 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "CloudStorage",
       "OneDrive-Personal",
-      "OpenClaw",
+      "EnClaws",
       ".enclaws",
     );
     const resolvedLocalPath = path.join(home, ".enclaws");
@@ -87,7 +87,7 @@ describe("detectMacCloudSyncedStateDir", () => {
   it("anchors cloud detection to OS homedir when ENCLAWS_HOME is overridden", () => {
     const stateDir = path.join(home, "Library", "CloudStorage", "iCloud Drive", ".enclaws");
     const originalOpenClawHome = process.env.ENCLAWS_HOME;
-    process.env.ENCLAWS_HOME = "/tmp/openclaw-home-override";
+    process.env.ENCLAWS_HOME = "/tmp/enclaws-home-override";
     const homedirSpy = vi.spyOn(os, "homedir").mockReturnValue(home);
     try {
       const result = detectMacCloudSyncedStateDir(stateDir, {
@@ -114,7 +114,7 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "Mobile Documents",
       "com~apple~CloudDocs",
-      "OpenClaw",
+      "EnClaws",
       ".enclaws",
     );
 

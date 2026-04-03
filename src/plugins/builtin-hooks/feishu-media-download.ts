@@ -1,6 +1,6 @@
 /**
  * Built-in after_tool_call hook: redirect Feishu media downloads
- * from /tmp/openclaw/ to the user's workspace download/ directory.
+ * from /tmp/enclaws/ to the user's workspace download/ directory.
  *
  * Registered as an internal typed hook so it runs alongside plugin hooks
  * without modifying the official openclaw-lark plugin.

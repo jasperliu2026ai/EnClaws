@@ -29,7 +29,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     approvals: Parameters<typeof saveExecApprovals>[0];
     run: (ctx: { tempHome: string }) => Promise<T>;
   }): Promise<T> {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-exec-approvals-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "enclaws-exec-approvals-"));
     const previousOpenClawHome = process.env.ENCLAWS_HOME;
     process.env.ENCLAWS_HOME = tempHome;
     saveExecApprovals(params.approvals);
@@ -230,7 +230,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "pins PATH-token executable to canonical path for approval-based runs",
     async () => {
-      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-path-pin-"));
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "enclaws-approval-path-pin-"));
       const binDir = path.join(tmp, "bin");
       fs.mkdirSync(binDir, { recursive: true });
       const link = path.join(binDir, "poccmd");
@@ -271,7 +271,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "pins PATH-token executable to canonical path for allowlist runs",
     async () => {
-      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-allowlist-path-pin-"));
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "enclaws-allowlist-path-pin-"));
       const binDir = path.join(tmp, "bin");
       fs.mkdirSync(binDir, { recursive: true });
       const link = path.join(binDir, "poccmd");
@@ -356,7 +356,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "denies approval-based execution when cwd is a symlink",
     async () => {
-      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-cwd-link-"));
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "enclaws-approval-cwd-link-"));
       const safeDir = path.join(tmp, "safe");
       const linkDir = path.join(tmp, "cwd-link");
       const script = path.join(safeDir, "run.sh");
@@ -391,7 +391,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "denies approval-based execution when cwd contains a symlink parent component",
     async () => {
-      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-cwd-parent-link-"));
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "enclaws-approval-cwd-parent-link-"));
       const safeRoot = path.join(tmp, "safe-root");
       const safeSub = path.join(safeRoot, "sub");
       const linkRoot = path.join(tmp, "approved-link");
@@ -422,7 +422,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   );
 
   it("uses canonical executable path for approval-based relative command execution", async () => {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-cwd-real-"));
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "enclaws-approval-cwd-real-"));
     const script = path.join(tmp, "run.sh");
     fs.writeFileSync(script, "#!/bin/sh\necho SAFE\n");
     fs.chmodSync(script, 0o755);
@@ -451,7 +451,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     }
   });
   it("denies ./sh wrapper spoof in allowlist on-miss mode before execution", async () => {
-    const marker = path.join(os.tmpdir(), `openclaw-wrapper-spoof-${process.pid}-${Date.now()}`);
+    const marker = path.join(os.tmpdir(), `enclaws-wrapper-spoof-${process.pid}-${Date.now()}`);
     const runCommand = vi.fn(async () => {
       fs.writeFileSync(marker, "executed");
       return {
@@ -602,7 +602,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("denies semicolon-chained shell payloads in allowlist mode without explicit approval", async () => {
-    const payloads = ["openclaw status; id", "openclaw status; cat /etc/passwd"];
+    const payloads = ["enclaws status; id", "enclaws status; cat /etc/passwd"];
     for (const payload of payloads) {
       const command =
         process.platform === "win32"

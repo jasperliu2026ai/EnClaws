@@ -190,7 +190,6 @@ export function ensureSkillsWatcher(params: { workspaceDir: string; config?: Ope
   const state: SkillsWatchState = { watcher, pathsKey, debounceMs };
 
   const schedule = (changedPath?: string) => {
-    log.info(`Skills watcher detected change: ${changedPath}`);
     state.pendingPath = changedPath ?? state.pendingPath;
     if (state.timer) {
       clearTimeout(state.timer);

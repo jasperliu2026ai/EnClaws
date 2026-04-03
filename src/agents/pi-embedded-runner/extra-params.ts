@@ -6,7 +6,7 @@ import type { OpenClawConfig } from "../../config/config.js";
 import { log } from "./logger.js";
 
 const OPENROUTER_APP_HEADERS: Record<string, string> = {
-  "HTTP-Referer": "https://openclaw.ai",
+  "HTTP-Referer": "https://enclaws.ai",
   "X-Title": "OpenClaw",
 };
 const ANTHROPIC_CONTEXT_1M_BETA = "context-1m-2025-08-07";
@@ -802,7 +802,7 @@ export function applyExtraParamsToAgent(
     // Omit the thinkingLevel so we never inject `reasoning.effort: "none"`,
     // which would cause a 400 on models where reasoning is mandatory.
     // Users who need reasoning control should target a specific model ID.
-    // See: openclaw/openclaw#24851
+    // See: enclaws/enclaws#24851
     const openRouterThinkingLevel = modelId === "auto" ? undefined : thinkingLevel;
     agent.streamFn = createOpenRouterWrapper(agent.streamFn, openRouterThinkingLevel);
     agent.streamFn = createOpenRouterSystemCacheWrapper(agent.streamFn);

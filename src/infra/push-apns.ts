@@ -482,7 +482,7 @@ export async function sendApnsAlert(params: {
       },
       sound: "default",
     },
-    openclaw: createOpenClawPushMetadata({
+    enclaws: createOpenClawPushMetadata({
       kind: "push.test",
       nodeId: params.nodeId,
     }),
@@ -511,7 +511,7 @@ export async function sendApnsBackgroundWake(params: {
     aps: {
       "content-available": 1,
     },
-    openclaw: createOpenClawPushMetadata({
+    enclaws: createOpenClawPushMetadata({
       kind: "node.wake",
       reason: params.wakeReason ?? "node.invoke",
       nodeId: params.nodeId,

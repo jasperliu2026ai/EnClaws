@@ -59,7 +59,7 @@ const ABORT_TRIGGERS = new Set([
   "hoer auf",
   "stopp",
   "pare",
-  "stop openclaw",
+  "stop enclaws",
   "enclaws stop",
   "stop action",
   "stop current action",

@@ -424,7 +424,7 @@ export async function statusCommand(
     },
   ];
 
-  runtime.log(theme.heading("OpenClaw status"));
+  runtime.log(theme.heading("EnClaws status"));
   runtime.log("");
   runtime.log(theme.heading("Overview"));
   runtime.log(
@@ -660,8 +660,8 @@ export async function statusCommand(
   }
 
   runtime.log("");
-  runtime.log("FAQ: https://docs.openclaw.ai/faq");
-  runtime.log("Troubleshooting: https://docs.openclaw.ai/troubleshooting");
+  runtime.log("FAQ: https://docs.enclaws.ai/faq");
+  runtime.log("Troubleshooting: https://docs.enclaws.ai/troubleshooting");
   runtime.log("");
   const updateHint = formatUpdateAvailableHint(update);
   if (updateHint) {

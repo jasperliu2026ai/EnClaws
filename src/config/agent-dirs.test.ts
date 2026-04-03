@@ -22,7 +22,7 @@ describe("resolveEffectiveAgentDir via findDuplicateAgentDirs", () => {
     };
 
     const env = {
-      ENCLAWS_HOME: "/srv/openclaw-home",
+      ENCLAWS_HOME: "/srv/enclaws-home",
       HOME: "/home/other",
     } as NodeJS.ProcessEnv;
 
@@ -37,7 +37,7 @@ describe("resolveEffectiveAgentDir via findDuplicateAgentDirs", () => {
     const cfg: OpenClawConfig = {};
 
     const env = {
-      ENCLAWS_HOME: "/srv/openclaw-home",
+      ENCLAWS_HOME: "/srv/enclaws-home",
     } as NodeJS.ProcessEnv;
 
     // No duplicates for a single default agent

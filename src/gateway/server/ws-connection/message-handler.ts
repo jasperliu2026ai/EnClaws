@@ -592,17 +592,6 @@ export function attachGatewayWsMessageHandler(params: {
             hasSharedAuth,
             isLocalClient,
           });
-          console.log("[debug-device-identity]", JSON.stringify({
-            decision: decision.kind,
-            hasDevice: Boolean(device),
-            isControlUi,
-            allowBypass: controlUiAuthPolicy.allowBypass,
-            sharedAuthOk,
-            authOk,
-            hasSharedAuth,
-            isLocalClient,
-            role,
-          }));
           if (decision.kind === "allow") {
             return true;
           }

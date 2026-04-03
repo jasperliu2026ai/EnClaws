@@ -107,7 +107,7 @@ export async function updateWizardCommand(opts: UpdateWizardOptions = {}): Promi
         const empty = await isEmptyDir(gitDir);
         if (!empty) {
           defaultRuntime.error(
-            `ENCLAWS_GIT_DIR points at a non-git directory: ${gitDir}. Set ENCLAWS_GIT_DIR to an empty folder or an openclaw checkout.`,
+            `ENCLAWS_GIT_DIR points at a non-git directory: ${gitDir}. Set ENCLAWS_GIT_DIR to an empty folder or an enclaws checkout.`,
           );
           defaultRuntime.exit(1);
           return;

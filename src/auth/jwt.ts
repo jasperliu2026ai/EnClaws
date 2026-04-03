@@ -79,8 +79,8 @@ export async function generateTokenPair(payload: JwtPayload): Promise<JwtTokenPa
 
   const accessToken = jwt.sign(payload, secret, {
     expiresIn: parseExpiresIn(accessExpiresExpr),
-    issuer: "openclaw",
-    audience: "openclaw-api",
+    issuer: "enclaws",
+    audience: "enclaws-api",
   });
 
   // Refresh token is an opaque random string stored in DB
@@ -112,8 +112,8 @@ export async function generateTokenPair(payload: JwtPayload): Promise<JwtTokenPa
 export function verifyAccessToken(token: string): JwtPayload {
   const secret = getSecret();
   const decoded = jwt.verify(token, secret, {
-    issuer: "openclaw",
-    audience: "openclaw-api",
+    issuer: "enclaws",
+    audience: "enclaws-api",
   });
   return decoded as JwtPayload;
 }

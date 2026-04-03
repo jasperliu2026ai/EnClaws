@@ -24,7 +24,7 @@ export const browserActionExamples = [
   "enclaws browser hover 44",
   "enclaws browser drag 10 11",
   "enclaws browser select 9 OptionA OptionB",
-  "enclaws browser upload /tmp/openclaw/uploads/file.pdf",
+  "enclaws browser upload /tmp/enclaws/uploads/file.pdf",
   'enclaws browser fill --fields \'[{"ref":"1","value":"Ada"}]\'',
   "enclaws browser dialog --accept",
   'enclaws browser wait --text "Done"',

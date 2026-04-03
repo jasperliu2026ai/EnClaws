@@ -8,7 +8,7 @@ import { __testing, loadOpenClawPlugins } from "./loader.js";
 
 type TempPlugin = { dir: string; file: string; id: string };
 
-const fixtureRoot = path.join(os.tmpdir(), `openclaw-plugin-${randomUUID()}`);
+const fixtureRoot = path.join(os.tmpdir(), `enclaws-plugin-${randomUUID()}`);
 let tempDirIndex = 0;
 const prevBundledDir = process.env.ENCLAWS_BUNDLED_PLUGINS_DIR;
 const EMPTY_PLUGIN_SCHEMA = { type: "object", additionalProperties: false, properties: {} };
@@ -84,7 +84,7 @@ function loadBundledMemoryPluginRegistry(options?: {
           name: options.packageMeta.name,
           version: options.packageMeta.version,
           description: options.packageMeta.description,
-          openclaw: { extensions: ["./index.js"] },
+          enclaws: { extensions: ["./index.js"] },
         },
         null,
         2,
@@ -258,7 +258,7 @@ describe("loadOpenClawPlugins", () => {
   it("preserves package.json metadata for bundled memory plugins", () => {
     const registry = loadBundledMemoryPluginRegistry({
       packageMeta: {
-        name: "@openclaw/memory-core",
+        name: "@enclaws/memory-core",
         version: "1.2.3",
         description: "Memory plugin package",
       },

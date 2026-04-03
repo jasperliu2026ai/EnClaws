@@ -11,8 +11,8 @@
  *   ENCLAWS_DB_URL          - Full connection URL (takes precedence)
  *   ENCLAWS_DB_HOST         - Database host (default: localhost)
  *   ENCLAWS_DB_PORT         - Database port (default: 5432)
- *   ENCLAWS_DB_NAME         - Database name (default: openclaw)
- *   ENCLAWS_DB_USER         - Database user (default: openclaw)
+ *   ENCLAWS_DB_NAME         - Database name (default: enclaws)
+ *   ENCLAWS_DB_USER         - Database user (default: enclaws)
  *   ENCLAWS_DB_PASSWORD     - Database password
  *   ENCLAWS_DB_SSL          - Enable SSL (default: false)
  *   ENCLAWS_DB_POOL_MAX     - Max pool connections (default: 20)
@@ -66,8 +66,8 @@ function resolveDbConfig(): DbConfig {
   return {
     host: process.env.ENCLAWS_DB_HOST || "localhost",
     port: parseInt(process.env.ENCLAWS_DB_PORT || "5432", 10),
-    database: process.env.ENCLAWS_DB_NAME || "openclaw",
-    user: process.env.ENCLAWS_DB_USER || "openclaw",
+    database: process.env.ENCLAWS_DB_NAME || "enclaws",
+    user: process.env.ENCLAWS_DB_USER || "enclaws",
     password: process.env.ENCLAWS_DB_PASSWORD || "",
     ssl: process.env.ENCLAWS_DB_SSL === "true" ? { rejectUnauthorized: false } : false,
     max: parseInt(process.env.ENCLAWS_DB_POOL_MAX || "20", 10),

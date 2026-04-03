@@ -81,11 +81,11 @@ const FIELD_PLACEHOLDERS: Record<string, string> = {
   "gateway.remote.url": "ws://host:18888",
   "gateway.remote.tlsFingerprint": "sha256:ab12cd34…",
   "gateway.remote.sshTarget": "user@host",
-  "gateway.controlUi.basePath": "/openclaw",
+  "gateway.controlUi.basePath": "/enclaws",
   "gateway.controlUi.root": "dist/control-ui",
   "gateway.controlUi.allowedOrigins": "https://control.example.com",
   "channels.mattermost.baseUrl": "https://chat.example.com",
-  "agents.list[].identity.avatar": "avatars/openclaw.png",
+  "agents.list[].identity.avatar": "avatars/enclaws.png",
 };
 
 /**
@@ -105,6 +105,18 @@ const SENSITIVE_KEY_WHITELIST_SUFFIXES = [
   "tokenbudget",
   "passwordFile",
 ] as const;
+
+/** Config path prefixes that match SENSITIVE_PATTERNS but are structural, not actual secrets. */
+const SENSITIVE_PATH_WHITELIST_PREFIXES = [
+  "secrets.",
+  "models.providers.*.apiKey.",
+  "skills.entries.*.apiKey.",
+] as const;
+
+/** Exact config paths whitelisted from the sensitive-key warning. */
+const SENSITIVE_PATH_WHITELIST = new Set([
+  "secrets",
+]);
 const NORMALIZED_SENSITIVE_KEY_WHITELIST_SUFFIXES = SENSITIVE_KEY_WHITELIST_SUFFIXES.map((suffix) =>
   suffix.toLowerCase(),
 );
@@ -118,6 +130,12 @@ const SENSITIVE_PATTERNS = [
 ];
 
 function isWhitelistedSensitivePath(path: string): boolean {
+  if (SENSITIVE_PATH_WHITELIST.has(path)) {
+    return true;
+  }
+  if (SENSITIVE_PATH_WHITELIST_PREFIXES.some((prefix) => path.startsWith(prefix))) {
+    return true;
+  }
   const lowerPath = path.toLowerCase();
   return NORMALIZED_SENSITIVE_KEY_WHITELIST_SUFFIXES.some((suffix) => lowerPath.endsWith(suffix));
 }
