@@ -5,4 +5,4 @@ title: EnClaws Blog
 
 # EnClaws Blog
 
-[English](./en/) | [简体中文](./zh-CN/)
+[English]({{ site.baseurl }}/en/) | [简体中文]({{ site.baseurl }}/zh-CN/)

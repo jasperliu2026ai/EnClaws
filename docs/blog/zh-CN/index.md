@@ -5,10 +5,10 @@ title: EnClaws 博客
 
 # EnClaws 博客
 
-[English](../en/)
+[English]({{ site.baseurl }}/en/)
 
 {% for post in site.posts %}
   {% if post.path contains 'zh-CN/_posts' %}
-  - **{{ post.date | date: "%Y-%m-%d" }}** — [{{ post.title }}]({{ post.url }})
+  - **{{ post.date | date: "%Y-%m-%d" }}** — [{{ post.title }}]({{ site.baseurl }}{{ post.url }})
   {% endif %}
 {% endfor %}
