@@ -1,6 +1,8 @@
 ---
 layout: default
 title: EnClaws Blog
+exclude: true
+permalink: /en/
 ---
 
 # EnClaws Blog
