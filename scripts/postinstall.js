@@ -51,7 +51,10 @@ if (/^ENCLAWS_DB_URL=/m.test(content)) {
 } else {
   content += `\nENCLAWS_DB_URL=${dbUrl}`;
 }
-if (!content.includes("SKILL_PACK_LOCAL_DIR")) {
+// Replace empty placeholder (from .env.example) or append if missing entirely
+if (/^SKILL_PACK_LOCAL_DIR=/m.test(content)) {
+  content = content.replace(/^SKILL_PACK_LOCAL_DIR=.*$/m, `SKILL_PACK_LOCAL_DIR=${skillPackDir}`);
+} else {
   content += `\nSKILL_PACK_LOCAL_DIR=${skillPackDir}`;
 }
 
