@@ -11,7 +11,7 @@
  */
 
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -41,19 +41,16 @@ const dbPath = join(stateDir, "data.db").replace(/\\/g, "/");
 // Resolve the bundled skill-pack directory (lives next to scripts/ in the package)
 const skillPackDir = join(appDir, "skills-pack").replace(/\\/g, "/");
 
-const content = `# EnClaws — auto-generated at install time
-# Edit freely. This file is never overwritten by reinstall / upgrade.
-
-ENCLAWS_DB_URL=sqlite:///${dbPath}
-ENCLAWS_GATEWAY_PORT=18888
-ENCLAWS_CONTROL_UI_DISABLE_DEVICE_AUTH=true
-ENCLAWS_CONTROL_UI_ALLOWED_ORIGINS=http://localhost:18888,http://127.0.0.1:18888
-
-# Skill pack auto-install (tenant onboarding)
-SKILL_PACK_AUTO_INSTALL=true
-SKILL_PACK_LOCAL_DIR=${skillPackDir}
-SKILL_PACK_GIT_URL=https://github.com/hashSTACS-Global/feishu-skills.git
-`;
+// Use project's .env as template (assumed to exist)
+const projectEnvPath = join(appDir, ".env");
+let content = readFileSync(projectEnvPath, "utf-8");
+// Append default dynamic values if not present
+if (!content.includes("ENCLAWS_DB_URL")) {
+  content += `\nENCLAWS_DB_URL=sqlite:///${dbPath}`;
+}
+if (!content.includes("SKILL_PACK_LOCAL_DIR")) {
+  content += `\nSKILL_PACK_LOCAL_DIR=${skillPackDir}`;
+}
 
 try {
   mkdirSync(stateDir, { recursive: true });
