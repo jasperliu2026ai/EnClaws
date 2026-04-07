@@ -45,6 +45,8 @@ export type UpdateAvailable = {
   currentVersion: string;
   latestVersion: string;
   channel: string;
+  /** For installer mode: URL to download the new installer. */
+  downloadUrl?: string;
 };
 
 let updateAvailableCache: UpdateAvailable | null = null;
@@ -64,6 +66,16 @@ const AUTO_UPDATE_COMMAND_TIMEOUT_MS = 45 * 60 * 1000;
 const AUTO_STABLE_DELAY_HOURS_DEFAULT = 6;
 const AUTO_STABLE_JITTER_HOURS_DEFAULT = 12;
 const AUTO_BETA_CHECK_INTERVAL_HOURS_DEFAULT = 1;
+
+/** Resolve the download URL for the installer update. */
+function resolveInstallerDownloadUrl(version: string): string {
+  const template = process.env.ENCLAWS_UPDATE_DOWNLOAD_URL?.trim();
+  if (template) {
+    return template.replace(/\{version\}/g, version);
+  }
+  // Default: redirect to official website
+  return "https://www.baidu.com";
+}
 
 function shouldSkipCheck(allowInTests: boolean): boolean {
   if (allowInTests) {
@@ -377,7 +389,7 @@ export async function runGatewayUpdateCheck(params: {
     if (behind > 0) {
       const nextAvailable: UpdateAvailable = {
         currentVersion: VERSION,
-        latestVersion: `${behind} commit(s) behind upstream`,
+        latestVersion: String(behind),
         channel: "git",
       };
       if (shouldRunUpdateHints) {
@@ -404,7 +416,7 @@ export async function runGatewayUpdateCheck(params: {
     return;
   }
 
-  if (status.installKind !== "package") {
+  if (status.installKind !== "package" && status.installKind !== "installer") {
     delete nextState.lastAvailableVersion;
     delete nextState.lastAvailableTag;
     clearAutoState(nextState);
@@ -416,6 +428,7 @@ export async function runGatewayUpdateCheck(params: {
     return;
   }
 
+  const isInstallerMode = status.installKind === "installer";
   const channel = normalizeUpdateTrack(settings.track) ?? DEFAULT_PACKAGE_TRACK;
   const resolved = await resolveNpmChannelTag({ channel, timeoutMs: 2500 });
   const tag = resolved.tag;
@@ -426,10 +439,14 @@ export async function runGatewayUpdateCheck(params: {
 
   const cmp = compareSemverStrings(VERSION, resolved.version);
   if (cmp != null && cmp < 0) {
+    const downloadUrl = isInstallerMode
+      ? resolveInstallerDownloadUrl(resolved.version)
+      : undefined;
     const nextAvailable: UpdateAvailable = {
       currentVersion: VERSION,
       latestVersion: resolved.version,
-      channel: tag,
+      channel: isInstallerMode ? "installer" : tag,
+      downloadUrl,
     };
     if (shouldRunUpdateHints) {
       setUpdateAvailableCache({
@@ -449,7 +466,7 @@ export async function runGatewayUpdateCheck(params: {
       nextState.lastNotifiedTag = tag;
     }
 
-    if (auto.enabled && (channel === "stable" || channel === "beta")) {
+    if (auto.enabled && !isInstallerMode && (channel === "stable" || channel === "beta")) {
       const runAuto = params.runAutoUpdate ?? runAutoUpdateCommand;
       const attemptIntervalMs =
         channel === "beta"

@@ -85,6 +85,17 @@ export const zh_TW: TranslationMap = {
     "tenant-traces": "追蹤系統與大模型的每次交互詳情。",
     "tenant-usage": "查看企業 Token 使用量和配額。",
   },
+  update: {
+    available: "有新版本可用：",
+    availableGit: "有新版本可用：",
+    versionInfo: "v{latest}（目前 v{current}）",
+    downloadInstall: "下載並安裝",
+    updateNow: "立即更新",
+    updating: "更新中…",
+    successRestart: "更新成功，請手動重新啟動服務以套用更新。",
+    successRestarting: "更新成功，服務正在重新啟動，請稍後重新整理頁面。",
+    commitsBehind: "落後遠端 {count} 個提交",
+  },
   platformModels: {
     title: "平台共享模型",
     addProvider: "新增模型",

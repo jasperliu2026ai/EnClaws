@@ -90,6 +90,17 @@ export const en: TranslationMap = {
     "tenant-traces": "Trace every LLM interaction for debugging and optimization.",
     "tenant-usage": "View tenant token usage and quota.",
   },
+  update: {
+    available: "Update available:",
+    availableGit: "Update available:",
+    versionInfo: "v{latest} (running v{current})",
+    downloadInstall: "Download & Install",
+    updateNow: "Update now",
+    updating: "Updating…",
+    successRestart: "Update successful. Please restart the service manually to apply changes.",
+    successRestarting: "Update successful. Service is restarting — please refresh the page in a few seconds.",
+    commitsBehind: "{count} commit(s) behind upstream",
+  },
   platformModels: {
     title: "Platform Shared Models",
     addProvider: "Add Model",

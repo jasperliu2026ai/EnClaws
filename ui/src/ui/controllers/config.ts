@@ -1,3 +1,4 @@
+import { t } from "../../i18n/index.ts";
 import type { GatewayBrowserClient } from "../gateway.ts";
 import type { ConfigSchemaResponse, ConfigSnapshot, ConfigUiHints } from "../types.ts";
 import type { JsonSchema } from "../views/config-form.shared.ts";
@@ -191,8 +192,8 @@ export async function runUpdate(state: ConfigState) {
     const result = (res as { result?: { status?: string; mode?: string } })?.result;
     if (result?.status === "ok") {
       state.updateMessage = result.mode === "git"
-        ? "Update successful. Please restart the service manually to apply changes."
-        : "Update successful. Service is restarting — please refresh the page in a few seconds.";
+        ? t("update.successRestart")
+        : t("update.successRestarting");
     }
   } catch (err) {
     state.lastError = String(err);

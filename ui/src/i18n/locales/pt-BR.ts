@@ -85,6 +85,17 @@ export const pt_BR: TranslationMap = {
     "tenant-traces": "Rastrear cada interação LLM para depuração e otimização.",
     "tenant-usage": "Visualizar uso de tokens e cota.",
   },
+  update: {
+    available: "Atualização disponível:",
+    availableGit: "Atualização disponível:",
+    versionInfo: "v{latest} (executando v{current})",
+    downloadInstall: "Baixar e instalar",
+    updateNow: "Atualizar agora",
+    updating: "Atualizando…",
+    successRestart: "Atualização concluída. Reinicie o serviço manualmente para aplicar as alterações.",
+    successRestarting: "Atualização concluída. O serviço está reiniciando — atualize a página em alguns segundos.",
+    commitsBehind: "{count} commit(s) atrás do upstream",
+  },
   platformModels: {
     title: "Modelos Compartilhados da Plataforma",
     addProvider: "Adicionar Modelo",
