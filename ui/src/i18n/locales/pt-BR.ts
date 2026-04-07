@@ -96,6 +96,8 @@ export const pt_BR: TranslationMap = {
     successRestarting: "Atualização concluída. O serviço está reiniciando — atualize a página em alguns segundos.",
     commitsBehind: "{count} commit(s) atrás do upstream",
     dirtyWorkspace: "Atualização ignorada: há alterações não commitadas. Faça commit ou stash primeiro.",
+    successDone: "Atualização concluída! Atualizando a página…",
+    connectionLost: "O serviço está reiniciando. Atualize a página em breve para verificar o resultado.",
     ebusyRestarting: "Arquivos em uso. Reiniciando o serviço para tentar a atualização novamente…",
     failed: "Atualização falhou: {reason}",
     close: "Fechar",

@@ -180,6 +180,32 @@ export async function applyConfig(state: ConfigState) {
   }
 }
 
+/** Poll the gateway until it comes back online, then reload the page. */
+async function waitForGatewayAndReload(state: ConfigState, oldVersion: string | undefined) {
+  const baseUrl = (state as unknown as { settings?: { gatewayUrl?: string } }).settings?.gatewayUrl || window.location.origin;
+  const maxAttempts = 60; // ~2 minutes
+  const intervalMs = 2000;
+
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((r) => setTimeout(r, intervalMs));
+    try {
+      const res = await fetch(baseUrl, { method: "HEAD", cache: "no-store" });
+      if (res.ok) {
+        state.updateMessage = t("update.successDone");
+        state.updateRunning = false;
+        // Reload after a brief delay so user sees the success message
+        setTimeout(() => window.location.reload(), 1500);
+        return;
+      }
+    } catch {
+      // Gateway not ready yet, keep polling
+    }
+  }
+  // Timed out — let user manually refresh
+  state.updateMessage = t("update.connectionLost");
+  state.updateRunning = false;
+}
+
 export async function runUpdate(state: ConfigState) {
   if (!state.client || !state.connected) {
     return;
@@ -187,6 +213,8 @@ export async function runUpdate(state: ConfigState) {
   state.updateRunning = true;
   state.updateMessage = t("update.updating");
   state.lastError = null;
+
+  const oldVersion = (state as unknown as { updateAvailable?: { currentVersion?: string } }).updateAvailable?.currentVersion;
 
   // Yield to let Lit render the "updating" state before starting the long request
   await new Promise((r) => setTimeout(r, 0));
@@ -199,9 +227,9 @@ export async function runUpdate(state: ConfigState) {
     const result = body?.result;
     if (result?.status === "ok") {
       state.updateMessage = t("update.successRestarting");
-    } else if (body?.restart) {
-      // EBUSY on Windows — restarting to release file locks, will auto-retry
-      state.updateMessage = t("update.ebusyRestarting");
+      // Poll for gateway to come back after restart
+      waitForGatewayAndReload(state, oldVersion);
+      return;
     } else if (result?.reason === "dirty") {
       state.updateMessage = null;
       state.updateRunning = false;
@@ -227,7 +255,6 @@ export async function runUpdate(state: ConfigState) {
   } catch (err) {
     const msg = String(err);
     if (msg.includes("rate limit")) {
-      // Rate limited — show dirty workspace hint since repeated clicks usually mean the first one failed
       state.updateMessage = null;
       state.updateRunning = false;
       await showConfirm({
@@ -238,10 +265,11 @@ export async function runUpdate(state: ConfigState) {
       });
       return;
     }
-    // Connection drops during gateway restart — that's expected
+    // Connection dropped — gateway is restarting
     state.updateMessage = t("update.successRestarting");
-  } finally {
-    state.updateRunning = false;
+    // Poll for gateway to come back
+    waitForGatewayAndReload(state, oldVersion);
+    return;
   }
 }
 

@@ -96,6 +96,8 @@ export const de: TranslationMap = {
     successRestarting: "Update erfolgreich. Der Dienst wird neu gestartet — bitte aktualisieren Sie die Seite in wenigen Sekunden.",
     commitsBehind: "{count} Commit(s) hinter Upstream",
     dirtyWorkspace: "Update übersprungen: Arbeitsbereich hat nicht commitete Änderungen. Bitte zuerst committen oder stashen.",
+    successDone: "Update erfolgreich! Seite wird aktualisiert…",
+    connectionLost: "Der Dienst wird neu gestartet. Bitte aktualisieren Sie die Seite in Kürze, um das Ergebnis zu überprüfen.",
     ebusyRestarting: "Dateien sind gesperrt. Dienst wird neu gestartet und Update automatisch wiederholt…",
     failed: "Update fehlgeschlagen: {reason}",
     close: "Schließen",

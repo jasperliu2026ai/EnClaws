@@ -1,4 +1,5 @@
 import { extractDeliveryInfo } from "../../config/sessions.js";
+import { resolveGatewayPort } from "../../config/paths.js";
 import { resolveOpenClawPackageRoot } from "../../infra/openclaw-root.js";
 import {
   formatDoctorNonInteractiveHint,
@@ -6,9 +7,17 @@ import {
   writeRestartSentinel,
 } from "../../infra/restart-sentinel.js";
 import { scheduleGatewaySigusr1Restart } from "../../infra/restart.js";
+import { spawnDeferredUpdate } from "../../infra/update-deferred.js";
+import {
+  detectGlobalInstallManagerForRoot,
+  type GlobalInstallManager,
+} from "../../infra/update-global.js";
 import { runGatewayUpdate } from "../../infra/update-runner.js";
 import { getStoredUpdateTrack } from "../../infra/update-settings.js";
-import { markPendingUpdateRetry } from "../../infra/update-startup.js";
+import { trackToNpmTag } from "../../infra/update-channels.js";
+import { checkUpdateStatus, type InstallKind } from "../../infra/update-check.js";
+import { readPackageName } from "../../infra/package-json.js";
+import { runCommandWithTimeout } from "../../process/exec.js";
 import { formatControlPlaneActor, resolveControlPlaneActor } from "../control-plane-audit.js";
 import { validateUpdateRunParams } from "../protocol/index.js";
 import { parseRestartRequestParams } from "./restart-request.js";
@@ -29,16 +38,60 @@ export const updateHandlers: GatewayRequestHandlers = {
         ? Math.max(1000, Math.floor(timeoutMsRaw))
         : undefined;
 
+    let storedTrack: string | null | undefined;
+    const root =
+      (await resolveOpenClawPackageRoot({
+        moduleUrl: import.meta.url,
+        argv1: process.argv[1],
+        cwd: process.cwd(),
+      })) ?? process.cwd();
+    storedTrack = await getStoredUpdateTrack();
+
+    // Detect install kind to decide update strategy
+    const status = await checkUpdateStatus({ root, timeoutMs: 2500, fetchGit: false, includeRegistry: false });
+    const installKind: InstallKind = status.installKind;
+
+    // Windows package mode: use deferred update to avoid EBUSY
+    if (process.platform === "win32" && (installKind === "package" || installKind === "installer")) {
+      const globalManager = await detectGlobalInstallManagerForRoot(
+        (argv, opts) => runCommandWithTimeout(argv, { timeoutMs: opts?.timeoutMs ?? 5000, cwd: opts?.cwd }),
+        root,
+        5000,
+      );
+      if (globalManager) {
+        const packageName = (await readPackageName(root)) ?? "enclaws";
+        const track = storedTrack ?? "stable";
+        const tag = trackToNpmTag(track as "stable" | "beta" | "dev");
+        const spec = `${packageName}@${tag}`;
+        const port = resolveGatewayPort(undefined, process.env);
+
+        await spawnDeferredUpdate({
+          spec,
+          manager: globalManager as "npm" | "pnpm" | "bun",
+          port,
+          pid: process.pid,
+          restartCommand: [process.execPath, ...process.execArgv, ...process.argv.slice(1)],
+          cwd: process.cwd(),
+        });
+
+        // Respond immediately, then exit so the deferred script can run npm install
+        respond(true, {
+          ok: true,
+          result: { status: "ok", mode: "deferred", reason: "windows-deferred-update" },
+          restart: { signal: "deferred", delayMs: 0 },
+        }, undefined);
+
+        // Schedule exit to release file locks
+        setTimeout(() => {
+          process.exit(0);
+        }, 1000);
+        return;
+      }
+    }
+
+    // Standard update path (git mode, or non-Windows package mode)
     let result: Awaited<ReturnType<typeof runGatewayUpdate>>;
     try {
-      const [storedTrack, root] = await Promise.all([
-        getStoredUpdateTrack(),
-        resolveOpenClawPackageRoot({
-          moduleUrl: import.meta.url,
-          argv1: process.argv[1],
-          cwd: process.cwd(),
-        }).then((r) => r ?? process.cwd()),
-      ]);
       result = await runGatewayUpdate({
         timeoutMs,
         cwd: root,
@@ -92,29 +145,14 @@ export const updateHandlers: GatewayRequestHandlers = {
       sentinelPath = null;
     }
 
-    // Restart the gateway after update:
-    // - On success: restart to load updated code
-    // - On Windows EBUSY failure (package mode): restart to release file locks,
-    //   so the next auto-update retry can succeed
-    // For git mode, add extra delay to ensure build output is fully flushed.
-    const isWindowsEbusy =
-      process.platform === "win32" &&
-      result.status === "error" &&
-      result.mode !== "git" &&
-      result.steps?.some((s) => s.stderrTail?.includes("EBUSY"));
-    if (isWindowsEbusy) {
-      // Mark for retry on next startup — after restart, file locks are released
-      const version = result.after?.version ?? result.before?.version;
-      if (version) {
-        await markPendingUpdateRetry(version, storedTrack ?? "stable");
-      }
-    }
-    const shouldRestart = result.status === "ok" || isWindowsEbusy;
+    // Restart gateway after successful update
+    // For git mode, add extra delay to ensure build output is fully flushed
     const effectiveDelayMs = result.mode === "git" ? Math.max(restartDelayMs, 3000) : restartDelayMs;
-    const restart = shouldRestart
+    const restart =
+      result.status === "ok"
         ? scheduleGatewaySigusr1Restart({
             delayMs: effectiveDelayMs,
-            reason: isWindowsEbusy ? "update.run (ebusy-retry)" : "update.run",
+            reason: "update.run",
             audit: {
               actor: actor.actor,
               deviceId: actor.deviceId,
@@ -126,11 +164,6 @@ export const updateHandlers: GatewayRequestHandlers = {
     context?.logGateway?.info(
       `update.run completed ${formatControlPlaneActor(actor)} changedPaths=<n/a> restartReason=update.run status=${result.status}`,
     );
-    if (restart?.coalesced) {
-      context?.logGateway?.warn(
-        `update.run restart coalesced ${formatControlPlaneActor(actor)} delayMs=${restart.delayMs}`,
-      );
-    }
 
     respond(
       true,
