@@ -44,9 +44,12 @@ const skillPackDir = join(appDir, "skills-pack").replace(/\\/g, "/");
 // Use project's .env.example as template (assumed to exist)
 const projectEnvPath = join(appDir, ".env.example");
 let content = readFileSync(projectEnvPath, "utf-8");
-// Append default dynamic values if not present
-if (!content.includes("ENCLAWS_DB_URL")) {
-  content += `\nENCLAWS_DB_URL=sqlite:///${dbPath}`;
+// Replace template ENCLAWS_DB_URL with absolute path (template may contain a relative placeholder)
+const dbUrl = `sqlite://${dbPath}`;
+if (/^ENCLAWS_DB_URL=/m.test(content)) {
+  content = content.replace(/^ENCLAWS_DB_URL=.*$/m, `ENCLAWS_DB_URL=${dbUrl}`);
+} else {
+  content += `\nENCLAWS_DB_URL=${dbUrl}`;
 }
 if (!content.includes("SKILL_PACK_LOCAL_DIR")) {
   content += `\nSKILL_PACK_LOCAL_DIR=${skillPackDir}`;

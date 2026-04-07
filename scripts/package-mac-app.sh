@@ -311,6 +311,7 @@ RESOURCES="$APP_ROOT/Contents/Resources"
 echo "📦 Bundling JS application code..."
 
 cp "$ROOT_DIR/enclaws.mjs" "$RESOURCES/enclaws.mjs"
+cp "$ROOT_DIR/.env.example" "$RESOURCES/.env.example"
 
 for dir in dist extensions skills assets; do
   if [ -d "$ROOT_DIR/$dir" ]; then
