@@ -72,7 +72,11 @@ const AUTO_BETA_CHECK_INTERVAL_HOURS_DEFAULT = 1;
 
 /** Resolve the download URL for the installer update. */
 function resolveInstallerDownloadUrl(version: string): string {
-  const template = process.env.ENCLAWS_UPDATE_DOWNLOAD_URL?.trim();
+  const envKey =
+    process.platform === "darwin"
+      ? "ENCLAWS_UPDATE_DOWNLOAD_URL_MAC"
+      : "ENCLAWS_UPDATE_DOWNLOAD_URL";
+  const template = process.env[envKey]?.trim();
   if (template) {
     return template.replace(/\{version\}/g, version);
   }
