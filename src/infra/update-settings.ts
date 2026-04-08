@@ -5,9 +5,12 @@ import { normalizeUpdateTrack, type UpdateTrack } from "./update-channels.js";
 
 const UPDATE_SETTINGS_FILENAME = "update-settings.json";
 
+export type InstallKind = "git" | "package" | "installer" | "unknown";
+
 export type UpdateSettings = {
   track?: UpdateTrack;
   checkOnStart?: boolean;
+  installKind?: InstallKind;
   auto?: {
     enabled?: boolean;
     stableDelayHours?: number;
@@ -38,22 +41,32 @@ export async function patchUpdateSettings(patch: Partial<UpdateSettings>): Promi
   await writeUpdateSettings({ ...current, ...patch });
 }
 
-/** Detect if running from a git checkout. */
-async function isGitInstall(): Promise<boolean> {
+async function fileExists(p: string): Promise<boolean> {
   try {
-    // Check if the project root (two levels up from this file) has a .git directory
-    const root = path.resolve(resolveStateDir(), "..");
-    await fs.stat(path.join(root, ".git"));
+    await fs.stat(p);
     return true;
   } catch {
-    // Also check via process.cwd()
-    try {
-      await fs.stat(path.join(process.cwd(), ".git"));
-      return true;
-    } catch {
-      return false;
-    }
+    return false;
   }
+}
+
+/** Detect the install kind at startup. */
+async function detectInstallKind(): Promise<InstallKind> {
+  // Check git checkout
+  const root = path.resolve(resolveStateDir(), "..");
+  const isGit = (await fileExists(path.join(root, ".git"))) ||
+    (await fileExists(path.join(process.cwd(), ".git")));
+  if (isGit) return "git";
+
+  // Check bundled installer (Windows .exe / macOS .dmg)
+  const isInstaller =
+    (process.platform === "win32" &&
+      (await fileExists(path.join(root, "..", "node", "node.exe")))) ||
+    (process.platform === "darwin" &&
+      (await fileExists(path.join(root, "node", "bin", "node"))));
+  if (isInstaller) return "installer";
+
+  return "package";
 }
 
 /** Ensure update-settings.json exists with defaults. Called on gateway startup. */
@@ -63,20 +76,28 @@ export async function ensureUpdateSettings(): Promise<UpdateSettings> {
     const raw = await fs.readFile(settingsPath, "utf-8");
     const parsed = JSON.parse(raw) as UpdateSettings;
     if (parsed && typeof parsed === "object") {
+      // Backfill installKind for existing settings files
+      if (!parsed.installKind) {
+        parsed.installKind = await detectInstallKind();
+        await writeUpdateSettings(parsed);
+      }
       return parsed;
     }
   } catch {
     // File doesn't exist or is invalid — create with defaults
   }
-  const isGit = await isGitInstall();
+  const installKind = await detectInstallKind();
+  const isGit = installKind === "git";
   const defaults: UpdateSettings = isGit
     ? {
         track: "dev",
         checkOnStart: true,
+        installKind,
       }
     : {
         track: "stable",
         checkOnStart: true,
+        installKind,
         auto: {
           enabled: false,
           stableDelayHours: 6,

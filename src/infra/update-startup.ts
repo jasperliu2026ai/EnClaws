@@ -190,7 +190,10 @@ function setUpdateAvailableCache(params: {
   params.onUpdateAvailableChange?.(params.next);
 }
 
-function resolvePersistedUpdateAvailable(state: UpdateCheckState): UpdateAvailable | null {
+function resolvePersistedUpdateAvailable(
+  state: UpdateCheckState,
+  installKind?: string,
+): UpdateAvailable | null {
   const latestVersion = state.lastAvailableVersion?.trim();
   if (!latestVersion) {
     return null;
@@ -200,10 +203,12 @@ function resolvePersistedUpdateAvailable(state: UpdateCheckState): UpdateAvailab
     return null;
   }
   const channel = state.lastAvailableTag?.trim() || DEFAULT_PACKAGE_TRACK;
+  const isInstallerMode = installKind === "installer";
   return {
     currentVersion: VERSION,
     latestVersion,
-    channel,
+    channel: isInstallerMode ? "installer" : channel,
+    downloadUrl: isInstallerMode ? resolveInstallerDownloadUrl(latestVersion) : undefined,
   };
 }
 
@@ -388,7 +393,7 @@ export async function runGatewayUpdateCheck(params: {
   const now = Date.now();
   const lastCheckedAt = state.lastCheckedAt ? Date.parse(state.lastCheckedAt) : null;
   if (shouldRunUpdateHints) {
-    const persistedAvailable = resolvePersistedUpdateAvailable(state);
+    const persistedAvailable = resolvePersistedUpdateAvailable(state, settings.installKind);
     setUpdateAvailableCache({
       next: persistedAvailable,
       onUpdateAvailableChange: params.onUpdateAvailableChange,
