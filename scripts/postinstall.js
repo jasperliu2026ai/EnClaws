@@ -36,7 +36,7 @@ if (existsSync(envPath)) {
   process.exit(0);
 }
 
-const dbPath = join(stateDir, "data.db").replace(/\\/g, "/");
+const dbPath = join(stateDir, ".sqlite", "data.db").replace(/\\/g, "/");
 
 // Resolve the bundled skill-pack directory (lives next to scripts/ in the package)
 const skillPackDir = join(appDir, "skills-pack").replace(/\\/g, "/");

@@ -76,6 +76,10 @@ Filename: "{app}\node\enclaws.exe"; Parameters: """{app}\app\scripts\postinstall
 ; Option to launch EnClaws after install
 Filename: "{app}\enclaws-gateway.vbs"; Description: "立即启动 EnClaws"; Flags: nowait postinstall shellexec skipifsilent
 
+[InstallDelete]
+; Remove old node.exe left over from pre-rebrand installs (replaced by enclaws.exe)
+Type: files; Name: "{app}\node\node.exe"
+
 [UninstallDelete]
 ; Clean up generated files in install dir (node_modules cache, etc.)
 Type: filesandordirs; Name: "{app}"

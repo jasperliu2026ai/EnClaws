@@ -70,8 +70,11 @@ $NodeExtractDir = Join-Path $InstallerDir "node-v${NodeVersion}-win-x64"
 if (Test-Path $NodePortableDir) {
     # Check if the bundled version matches
     $existingVersion = $null
+    # Check enclaws.exe first (renamed), then fall back to node.exe (fresh download)
+    $checkExe = Join-Path $NodePortableDir "enclaws.exe"
+    if (-not (Test-Path $checkExe)) { $checkExe = Join-Path $NodePortableDir "node.exe" }
     try {
-        $existingVersion = (& (Join-Path $NodePortableDir "node.exe") -v 2>$null).Trim()
+        $existingVersion = (& $checkExe -v 2>$null).Trim()
     } catch {}
 
     if ($existingVersion -eq "v${NodeVersion}") {
@@ -98,8 +101,10 @@ if (-not (Test-Path $NodePortableDir)) {
     Write-Host "[OK] Node.js extracted to node-portable/" -ForegroundColor Green
 }
 
-# Verify node works
+# Verify node works (enclaws.exe if already renamed, node.exe if fresh)
+$enclawsExe = Join-Path $NodePortableDir "enclaws.exe"
 $nodeExe = Join-Path $NodePortableDir "node.exe"
+if (Test-Path $enclawsExe) { $nodeExe = $enclawsExe }
 $nodeVer = (& $nodeExe -v).Trim()
 Write-Host "[OK] Bundled Node.js: $nodeVer" -ForegroundColor Green
 
@@ -107,7 +112,6 @@ Write-Host "[OK] Bundled Node.js: $nodeVer" -ForegroundColor Green
 # Step 1b: Rename node.exe to enclaws.exe and rebrand PE version info
 # ---------------------------------------------------------------------------
 
-$enclawsExe = Join-Path $NodePortableDir "enclaws.exe"
 if (-not (Test-Path $enclawsExe)) {
     # Download rcedit to modify PE version info (FileDescription shown in Task Manager)
     $rceditPath = Join-Path $InstallerDir "rcedit-x64.exe"
@@ -118,7 +122,7 @@ if (-not (Test-Path $enclawsExe)) {
     }
 
     Write-Host "[*] Rebranding node.exe -> enclaws.exe..." -ForegroundColor Yellow
-    Copy-Item $nodeExe $enclawsExe
+    Rename-Item $nodeExe $enclawsExe
     & $rceditPath $enclawsExe --set-version-string "FileDescription" "EnClaws"
     & $rceditPath $enclawsExe --set-version-string "ProductName" "EnClaws"
     & $rceditPath $enclawsExe --set-icon (Join-Path $InstallerDir "assets\enclaws-icon.ico")
