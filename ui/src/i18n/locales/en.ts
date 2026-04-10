@@ -302,6 +302,13 @@ export const en: TranslationMap = {
     onboardingDisabled: "Disabled during onboarding",
     emptyTitle: "EnClaws AI Assistant Ready",
     emptySubtitle: "I'm EnClaws AI. What grand blueprints shall we build together?",
+    placeholder: "Message (↩ to send, Shift+↩ for line breaks, paste images)",
+    placeholderAttach: "Add a message or paste more images...",
+    placeholderDisconnected: "Connect to the gateway to start chatting…",
+    send: "Send",
+    queue: "Queue",
+    stop: "Stop",
+    newSession: "New session",
   },
   sessions: {
     title: "Sessions",

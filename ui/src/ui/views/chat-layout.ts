@@ -1039,7 +1039,6 @@ export class ChatLayout extends LitElement {
                 @abort=${() => this.props.onAbort?.()}
                 @new-session=${() => this.props.onNewSession()}
               ></chat-input-area>
-              <div class="chat-tagline">Works for you, grows with you</div>
             </div>
           </div>
 

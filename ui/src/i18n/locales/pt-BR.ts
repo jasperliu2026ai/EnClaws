@@ -298,6 +298,13 @@ export const pt_BR: TranslationMap = {
     onboardingDisabled: "Desativado durante a integração",
     emptyTitle: "EnClaws AI Assistente Pronto",
     emptySubtitle: "Sou o EnClaws AI. Que grandes projetos vamos construir juntos?",
+    placeholder: "Mensagem (↩ enviar, Shift+↩ nova linha, colar imagens)",
+    placeholderAttach: "Adicione uma mensagem ou cole mais imagens…",
+    placeholderDisconnected: "Conecte-se ao gateway para começar a conversar…",
+    send: "Enviar",
+    queue: "Fila",
+    stop: "Parar",
+    newSession: "Nova sessão",
   },
   sessions: {
     title: "Sessões",

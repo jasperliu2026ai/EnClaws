@@ -301,6 +301,13 @@ export const zh_CN: TranslationMap = {
     onboardingDisabled: "引导期间禁用",
     emptyTitle: "EnClaws AI 助手已就绪",
     emptySubtitle: "我是 EnClaws AI，你有什么伟大的蓝图需要我们构建吗？",
+    placeholder: "输入消息（↩ 发送，Shift+↩ 换行，可粘贴图片）",
+    placeholderAttach: "添加消息或粘贴更多图片…",
+    placeholderDisconnected: "连接网关后即可开始对话…",
+    send: "发送",
+    queue: "排队",
+    stop: "停止",
+    newSession: "新会话",
   },
   sessions: {
     title: "会话",

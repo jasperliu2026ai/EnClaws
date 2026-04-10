@@ -299,6 +299,13 @@ export const de: TranslationMap = {
     onboardingDisabled: "Während der Einrichtung deaktiviert",
     emptyTitle: "EnClaws AI Assistent bereit",
     emptySubtitle: "Ich bin EnClaws AI. Welche großartigen Pläne sollen wir gemeinsam umsetzen?",
+    placeholder: "Nachricht (↩ senden, Shift+↩ Zeilenumbruch, Bilder einfügen)",
+    placeholderAttach: "Nachricht hinzufügen oder weitere Bilder einfügen…",
+    placeholderDisconnected: "Verbinden Sie sich mit dem Gateway, um zu chatten…",
+    send: "Senden",
+    queue: "Warteschlange",
+    stop: "Stopp",
+    newSession: "Neue Sitzung",
   },
   sessions: {
     title: "Sitzungen",

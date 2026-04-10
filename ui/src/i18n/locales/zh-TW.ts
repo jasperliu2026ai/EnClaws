@@ -295,6 +295,13 @@ export const zh_TW: TranslationMap = {
     onboardingDisabled: "引導期間禁用",
     emptyTitle: "EnClaws AI 助手已就緒",
     emptySubtitle: "我是 EnClaws AI，你有什麼偉大的藍圖需要我們構建嗎？",
+    placeholder: "輸入訊息（↩ 傳送，Shift+↩ 換行，可貼上圖片）",
+    placeholderAttach: "新增訊息或貼上更多圖片…",
+    placeholderDisconnected: "連線至閘道器後即可開始對話…",
+    send: "傳送",
+    queue: "排隊",
+    stop: "停止",
+    newSession: "新會話",
   },
   sessions: {
     title: "會話",

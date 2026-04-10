@@ -391,6 +391,7 @@
 .btn.primary:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
+  color: #fff;
   box-shadow:
     var(--shadow-md),
     0 0 20px var(--accent-glow);
