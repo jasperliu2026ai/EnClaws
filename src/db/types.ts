@@ -77,12 +77,18 @@ export interface User {
   forceChangePassword: boolean;
   /** Timestamp of the last password change; used by Phase 2 expiry policy. */
   passwordChangedAt: Date | null;
+  /** Phase 3: encrypted TOTP secret (AES-256-GCM, same key as temp-password payload). */
+  mfaSecret: string | null;
+  /** Phase 3: whether MFA is enabled for this user. */
+  mfaEnabled: boolean;
+  /** Phase 3: JSON array of SHA-256 hashed backup codes. */
+  mfaBackupCodes: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-/** User object without password hash, safe to return from API. */
-export type SafeUser = Omit<User, "passwordHash">;
+/** User object without sensitive secrets, safe to return from API. */
+export type SafeUser = Omit<User, "passwordHash" | "mfaSecret" | "mfaBackupCodes">;
 
 export interface CreateUserInput {
   tenantId: string;

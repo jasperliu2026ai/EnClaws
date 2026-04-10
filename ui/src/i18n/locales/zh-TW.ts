@@ -851,6 +851,8 @@ export const zh_TW: TranslationMap = {
     errPasswordWeak: "密碼至少8位，需包含大小寫字母、數字和特殊字元",
     errSlugInvalid: "企業標識必須以字母或數字開頭和結尾，僅包含字母、數字和連字號",
     forgotPassword: "忘記密碼？",
+    pendingVerification: "請先驗證信箱後再登入",
+    rateLimited: "登入嘗試過於頻繁，請稍後重試",
   },
   auth: {
     common: {
@@ -924,6 +926,9 @@ export const zh_TW: TranslationMap = {
       changeNow: "立即修改",
       closeLabel: "關閉",
     },
+    sessions: { title: "活躍工作階段", subtitle: "以下是您目前登入的所有裝置。", noSessions: "沒有活躍工作階段。", currentDevice: "（本機）", revoke: "登出", revokeAllOthers: "登出其他所有裝置" },
+    verify: { pendingTitle: "請驗證信箱", pendingBody: "我們已向您的信箱寄送驗證郵件，請點擊連結以啟用帳戶。", resendBtn: "重新寄送驗證信", resent: "驗證信已重新寄出。", invalidLink: "驗證連結無效", doneTitle: "信箱驗證成功", doneBody: "您的信箱已驗證，現在可以登入了。", failedTitle: "驗證失敗" },
+    mfa: { setupTitle: "啟用兩步驟驗證", setupSubtitle: "兩步驟驗證為您的帳戶增加額外安全防護。", step1: "第 1 步：掃描 QR 碼", scanHint: "使用 Google Authenticator 或其他 TOTP 應用掃描以下 QR 碼。", manualHint: "無法掃描？手動輸入金鑰", step2: "第 2 步：儲存備用恢復碼", backupHint: "請將恢復碼儲存在安全的地方。", step3: "第 3 步：輸入驗證碼", codeLabel: "6 位驗證碼", invalidCode: "請輸入有效的驗證碼", verifyBtn: "驗證並啟用", enabledTitle: "兩步驟驗證已啟用", enabledBody: "您的帳戶已受兩步驟驗證保護。", challengeTitle: "兩步驟驗證", challengeSubtitle: "請輸入身分驗證器中的 6 位驗證碼。", backupCodeHint: "也可以輸入 8 位備用恢復碼。" },
   },
   models: {
     title: "模型管理",

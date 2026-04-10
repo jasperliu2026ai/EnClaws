@@ -55,6 +55,14 @@ export class LoginRateLimitedError extends Error {
   }
 }
 
+/** Thrown by login() when the server requires MFA (Phase 3). */
+export class LoginMfaRequiredError extends Error {
+  constructor(public readonly challengeToken: string) {
+    super("MFA required");
+    this.name = "LoginMfaRequiredError";
+  }
+}
+
 export interface AuthTenant {
   id: string;
   name: string;
@@ -354,6 +362,11 @@ export async function login(params: {
           ws.close();
           if (frame.ok && frame.payload) {
             const p = frame.payload;
+            // Phase 3: MFA required — server returns challengeToken instead of JWT
+            if (p.mfaRequired && p.mfaChallengeToken) {
+              reject(new LoginMfaRequiredError(p.mfaChallengeToken));
+              return;
+            }
             const auth: AuthState = {
               accessToken: p.accessToken,
               refreshToken: p.refreshToken,
@@ -550,9 +563,10 @@ export async function verifyForgotPassword(
   token: string,
   newPassword: string,
 ): Promise<void> {
+  const hashedNew = await hashPasswordForTransport(newPassword);
   const r = await callPublicRpc(gatewayUrl, "auth.forgotPassword.verify", {
     token,
-    newPassword,
+    newPassword: hashedNew,
   });
   if (!r.ok) throw new Error(r.errorMessage ?? "reset failed");
 }
@@ -575,7 +589,12 @@ export async function changePasswordAuthed(
   currentPassword: string,
   newPassword: string,
 ): Promise<void> {
-  await callAuthRpc("auth.changePassword", { currentPassword, newPassword });
+  const hashedCurrent = await hashPasswordForTransport(currentPassword);
+  const hashedNew = await hashPasswordForTransport(newPassword);
+  await callAuthRpc("auth.changePassword", {
+    currentPassword: hashedCurrent,
+    newPassword: hashedNew,
+  });
   // After a successful change, the server has revoked all refresh tokens.
   // Clear local auth so the user is forced through a fresh login.
   clearAuth();

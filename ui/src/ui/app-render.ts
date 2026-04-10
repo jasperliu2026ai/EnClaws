@@ -108,6 +108,7 @@ import "./views/platform-models.ts";
 import "./views/onboarding-wizard.ts";
 import "./views/auth-phase1.ts";
 import "./views/password-expiry-banner.ts";
+import "./views/auth-phase3.ts";
 import { isAuthenticated, loadAuth, clearAuth } from "./auth-store.ts";
 import { tenantRpc } from "./views/tenant/rpc.ts";
 import type { TenantAgentOption } from "./views/chat.ts";
@@ -361,6 +362,9 @@ export function renderApp(state: AppViewState) {
       if (hash.startsWith("#/auth/temp-password")) {
         return html`<enclaws-temp-password-view .gatewayUrl=${state.settings.gatewayUrl}></enclaws-temp-password-view>`;
       }
+      if (hash.startsWith("#/auth/verify-email")) {
+        return html`<enclaws-verify-email .gatewayUrl=${state.settings.gatewayUrl}></enclaws-verify-email>`;
+      }
     }
     return html`<enclaws-login
       .gatewayUrl=${state.settings.gatewayUrl}
@@ -397,10 +401,19 @@ export function renderApp(state: AppViewState) {
     return html`<enclaws-force-change-password></enclaws-force-change-password>`;
   }
 
-  // Phase 2: authenticated /change-password route (for the banner "立即修改" button
-  // and a voluntary user-initiated change)
+  // Phase 2: authenticated /change-password route
   if (typeof window !== "undefined" && (window.location.hash || "").startsWith("#/auth/change-password")) {
     return html`<enclaws-change-password></enclaws-change-password>`;
+  }
+  // Phase 3: authenticated session/security routes
+  if (typeof window !== "undefined") {
+    const authHash = window.location.hash || "";
+    if (authHash.startsWith("#/auth/sessions")) {
+      return html`<enclaws-sessions-list></enclaws-sessions-list>`;
+    }
+    if (authHash.startsWith("#/auth/mfa-setup")) {
+      return html`<enclaws-mfa-setup></enclaws-mfa-setup>`;
+    }
   }
 
   return html`

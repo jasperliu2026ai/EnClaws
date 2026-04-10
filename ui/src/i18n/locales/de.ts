@@ -855,6 +855,8 @@ export const de: TranslationMap = {
     errPasswordWeak: "Passwort muss mindestens 8 Zeichen lang sein und Gross-/Kleinbuchstaben, Zahlen und Sonderzeichen enthalten",
     errSlugInvalid: "Die Kennung muss mit einem Buchstaben oder einer Zahl beginnen und enden und darf nur Buchstaben, Zahlen und Bindestriche enthalten",
     forgotPassword: "Passwort vergessen?",
+    pendingVerification: "Bitte bestätigen Sie Ihre E-Mail vor der Anmeldung",
+    rateLimited: "Zu viele Anmeldeversuche, bitte versuchen Sie es später erneut",
   },
   auth: {
     common: {
@@ -928,6 +930,9 @@ export const de: TranslationMap = {
       changeNow: "Jetzt ändern",
       closeLabel: "Schließen",
     },
+    sessions: { title: "Aktive Sitzungen", subtitle: "Diese Geräte sind aktuell angemeldet.", noSessions: "Keine aktiven Sitzungen.", currentDevice: "(dieses Gerät)", revoke: "Abmelden", revokeAllOthers: "Alle anderen Geräte abmelden" },
+    verify: { pendingTitle: "E-Mail bestätigen", pendingBody: "Wir haben Ihnen eine Bestätigungsmail gesendet. Klicken Sie auf den Link, um Ihr Konto zu aktivieren.", resendBtn: "Bestätigungsmail erneut senden", resent: "Bestätigungsmail erneut gesendet.", invalidLink: "Ungültiger Bestätigungslink", doneTitle: "E-Mail bestätigt", doneBody: "Ihre E-Mail wurde bestätigt. Sie können sich jetzt anmelden.", failedTitle: "Bestätigung fehlgeschlagen" },
+    mfa: { setupTitle: "Zwei-Faktor-Authentifizierung aktivieren", setupSubtitle: "Zwei-Faktor-Authentifizierung erhöht die Sicherheit Ihres Kontos.", step1: "Schritt 1: QR-Code scannen", scanHint: "Verwenden Sie Google Authenticator oder eine andere TOTP-App.", manualHint: "QR-Code nicht scanbar? Schlüssel manuell eingeben", step2: "Schritt 2: Backup-Codes sichern", backupHint: "Bewahren Sie diese Codes sicher auf.", step3: "Schritt 3: Code eingeben", codeLabel: "6-stelliger Code", invalidCode: "Bitte geben Sie einen gültigen Code ein", verifyBtn: "Überprüfen und aktivieren", enabledTitle: "Zwei-Faktor-Authentifizierung aktiviert", enabledBody: "Ihr Konto ist jetzt durch 2FA geschützt.", challengeTitle: "Zwei-Faktor-Authentifizierung", challengeSubtitle: "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.", backupCodeHint: "Alternativ einen 8-stelligen Backup-Code eingeben." },
   },
   models: {
     title: "Modellverwaltung",

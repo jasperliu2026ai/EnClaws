@@ -11,8 +11,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadDotEnv } from "../infra/dotenv.js";
 import { initDb, closeDb, withTransaction, query, getDbType, DB_SQLITE } from "./index.js";
 import { getSqliteDb, sqliteQuery } from "./sqlite/index.js";
+
+// Load .env so that ENCLAWS_DB_URL is available when running standalone
+// (e.g. `pnpm db:migrate`).  The gateway gets this via run-main.ts, but
+// migrate.ts is its own entry point.
+loadDotEnv({ quiet: true });
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = path.join(__dirname, "migrations");

@@ -250,3 +250,82 @@ export async function sendPasswordResetEmail(opts: {
     return false;
   }
 }
+
+/**
+ * Send an email verification link.  Same transport + error semantics as
+ * sendPasswordResetEmail.
+ */
+export async function sendVerifyEmail(opts: {
+  to: string;
+  verifyUrl: string;
+  expiresInHours: number;
+}): Promise<boolean> {
+  const cfg = loadSmtpConfig();
+  if (!cfg) return false;
+
+  const safeUrl = escapeHtml(opts.verifyUrl);
+  const ttl = opts.expiresInHours;
+  const subject = "EnClaws — verify your email address";
+  const text = [
+    "Welcome to EnClaws!",
+    "",
+    "Please verify your email address by visiting the link below:",
+    "",
+    opts.verifyUrl,
+    "",
+    `This link expires in ${ttl} hours.`,
+    "If you did not create this account, you can safely ignore this email.",
+    "",
+    "— EnClaws",
+  ].join("\r\n");
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="margin:0;padding:0;background:#f6f6f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#222;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f6f6;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:520px;background:#fff;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;">
+        <tr><td style="padding:28px 32px 16px;">
+          <h2 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#111;">Verify your email</h2>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#444;">
+            Click the button below to verify your email address and activate your EnClaws account.
+          </p>
+          <p style="text-align:center;margin:24px 0;">
+            <a href="${safeUrl}" style="display:inline-block;padding:12px 28px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;">
+              Verify email
+            </a>
+          </p>
+          <p style="margin:0 0 12px;font-size:13px;color:#666;line-height:1.6;">
+            If the button doesn't work, copy this link into your browser:
+          </p>
+          <p style="margin:0 0 16px;font-size:12px;color:#3b82f6;word-break:break-all;">
+            <a href="${safeUrl}" style="color:#3b82f6;text-decoration:none;">${safeUrl}</a>
+          </p>
+          <p style="margin:16px 0 0;font-size:12px;color:#888;line-height:1.6;">
+            This link expires in <strong>${ttl} hours</strong>.<br>
+            If you didn't create this account, please ignore this email.
+          </p>
+        </td></tr>
+        <tr><td style="padding:16px 32px;background:#fafafa;border-top:1px solid #eee;font-size:11px;color:#999;">
+          — EnClaws
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const from = cfg.fromName ? `"${cfg.fromName}" <${cfg.from}>` : cfg.from;
+  try {
+    const transport = getTransport(cfg);
+    const info = await transport.sendMail({ from, to: opts.to, subject, text, html });
+    console.log(`[smtp] sent verify email to=${opts.to} messageId=${info.messageId ?? "?"}`);
+    return true;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[smtp] failed to send verify email to=${opts.to}: ${message}`);
+    return false;
+  }
+}

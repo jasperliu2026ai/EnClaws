@@ -116,6 +116,47 @@ After startup, the Gateway is available at `http://localhost:18888`.
   <img src="https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/docs/assets/dashboard-enclaws-placeholder.jpg" alt="EnClaws dashboard placeholder" width="92%" />
 </p>
 
+## Operations: Password Reset
+
+When an admin or user loses access and cannot self-service reset via the web UI, use one of the following methods.
+
+### Option 1: CLI command (recommended)
+
+```bash
+# Generate a temporary password for the given email; user must change it on next login
+pnpm admin:reset-password --email user@example.com
+
+# In multi-tenant setups where the same email exists across tenants, specify the tenant slug
+pnpm admin:reset-password --email user@example.com --tenant my-tenant
+```
+
+The temporary password is printed to stdout once. The user logs in with it and is immediately redirected to a forced password change page.
+
+### Option 2: Environment variable trigger (containerized / no CLI access)
+
+```bash
+# Resets all platform-admin account passwords on startup
+ENCLAWS_ADMIN_RESET=1 enclaws gateway
+```
+
+Temporary passwords are printed to stdout. Remove the environment variable before the next restart to avoid regenerating passwords on every boot.
+
+### Option 3: Self-service reset via email (requires SMTP)
+
+Configure email in `.env` to enable the "Forgot password?" link on the login page:
+
+```bash
+ENCLAWS_SMTP_HOST=smtp.example.com
+ENCLAWS_SMTP_PORT=465
+ENCLAWS_SMTP_SECURE=true
+ENCLAWS_SMTP_USER=noreply@example.com
+ENCLAWS_SMTP_PASS=your-smtp-password
+ENCLAWS_SMTP_FROM=noreply@example.com
+ENCLAWS_PUBLIC_BASE_URL=https://your-domain.com
+```
+
+> **Note:** Options 1 and 2 only apply to `platform-admin` and `owner` roles. Generated temporary passwords are displayed once and never persisted.
+
 ## Highlights
 
 - **One assistant, many concurrent tasks**  

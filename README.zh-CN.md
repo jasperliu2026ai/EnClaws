@@ -112,6 +112,47 @@ enclaws gateway
   <img src="https://raw.githubusercontent.com/hashSTACS-Global/EnClaws/main/docs/assets/dashboard-enclaws-placeholder.jpg" alt="EnClaws dashboard placeholder" width="92%" />
 </p>
 
+## 运维：密码重置
+
+当管理员或用户忘记密码且无法通过页面自助重置时，可通过以下方式恢复访问。
+
+### 方式一：CLI 命令（推荐）
+
+```bash
+# 为指定邮箱生成临时密码，用户登录后会被强制修改
+pnpm admin:reset-password --email user@example.com
+
+# 多租户环境下同一邮箱存在于多个租户时，需指定租户标识
+pnpm admin:reset-password --email user@example.com --tenant my-tenant
+```
+
+执行后终端会打印一次性临时密码，用户使用该密码登录后会进入强制改密页面。
+
+### 方式二：环境变量触发（容器化 / 无法执行 CLI 时）
+
+```bash
+# 启动时自动重置所有 platform-admin 账户的密码
+ENCLAWS_ADMIN_RESET=1 enclaws gateway
+```
+
+临时密码会打印到 stdout，启动后请立即移除该环境变量以避免每次重启都重新生成。
+
+### 方式三：页面自助重置（需配置 SMTP）
+
+在 `.env` 中配置邮件服务后，用户可在登录页点击「忘记密码」自助重置：
+
+```bash
+ENCLAWS_SMTP_HOST=smtp.example.com
+ENCLAWS_SMTP_PORT=465
+ENCLAWS_SMTP_SECURE=true
+ENCLAWS_SMTP_USER=noreply@example.com
+ENCLAWS_SMTP_PASS=your-smtp-password
+ENCLAWS_SMTP_FROM=noreply@example.com
+ENCLAWS_PUBLIC_BASE_URL=https://your-domain.com
+```
+
+> **注意：** 方式一和方式二仅适用于 `platform-admin` 和 `owner` 角色。生成的临时密码仅显示一次，不会被持久化存储。
+
 ## 核心亮点
 
 - **一个助手，同时处理多个并发任务**  

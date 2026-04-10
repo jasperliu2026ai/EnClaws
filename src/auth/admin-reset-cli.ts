@@ -12,11 +12,14 @@
  * `force_change_password = 1`, so the next login forces an immediate change.
  */
 
+import { loadDotEnv } from "../infra/dotenv.js";
 import { initDb, closeDb, isDbInitialized, query, getDbType, DB_SQLITE } from "../db/index.js";
 import { generateTempPassword } from "./password-policy.js";
 import { hashPassword } from "./password.js";
 import { revokeAllUserTokens } from "./jwt.js";
 import { createAuditLog } from "../db/models/audit-log.js";
+
+loadDotEnv({ quiet: true });
 
 interface CliArgs {
   email?: string;

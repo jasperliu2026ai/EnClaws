@@ -7,7 +7,7 @@
 
 import { html, css, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { login, register, LoginRateLimitedError, type AuthState } from "../auth-store.ts";
+import { login, register, LoginRateLimitedError, LoginMfaRequiredError, type AuthState } from "../auth-store.ts";
 import { loadSettings, saveSettings } from "../storage.ts";
 import { t, i18n, I18nController, SUPPORTED_LOCALES } from "../../i18n/index.ts";
 import type { Locale } from "../../i18n/index.ts";
@@ -305,6 +305,8 @@ export class EnClawsLogin extends LitElement {
   /** Countdown (seconds) when login is rate-limited; 0 = no countdown active. */
   @state() private rateLimitCountdown = 0;
   private rateLimitTimer: ReturnType<typeof setInterval> | null = null;
+  /** Phase 3: when MFA is required, store the challenge token to render the MFA view. */
+  @state() private mfaChallengeToken = "";
 
   // Login fields
   @state() private email = "";
@@ -337,9 +339,11 @@ export class EnClawsLogin extends LitElement {
 
   /** Map raw server error to i18n at render time so language switches take effect. */
   private translateServerError(raw: string): string {
+    if (raw === "__rate_limited__") return t("login.rateLimited");
     if (raw.includes("Invalid credentials")) return t("login.invalidCredentials");
     if (raw.includes("slug already in use")) return t("login.slugAlreadyInUse");
     if (raw.includes("已注册") || raw.includes("already registered") || raw.includes("duplicate key") || raw.includes("unique constraint")) return t("login.emailAlreadyRegistered");
+    if (raw.includes("verify your email") || raw.includes("pendingVerification")) return t("login.pendingVerification");
     return raw;
   }
 
@@ -464,7 +468,13 @@ export class EnClawsLogin extends LitElement {
     } catch (err) {
       if (err instanceof LoginRateLimitedError) {
         this.startRateLimitCountdown(err.retryAfterMs);
-        this.serverError = err.message;
+        // Show a short translated message instead of the server's raw
+        // Chinese countdown string — the live countdown on the button
+        // already indicates the remaining wait time.
+        this.serverError = "__rate_limited__";
+      } else if (err instanceof LoginMfaRequiredError) {
+        // Phase 3: password verified, MFA required — show the challenge view
+        this.mfaChallengeToken = err.challengeToken;
       } else {
         this.serverError = err instanceof Error ? err.message : t("login.loginFailed");
       }
@@ -537,6 +547,15 @@ export class EnClawsLogin extends LitElement {
   }
 
   render() {
+    // Phase 3: if MFA challenge is active, render the challenge view
+    // instead of the login form.
+    if (this.mfaChallengeToken) {
+      return html`<enclaws-mfa-challenge
+        .gatewayUrl=${this.resolveGatewayUrl()}
+        .challengeToken=${this.mfaChallengeToken}
+      ></enclaws-mfa-challenge>`;
+    }
+
     return html`
       <div class="top-toolbar">
         <div class="lang-switcher">

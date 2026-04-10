@@ -86,6 +86,30 @@ export function isWeakPassword(password: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Pre-hashed password detection
+// ---------------------------------------------------------------------------
+
+/**
+ * The frontend may SHA-256 hash the password before sending it over the
+ * wire (see `hashPasswordForTransport` in auth-store.ts).  The resulting
+ * value is a 64-character lowercase hex string.  When we detect this
+ * format, we skip server-side strength validation — the client already
+ * validated the plaintext before hashing.
+ *
+ * This is safe because:
+ *   1. The frontend runs `clientValidatePasswordKey()` before hashing.
+ *   2. A 64-char hex string has ~256 bits of entropy, so it's never
+ *      weak itself — the weakness check is about the original plaintext.
+ *   3. Non-browser clients that don't pre-hash still get server-side
+ *      validation (their password won't match the 64-hex-char pattern).
+ */
+const SHA256_HEX_RE = /^[0-9a-f]{64}$/;
+
+export function isPreHashedPassword(password: string): boolean {
+  return SHA256_HEX_RE.test(password);
+}
+
+// ---------------------------------------------------------------------------
 // Validation
 // ---------------------------------------------------------------------------
 
@@ -137,6 +161,11 @@ export function validatePasswordStrength(
   password: string,
   email?: string | null,
 ): PasswordValidationResult {
+  // If the frontend pre-hashed with SHA-256, skip server-side policy
+  // (the client already validated the plaintext before hashing).
+  if (isPreHashedPassword(password)) {
+    return { ok: true };
+  }
   if (!password || password.length < PASSWORD_MIN_LENGTH) {
     return {
       ok: false,

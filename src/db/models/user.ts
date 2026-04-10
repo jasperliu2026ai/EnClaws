@@ -39,13 +39,16 @@ function rowToUser(row: Record<string, unknown>): User {
     settings: (row.settings ?? {}) as User["settings"],
     forceChangePassword: Number(row.force_change_password ?? 0) === 1,
     passwordChangedAt: (row.password_changed_at as Date) ?? null,
+    mfaSecret: (row.mfa_secret as string) ?? null,
+    mfaEnabled: Number(row.mfa_enabled ?? 0) === 1,
+    mfaBackupCodes: (row.mfa_backup_codes as string) ?? null,
     createdAt: row.created_at as Date,
     updatedAt: row.updated_at as Date,
   };
 }
 
 export function toSafeUser(user: User): SafeUser {
-  const { passwordHash: _, ...safe } = user;
+  const { passwordHash: _, mfaSecret: _s, mfaBackupCodes: _b, ...safe } = user;
   return safe;
 }
 

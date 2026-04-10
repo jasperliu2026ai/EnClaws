@@ -854,6 +854,8 @@ export const pt_BR: TranslationMap = {
     errPasswordWeak: "A senha deve ter pelo menos 8 caracteres e incluir maiusculas, minusculas, numeros e caracteres especiais",
     errSlugInvalid: "O identificador deve comecar e terminar com uma letra ou numero, e conter apenas letras, numeros e hifens",
     forgotPassword: "Esqueceu a senha?",
+    pendingVerification: "Verifique seu email antes de entrar",
+    rateLimited: "Muitas tentativas de login, tente novamente mais tarde",
   },
   auth: {
     common: {
@@ -927,6 +929,9 @@ export const pt_BR: TranslationMap = {
       changeNow: "Alterar agora",
       closeLabel: "Fechar",
     },
+    sessions: { title: "Sessoes ativas", subtitle: "Estes sao os dispositivos conectados a sua conta.", noSessions: "Nenhuma sessao ativa.", currentDevice: "(este dispositivo)", revoke: "Sair", revokeAllOthers: "Sair de todos os outros dispositivos" },
+    verify: { pendingTitle: "Verifique seu email", pendingBody: "Enviamos um email de verificacao. Clique no link para ativar sua conta.", resendBtn: "Reenviar email de verificacao", resent: "Email de verificacao reenviado.", invalidLink: "Link de verificacao invalido", doneTitle: "Email verificado", doneBody: "Seu email foi verificado. Agora voce pode entrar.", failedTitle: "Verificacao falhou" },
+    mfa: { setupTitle: "Ativar autenticacao em duas etapas", setupSubtitle: "A autenticacao em duas etapas adiciona seguranca extra a sua conta.", step1: "Passo 1: Escaneie o QR code", scanHint: "Use o Google Authenticator ou outro app TOTP.", manualHint: "Nao consegue escanear? Insira a chave manualmente", step2: "Passo 2: Salve os codigos de backup", backupHint: "Guarde esses codigos em um local seguro.", step3: "Passo 3: Insira o codigo de verificacao", codeLabel: "Codigo de 6 digitos", invalidCode: "Insira um codigo valido", verifyBtn: "Verificar e ativar", enabledTitle: "Autenticacao em duas etapas ativada", enabledBody: "Sua conta agora esta protegida por 2FA.", challengeTitle: "Autenticacao em duas etapas", challengeSubtitle: "Insira o codigo de 6 digitos do seu app autenticador.", backupCodeHint: "Voce tambem pode inserir um codigo de backup de 8 caracteres." },
   },
   models: {
     title: "Gerenciamento de Modelos",

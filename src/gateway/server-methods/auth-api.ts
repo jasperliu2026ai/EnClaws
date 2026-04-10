@@ -13,6 +13,15 @@
  *   auth.forgotPassword.verify - Consume a reset token + set new password
  *   auth.adminResetPassword    - platform-admin reset for an owner (one-time link)
  *   auth.viewTempPassword      - One-time view of an admin-issued temp password
+ *   auth.sessions              - List active sessions
+ *   auth.revokeSession         - Revoke a single session
+ *   auth.revokeAllOtherSessions - Revoke all sessions except current
+ *   auth.verifyEmail           - Consume email verification token
+ *   auth.resendVerifyEmail     - Resend email verification
+ *   auth.mfa.setup.begin       - Start MFA setup (returns QR + backup codes)
+ *   auth.mfa.setup.verify      - Verify first TOTP code to complete setup
+ *   auth.mfa.disable           - Disable MFA
+ *   auth.mfa.verify            - Second factor during login
  */
 
 import type { GatewayRequestHandlers, GatewayRequestHandlerOptions } from "./types.js";
@@ -51,7 +60,31 @@ import {
 import {
   hasEmailCapability,
   sendPasswordResetEmail,
+  sendVerifyEmail,
 } from "../../auth/smtp-capability.js";
+import {
+  listUserSessions,
+  revokeSession as revokeSessionById,
+  revokeOtherSessions,
+  touchSession,
+} from "../../auth/sessions.js";
+import { parseUserAgent } from "../../auth/user-agent-parser.js";
+import {
+  isEmailVerificationRequired,
+  issueVerifyEmailToken,
+  consumeVerifyEmailToken,
+  shouldThrottleResend,
+  noteResendIssued,
+} from "../../auth/email-verification.js";
+import {
+  beginMfaSetup,
+  completeMfaSetup,
+  disableMfa,
+  verifyUserTotp,
+  tryBackupCode,
+  issueMfaChallenge,
+  consumeMfaChallenge,
+} from "../../auth/mfa.js";
 import {
   issueResetToken,
   issueViewTempToken,
@@ -183,7 +216,40 @@ export const authHandlers: GatewayRequestHandlers = {
         role: "owner",
       }, { skipDirInit: true });
 
-      // Generate tokens
+      // Phase 3: if email verification is required AND SMTP is available,
+      // set the user to 'invited' status and send a verification email
+      // instead of issuing tokens immediately.
+      const requireVerify = isEmailVerificationRequired() && hasEmailCapability();
+      if (requireVerify) {
+        // Set status to 'invited' (pending verification)
+        const { query: dbQuery, getDbType: gdt, DB_SQLITE: sq } = await import("../../db/index.js");
+        const nowExpr = gdt() === sq ? "datetime('now')" : "NOW()";
+        await dbQuery(
+          `UPDATE users SET status = 'invited', updated_at = ${nowExpr} WHERE id = $1`,
+          [user.id],
+        );
+        const issued = await issueVerifyEmailToken(user.id, 24 * 60);
+        const baseUrl = process.env.ENCLAWS_PUBLIC_BASE_URL ?? "";
+        const verifyUrl = `${baseUrl.replace(/\/$/, "")}/#/auth/verify-email?token=${encodeURIComponent(issued.token)}`;
+        await sendVerifyEmail({ to: email, verifyUrl, expiresInHours: 24 }).catch(() => undefined);
+
+        await createAuditLog({
+          tenantId: tenant.id,
+          userId: user.id,
+          action: "tenant.register",
+          resource: `tenant:${tenant.slug}`,
+          detail: { pendingVerification: true },
+        });
+
+        respond(true, {
+          tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug },
+          user: { id: user.id, email: user.email, role: user.role, displayName: user.displayName },
+          pendingVerification: true,
+        });
+        return;
+      }
+
+      // Normal path: generate tokens immediately
       const payload: JwtPayload = {
         sub: user.id,
         tid: tenant.id,
@@ -237,7 +303,10 @@ export const authHandlers: GatewayRequestHandlers = {
       return;
     }
 
-    const clientIp = client?.clientIp;
+    // Prefer rawClientIp (always populated, even for loopback) over
+    // clientIp (undefined for localhost) so rate limiting and audit
+    // logging work correctly during local development.
+    const clientIp = (client as unknown as { rawClientIp?: string })?.rawClientIp ?? client?.clientIp;
 
     // Phase 1 RPC-layer rate limit: compound (ip+email) sliding window
     // + exponential backoff. Returns 429 with retryAfterMs when blocked.
@@ -274,9 +343,20 @@ export const authHandlers: GatewayRequestHandlers = {
       user = await findUserByEmail(email);
     }
 
+    // Phase 3: handle pending email verification separately so the
+    // frontend can show the "verify your email first" page.
+    if (user && user.status === "invited" && isEmailVerificationRequired()) {
+      respond(false, undefined, errorShape(
+        ErrorCodes.INVALID_REQUEST,
+        "Please verify your email address before signing in",
+        { details: { pendingVerification: true, email: user.email } } as unknown as { retryAfterMs?: number },
+      ));
+      return;
+    }
+
     if (!user || user.status !== "active") {
       const after = loginRateLimiter.recordFailure(clientIp, email);
-      // Phase 2: persist failure row (no user_id because we can't identify the user)
+      // Phase 2: persist failure row
       void recordLoginAttempt({
         ip: clientIp ?? "unknown",
         email,
@@ -368,7 +448,39 @@ export const authHandlers: GatewayRequestHandlers = {
       payload.tslug = tenant.slug;
     }
 
-    const tokens = await generateTokenPair(payload);
+    // Phase 3: MFA two-phase flow — if user has MFA enabled, return a
+    // short-lived challenge token instead of real JWT tokens.  The
+    // client must call auth.mfa.verify with this token + a TOTP code.
+    if (user.mfaEnabled && !mustChangePassword) {
+      const challengeToken = issueMfaChallenge({
+        userId: user.id,
+        tenantId: user.tenantId,
+        email: user.email,
+        role: user.role,
+        tslug: payload.tslug,
+      });
+      await createAuditLog({
+        tenantId: user.tenantId,
+        userId: user.id,
+        action: "user.login.mfa_required",
+      });
+      respond(true, {
+        mfaRequired: true,
+        mfaChallengeToken: challengeToken,
+      });
+      return;
+    }
+
+    // Phase 3: capture device info for the sessions UI
+    const uaHeader = (client as unknown as { userAgent?: string })?.userAgent ?? null;
+    const uaParsed = parseUserAgent(uaHeader);
+    const deviceInfo = {
+      ip: clientIp,
+      userAgent: uaHeader,
+      label: uaParsed.label,
+    };
+
+    const tokens = await generateTokenPair(payload, deviceInfo);
 
     await createAuditLog({
       tenantId: user.tenantId,
@@ -384,6 +496,7 @@ export const authHandlers: GatewayRequestHandlers = {
         displayName: user.displayName,
         tenantId: user.tenantId,
         forceChangePassword: mustChangePassword,
+        mfaEnabled: user.mfaEnabled,
       },
       pwExp: pwExp ?? undefined,
       ...tokens,
@@ -428,6 +541,10 @@ export const authHandlers: GatewayRequestHandlers = {
       role: user.role,
       tslug: tenant?.slug ?? "",
     };
+    // Phase 3: bump last_used_at on the old session so the sessions UI
+    // tracks recency even across access-token refreshes.
+    void touchSession(refreshToken);
+
     const tokens = await generateTokenPair(payload);
 
     respond(true, tokens);
@@ -583,7 +700,7 @@ export const authHandlers: GatewayRequestHandlers = {
    * Public + IP-rate-limited (reuses login limiter under a synthetic email).
    */
   "auth.capabilities": async ({ client, respond }: GatewayRequestHandlerOptions) => {
-    const clientIp = client?.clientIp;
+    const clientIp = (client as unknown as { rawClientIp?: string })?.rawClientIp ?? client?.clientIp;
     const gate = loginRateLimiter.check(clientIp, "__capabilities__");
     if (!gate.allowed) {
       respond(false, undefined, errorShape(
@@ -636,17 +753,22 @@ export const authHandlers: GatewayRequestHandlers = {
       user && user.status === "active" &&
       (user.role === "platform-admin" || user.role === "owner");
 
+    console.log(`[auth.forgotPassword] email=${email} userFound=${!!user} role=${user?.role ?? "n/a"} status=${user?.status ?? "n/a"} eligible=${!!eligible}`);
+
     if (eligible && user) {
       const issued = await issueResetToken(user.id, 30);
       const baseUrl = process.env.ENCLAWS_PUBLIC_BASE_URL ?? "";
       const resetUrl = `${baseUrl.replace(/\/$/, "")}/#/auth/reset-password?token=${encodeURIComponent(issued.token)}`;
-      await sendPasswordResetEmail({
+      console.log(`[auth.forgotPassword] issuing reset token for userId=${user.id} to=${user.email ?? email} url=${resetUrl}`);
+      const sent = await sendPasswordResetEmail({
         to: user.email ?? email,
         resetUrl,
         expiresInMinutes: 30,
       }).catch((err) => {
         console.error("[auth.forgotPassword] sendPasswordResetEmail failed:", err);
+        return false;
       });
+      console.log(`[auth.forgotPassword] sendPasswordResetEmail result=${sent}`);
       noteForgotIssued(email);
       await createAuditLog({
         tenantId: user.tenantId,
@@ -654,6 +776,8 @@ export const authHandlers: GatewayRequestHandlers = {
         action: "user.password.reset.requested",
         ipAddress: client?.clientIp,
       }).catch(() => undefined);
+    } else {
+      console.log(`[auth.forgotPassword] skipped — user not eligible for reset (not found or not owner/platform-admin)`);
     }
 
     respond(true, { ok: true, email: true });
@@ -833,5 +957,192 @@ export const authHandlers: GatewayRequestHandlers = {
     await consumeResetToken(found.id);
 
     respond(true, { tempPassword });
+  },
+
+  // ==========================================================================
+  // Phase 3 — Session management
+  // ==========================================================================
+
+  "auth.sessions": async ({ params, client, respond }: GatewayRequestHandlerOptions) => {
+    if (!requireDb(respond)) return;
+    const ctx = (client as unknown as { tenant?: TenantContext })?.tenant;
+    if (!ctx) { respond(false, undefined, errorShape(ErrorCodes.UNAUTHORIZED, "Not authenticated")); return; }
+    const { currentRefreshToken } = (params ?? {}) as { currentRefreshToken?: string };
+    const sessions = await listUserSessions(ctx.userId, currentRefreshToken);
+    respond(true, { sessions });
+  },
+
+  "auth.revokeSession": async ({ params, client, respond }: GatewayRequestHandlerOptions) => {
+    if (!requireDb(respond)) return;
+    const ctx = (client as unknown as { tenant?: TenantContext })?.tenant;
+    if (!ctx) { respond(false, undefined, errorShape(ErrorCodes.UNAUTHORIZED, "Not authenticated")); return; }
+    const { sessionId } = params as { sessionId: string };
+    if (!sessionId) { respond(false, undefined, errorShape(ErrorCodes.INVALID_PARAMS, "Missing sessionId")); return; }
+    const ok = await revokeSessionById(ctx.userId, sessionId);
+    if (!ok) { respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "Session not found")); return; }
+    await createAuditLog({ tenantId: ctx.tenantId, userId: ctx.userId, action: "user.session.revoked", detail: { sessionId } }).catch(() => undefined);
+    respond(true, { ok: true });
+  },
+
+  "auth.revokeAllOtherSessions": async ({ params, client, respond }: GatewayRequestHandlerOptions) => {
+    if (!requireDb(respond)) return;
+    const ctx = (client as unknown as { tenant?: TenantContext })?.tenant;
+    if (!ctx) { respond(false, undefined, errorShape(ErrorCodes.UNAUTHORIZED, "Not authenticated")); return; }
+    const { currentRefreshToken } = params as { currentRefreshToken: string };
+    if (!currentRefreshToken) { respond(false, undefined, errorShape(ErrorCodes.INVALID_PARAMS, "Missing currentRefreshToken")); return; }
+    const count = await revokeOtherSessions(ctx.userId, currentRefreshToken);
+    await createAuditLog({ tenantId: ctx.tenantId, userId: ctx.userId, action: "user.sessions.revoked_others", detail: { count } }).catch(() => undefined);
+    respond(true, { revoked: count });
+  },
+
+  // ==========================================================================
+  // Phase 3 — Email verification
+  // ==========================================================================
+
+  "auth.verifyEmail": async ({ params, respond }: GatewayRequestHandlerOptions) => {
+    if (!requireDb(respond)) return;
+    const { token } = params as { token: string };
+    if (!token) { respond(false, undefined, errorShape(ErrorCodes.INVALID_PARAMS, "Missing token")); return; }
+    const userId = await consumeVerifyEmailToken(token);
+    if (!userId) { respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "Invalid or expired verification link")); return; }
+    // Activate the user
+    const { query: dbQuery, getDbType: gdt, DB_SQLITE: sq } = await import("../../db/index.js");
+    const nowExpr = gdt() === sq ? "datetime('now')" : "NOW()";
+    await dbQuery(`UPDATE users SET status = 'active', updated_at = ${nowExpr} WHERE id = $1 AND status = 'invited'`, [userId]);
+    respond(true, { ok: true });
+  },
+
+  "auth.resendVerifyEmail": async ({ params, client, respond }: GatewayRequestHandlerOptions) => {
+    if (!requireDb(respond)) return;
+    const { email } = params as { email: string };
+    if (!email) { respond(false, undefined, errorShape(ErrorCodes.INVALID_PARAMS, "Missing email")); return; }
+    if (!hasEmailCapability()) { respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "Email not configured")); return; }
+    if (shouldThrottleResend(email)) { respond(true, { ok: true }); return; }
+    const user = await findUserByEmail(email);
+    if (user && user.status === "invited") {
+      const issued = await issueVerifyEmailToken(user.id, 24 * 60);
+      const baseUrl = process.env.ENCLAWS_PUBLIC_BASE_URL ?? "";
+      const verifyUrl = `${baseUrl.replace(/\/$/, "")}/#/auth/verify-email?token=${encodeURIComponent(issued.token)}`;
+      await sendVerifyEmail({ to: email, verifyUrl, expiresInHours: 24 }).catch(() => undefined);
+      noteResendIssued(email);
+    }
+    // Always respond ok to prevent enumeration
+    respond(true, { ok: true });
+  },
+
+  // ==========================================================================
+  // Phase 3 — MFA (TOTP)
+  // ==========================================================================
+
+  "auth.mfa.setup.begin": async ({ client, respond }: GatewayRequestHandlerOptions) => {
+    if (!requireDb(respond)) return;
+    const ctx = (client as unknown as { tenant?: TenantContext })?.tenant;
+    if (!ctx) { respond(false, undefined, errorShape(ErrorCodes.UNAUTHORIZED, "Not authenticated")); return; }
+    const user = await getUserById(ctx.userId);
+    if (!user) { respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "User not found")); return; }
+    if (user.mfaEnabled) { respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "MFA is already enabled")); return; }
+    const result = beginMfaSetup(user.email ?? ctx.userId);
+    respond(true, result);
+  },
+
+  "auth.mfa.setup.verify": async ({ params, client, respond }: GatewayRequestHandlerOptions) => {
+    if (!requireDb(respond)) return;
+    const ctx = (client as unknown as { tenant?: TenantContext })?.tenant;
+    if (!ctx) { respond(false, undefined, errorShape(ErrorCodes.UNAUTHORIZED, "Not authenticated")); return; }
+    const { secret, code, backupCodes } = params as { secret: string; code: string; backupCodes: string[] };
+    if (!secret || !code || !Array.isArray(backupCodes)) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_PARAMS, "Missing secret, code, or backupCodes"));
+      return;
+    }
+    // Verify the TOTP code against the secret to prove the user scanned the QR
+    const { verifyTOTP } = await import("../../auth/mfa-totp.js");
+    if (!verifyTOTP(secret, code)) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "Invalid TOTP code"));
+      return;
+    }
+    await completeMfaSetup(ctx.userId, secret, backupCodes);
+    await createAuditLog({ tenantId: ctx.tenantId, userId: ctx.userId, action: "user.mfa.enabled" }).catch(() => undefined);
+    respond(true, { ok: true });
+  },
+
+  "auth.mfa.disable": async ({ params, client, respond }: GatewayRequestHandlerOptions) => {
+    if (!requireDb(respond)) return;
+    const ctx = (client as unknown as { tenant?: TenantContext })?.tenant;
+    if (!ctx) { respond(false, undefined, errorShape(ErrorCodes.UNAUTHORIZED, "Not authenticated")); return; }
+    const { currentPassword } = params as { currentPassword: string };
+    if (!currentPassword) { respond(false, undefined, errorShape(ErrorCodes.INVALID_PARAMS, "Missing currentPassword")); return; }
+    const user = await getUserById(ctx.userId);
+    if (!user || !user.passwordHash) { respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "User not found")); return; }
+    if (!(await verifyPassword(currentPassword, user.passwordHash))) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "Wrong password")); return;
+    }
+    await disableMfa(ctx.userId);
+    await createAuditLog({ tenantId: ctx.tenantId, userId: ctx.userId, action: "user.mfa.disabled" }).catch(() => undefined);
+    respond(true, { ok: true });
+  },
+
+  "auth.mfa.verify": async ({ params, client, respond }: GatewayRequestHandlerOptions) => {
+    if (!requireDb(respond)) return;
+    const { challengeToken, code } = params as { challengeToken: string; code: string };
+    if (!challengeToken || !code) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_PARAMS, "Missing challengeToken or code"));
+      return;
+    }
+    const challenge = consumeMfaChallenge(challengeToken);
+    if (!challenge) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "MFA challenge expired or invalid"));
+      return;
+    }
+    const user = await getUserById(challenge.userId);
+    if (!user) { respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "User not found")); return; }
+
+    // Try TOTP code first, then backup code
+    let ok = verifyUserTotp(user, code);
+    if (!ok) {
+      ok = await tryBackupCode(user.id, user.mfaBackupCodes, code);
+    }
+    if (!ok) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "Invalid MFA code"));
+      return;
+    }
+
+    // MFA passed — issue real tokens
+    const payload: JwtPayload = {
+      sub: user.id,
+      tid: challenge.tenantId,
+      email: user.email,
+      role: user.role,
+      tslug: challenge.tslug,
+    };
+    const pwExp = computePasswordExpiresAt(user.passwordChangedAt);
+    if (pwExp !== null) payload.pwExp = pwExp;
+
+    const clientIp = (client as unknown as { rawClientIp?: string })?.rawClientIp ?? client?.clientIp;
+    const uaParsed = parseUserAgent(null);
+    const tokens = await generateTokenPair(payload, {
+      ip: clientIp,
+      userAgent: null,
+      label: uaParsed.label,
+    });
+
+    await createAuditLog({
+      tenantId: challenge.tenantId,
+      userId: user.id,
+      action: "user.login.mfa_verified",
+    });
+
+    respond(true, {
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        displayName: user.displayName,
+        tenantId: challenge.tenantId,
+        forceChangePassword: user.forceChangePassword,
+        mfaEnabled: true,
+      },
+      pwExp: pwExp ?? undefined,
+      ...tokens,
+    });
   },
 };
