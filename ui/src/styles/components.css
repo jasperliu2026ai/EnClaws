@@ -1595,6 +1595,18 @@
   margin-top: 0.2rem;
 }
 
+.session-card__meta {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #a3a3a3);
+  margin-top: 0.35rem;
+}
+
+.session-card__meta span {
+  white-space: nowrap;
+}
+
 .session-card__badges {
   display: flex;
   gap: 0.5rem;

@@ -296,11 +296,13 @@ function renderRow(
             }}>${truncatedKey}</a>` : html`<span class="session-card__key" title=${row.key}>${truncatedKey}</span>`}
           </div>
           ${showDisplayName ? html`<div class="session-card__display-name">${displayName}</div>` : nothing}
+          <div class="session-card__meta">
+            <span>${kindLabel}</span>
+            ${tokens ? html`<span>${tokens}</span>` : nothing}
+            <span>${updated}</span>
+          </div>
         </div>
         <div class="session-card__badges">
-          <span class="badge badge-rounds">${kindLabel}</span>
-          ${tokens ? html`<span class="badge badge-tokens">${tokens}</span>` : nothing}
-          <span class="badge badge-time">${updated}</span>
           ${modelDisplay ? html`<span class="badge badge-platform">${modelDisplay}</span>` : nothing}
         </div>
       </div>
