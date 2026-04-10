@@ -10,6 +10,7 @@ import { customElement, state, property } from "lit/decorators.js";
 import { t, i18n, I18nController } from "../../../i18n/index.ts";
 import { tenantRpc } from "./rpc.ts";
 import "../../components/date-picker.ts";
+import { caretFix } from "../../shared-styles.ts";
 
 interface TurnSummary {
   turnId: string;
@@ -53,7 +54,7 @@ interface InteractionTrace {
 export class TenantTracesView extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block; padding: 1.5rem; color: var(--text, #e5e5e5);
       font-family: var(--font-sans, system-ui, sans-serif);
@@ -220,7 +221,7 @@ export class TenantTracesView extends LitElement {
       display: flex; justify-content: center; align-items: center; gap: 0.75rem;
       margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary, #a3a3a3);
     }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
 

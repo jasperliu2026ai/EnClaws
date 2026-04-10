@@ -9,6 +9,7 @@ import { customElement, state, property } from "lit/decorators.js";
 import { t, i18n, I18nController } from "../../../i18n/index.ts";
 import { loadAuth, hashPasswordForTransport } from "../../auth-store.ts";
 import { tenantRpc } from "./rpc.ts";
+import { caretFix } from "../../shared-styles.ts";
 
 interface TenantUser {
   id: string;
@@ -24,7 +25,7 @@ interface TenantUser {
 export class TenantUsersView extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block;
       padding: 1.5rem;
@@ -167,7 +168,7 @@ export class TenantUsersView extends LitElement {
       font-size: 0.85rem;
     }
     .loading { text-align: center; padding: 2rem; color: var(--text-muted, #525252); }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
   @state() private users: TenantUser[] = [];

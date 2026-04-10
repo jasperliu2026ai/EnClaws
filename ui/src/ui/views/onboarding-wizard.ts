@@ -11,6 +11,7 @@ import { t, I18nController } from "../../i18n/index.ts";
 import { tenantRpc } from "./tenant/rpc.ts";
 import { PROVIDER_TYPES } from "../../constants/providers.ts";
 import { CHANNEL_TYPES, CHANNEL_ICON_MAP } from "../../constants/channels.ts";
+import { caretFix } from "../shared-styles.ts";
 
 type WizardStep = "welcome" | "channel" | "model" | "agent" | "done";
 
@@ -34,7 +35,7 @@ const MODEL_PROVIDERS = PROVIDER_TYPES.map((p) => ({
 export class OnboardingWizard extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block;
       position: fixed;
@@ -349,7 +350,7 @@ export class OnboardingWizard extends LitElement {
       justify-content: center;
       gap: 0.75rem;
     }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
   @state() private step: WizardStep = "welcome";

@@ -3,6 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { icons } from "../icons.ts";
 import { detectTextDirection } from "../text-direction.ts";
 import type { ChatAttachment } from "../ui-types.ts";
+import { caretFix } from "../shared-styles.ts";
 
 @customElement("chat-input-area")
 export class ChatInputArea extends LitElement {
@@ -13,7 +14,7 @@ export class ChatInputArea extends LitElement {
   @property({ type: Array }) attachments: ChatAttachment[] = [];
   @property({ type: String }) disabledHint = "";
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block;
       position: relative;
@@ -170,7 +171,7 @@ export class ChatInputArea extends LitElement {
       background: rgba(0, 0, 0, 0.05);
       border-radius: 4px;
     }
-  `;
+  `];
 
   private generateAttachmentId(): string {
     return `att-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;

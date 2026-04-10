@@ -2,6 +2,7 @@ import { html, css, LitElement, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { t, I18nController } from "../../i18n/index.ts";
 import { tenantRpc } from "./tenant/rpc.ts";
+import { caretFix } from "../shared-styles.ts";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -74,7 +75,7 @@ export class PlatformToolsView extends LitElement {
   @state() private catalogGroups: ToolGroup[] | null = null;
   @state() private error = "";
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block;
       font-family: var(--font-sans, system-ui, sans-serif);
@@ -209,7 +210,7 @@ export class PlatformToolsView extends LitElement {
       background: var(--bg-destructive, #7f1d1d); color: var(--text-destructive, #fca5a5);
       border-radius: var(--radius-md, 6px); font-size: 13px;
     }
-  `;
+  `];
 
   connectedCallback() {
     super.connectedCallback();

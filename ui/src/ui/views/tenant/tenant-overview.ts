@@ -16,6 +16,7 @@ import { t, I18nController } from "../../../i18n/index.ts";
 import { tenantRpc } from "./rpc.ts";
 import { CHANNEL_ICON_MAP } from "../../../constants/channels.ts";
 import * as echarts from "echarts";
+import { caretFix } from "../../shared-styles.ts";
 
 // ── Types ──
 
@@ -43,7 +44,7 @@ interface RecentTrace { agentName: string; userName: string; model: string; toke
 export class TenantOverviewView extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block; padding: 1.5rem;
       color: var(--text, #e5e5e5);
@@ -148,7 +149,7 @@ export class TenantOverviewView extends LitElement {
 
     .empty { text-align: center; padding: 2rem; color: var(--text-muted, #525252); font-size: 0.8rem; }
     .loading { text-align: center; padding: 3rem; color: var(--text-muted, #525252); }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
 

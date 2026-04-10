@@ -12,6 +12,7 @@ import { PROVIDER_TYPES as SHARED_PROVIDERS, API_PROTOCOLS as SHARED_PROTOCOLS }
 import { t } from "../../../i18n/index.ts";
 import { I18nController } from "../../../i18n/lib/lit-controller.ts";
 import { showConfirm } from "../../components/confirm-dialog.ts";
+import { caretFix } from "../../shared-styles.ts";
 
 interface ModelDefinition {
   id: string;
@@ -44,7 +45,7 @@ const API_PROTOCOLS = SHARED_PROTOCOLS;
 
 @customElement("tenant-models-view")
 export class TenantModelsView extends LitElement {
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block;
       padding: 1.5rem;
@@ -132,7 +133,7 @@ export class TenantModelsView extends LitElement {
     .sub-model-row .form-field { flex: 1; }
     .sub-model-row .form-field label { font-size: 0.72rem; }
     .sub-model-row .form-field input { font-size: 0.8rem; padding: 0.35rem 0.5rem; }
-  `;
+  `];
 
   private i18nController = new I18nController(this);
 

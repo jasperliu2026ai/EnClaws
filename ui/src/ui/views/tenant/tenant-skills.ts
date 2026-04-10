@@ -8,6 +8,7 @@
 import { html, css, LitElement, nothing } from "lit";
 import { customElement, state, property } from "lit/decorators.js";
 import { t, I18nController } from "../../../i18n/index.ts";
+import { caretFix } from "../../shared-styles.ts";
 import { tenantRpc } from "./rpc.ts";
 
 interface SkillInstallSpec {
@@ -95,7 +96,7 @@ function sourceLabel(source: string): string {
 export class TenantSkillsView extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block; padding: 1.5rem; color: var(--text, #e5e5e5);
       font-family: var(--font-sans, system-ui, sans-serif);
@@ -163,7 +164,7 @@ export class TenantSkillsView extends LitElement {
     .skill-actions { display: flex; gap: 0.4rem; flex-shrink: 0; align-items: center; }
     .empty { text-align: center; padding: 3rem 1rem; color: var(--text-secondary, #a3a3a3); }
     .loading { text-align: center; padding: 2rem; color: var(--text-secondary, #a3a3a3); }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
 

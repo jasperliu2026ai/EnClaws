@@ -10,6 +10,7 @@ import { customElement, state, property } from "lit/decorators.js";
 import { t, I18nController } from "../../i18n/index.ts";
 import { tenantRpc } from "./tenant/rpc.ts";
 import * as echarts from "echarts";
+import { caretFix } from "../shared-styles.ts";
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -48,7 +49,7 @@ interface ChannelItem { type: string; count: number }
 export class PlatformOverviewView extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block;
       padding: 1.5rem;
@@ -331,7 +332,7 @@ export class PlatformOverviewView extends LitElement {
       color: var(--text-secondary, #a3a3a3);
       margin-top: 0.2rem;
     }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
   @state() private period: "7d" | "30d" = "7d";

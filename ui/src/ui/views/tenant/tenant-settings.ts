@@ -6,12 +6,13 @@ import { html, css, LitElement, nothing } from "lit";
 import { customElement, state, property } from "lit/decorators.js";
 import { t, I18nController } from "../../../i18n/index.ts";
 import { tenantRpc } from "./rpc.ts";
+import { caretFix } from "../../shared-styles.ts";
 
 @customElement("tenant-settings-view")
 export class TenantSettingsView extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block;
       padding: 1.5rem;
@@ -93,7 +94,7 @@ export class TenantSettingsView extends LitElement {
     }
     .loading { text-align: center; padding: 2rem; color: var(--text-muted, #525252); }
     .actions { margin-top: 1rem; }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
   @state() private loading = false;
