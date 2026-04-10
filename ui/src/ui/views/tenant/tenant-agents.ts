@@ -15,6 +15,7 @@ import { tenantRpc } from "./rpc.ts";
 import { pathForTab, inferBasePathFromPathname } from "../../navigation.ts";
 import { showConfirm } from "../../components/confirm-dialog.ts";
 import { CHANNEL_ICON_MAP } from "../../../constants/channels.ts";
+import { caretFix } from "../../shared-styles.ts";
 
 
 interface ModelConfigEntry {
@@ -172,7 +173,7 @@ const DEFAULT_SYSTEM_PROMPT = "你的名字是 EnClaws AI 助手。当用户问�
 export class TenantAgentsView extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block; padding: 1.5rem; color: var(--text, #e5e5e5);
       font-family: var(--font-sans, system-ui, sans-serif);
@@ -581,7 +582,7 @@ export class TenantAgentsView extends LitElement {
       padding: 0.75rem; margin-top: 0.5rem; white-space: pre-wrap;
       max-height: 120px; overflow-y: auto; line-height: 1.5;
     }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
   @state() private agents: TenantAgent[] = [];

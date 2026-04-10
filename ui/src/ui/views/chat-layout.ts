@@ -7,6 +7,7 @@ import type { ChatProps } from "./chat.ts";
 import { renderMarkdownSidebar } from "./markdown-sidebar.ts";
 import "../components/chat-input-area.ts";
 import "../components/resizable-divider.ts";
+import { caretFix } from "../shared-styles.ts";
 
 export type ChatLayoutProps = ChatProps & {
   // Pass through props from the functional renderChat function
@@ -16,7 +17,7 @@ export type ChatLayoutProps = ChatProps & {
 export class ChatLayout extends LitElement {
   @property({ type: Object }) props!: ChatLayoutProps;
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: flex;
       flex-direction: column;
@@ -736,7 +737,7 @@ export class ChatLayout extends LitElement {
     .agent-selector-bar select:focus {
       border-color: var(--accent, #3b82f6);
     }
-  `;
+  `];
 
   private _renderAgentSelector() {
     const agents = this.props?.tenantAgents;

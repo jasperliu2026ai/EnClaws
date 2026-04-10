@@ -190,12 +190,18 @@
 * {
   box-sizing: border-box;
   caret-color: transparent;
+  user-select: none;
 }
 
-input:focus,
-textarea:focus,
-[contenteditable]:focus {
-  caret-color: auto;
+input,
+textarea,
+[contenteditable] {
+  caret-color: auto !important;
+  user-select: text !important;
+}
+
+select {
+  caret-color: auto !important;
 }
 
 html,

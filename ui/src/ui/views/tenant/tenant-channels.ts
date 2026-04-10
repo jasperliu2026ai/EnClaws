@@ -13,6 +13,7 @@ import { pathForTab, inferBasePathFromPathname } from "../../navigation.ts";
 import { CHANNEL_TYPES } from "../../../constants/channels.ts";
 import feishuScopes from "./feishu-scopes.json";
 import { showConfirm } from "../../components/confirm-dialog.ts";
+import { caretFix } from "../../shared-styles.ts";
 
 type ChannelPolicy = "open" | "allowlist" | "disabled";
 
@@ -71,7 +72,7 @@ interface TenantChannel {
 export class TenantChannelsView extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block; padding: 1.5rem; color: var(--text, #e5e5e5);
       font-family: var(--font-sans, system-ui, sans-serif);
@@ -276,7 +277,7 @@ export class TenantChannelsView extends LitElement {
       font-size: 0.72rem; font-family: monospace; resize: vertical;
     }
     .modal-footer { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
   @state() private channels: TenantChannel[] = [];

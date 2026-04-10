@@ -8,6 +8,7 @@ import { html, css, LitElement, nothing } from "lit";
 import { customElement, state, property } from "lit/decorators.js";
 import { tenantRpc } from "./rpc.ts";
 import "../../components/date-picker.ts";
+import { caretFix } from "../../shared-styles.ts";
 
 interface UsageSummary {
   totalInputTokens: number;
@@ -27,7 +28,7 @@ interface QuotaInfo {
 
 @customElement("tenant-usage-view")
 export class TenantUsageView extends LitElement {
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: block; padding: 1.5rem; color: var(--text, #e5e5e5);
       font-family: var(--font-sans, system-ui, sans-serif);
@@ -82,7 +83,7 @@ export class TenantUsageView extends LitElement {
       color: var(--text, #e5e5e5); font-size: 0.8rem; outline: none;
     }
     .period-selector input:focus { border-color: var(--accent, #3b82f6); }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
   @state() private summary: UsageSummary | null = null;

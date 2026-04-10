@@ -14,6 +14,7 @@ import type { Locale } from "../../i18n/index.ts";
 import type { ThemeMode } from "../theme.ts";
 import { resolveTheme } from "../theme.ts";
 import "../components/language-switcher.ts";
+import { caretFix } from "../shared-styles.ts";
 
 type AuthMode = "login" | "register";
 
@@ -24,7 +25,7 @@ type FieldErrors = Record<string, string>;
 export class EnClawsLogin extends LitElement {
   private i18nCtrl = new I18nController(this);
 
-  static styles = css`
+  static styles = [caretFix, css`
     :host {
       display: flex;
       align-items: center;
@@ -34,12 +35,6 @@ export class EnClawsLogin extends LitElement {
       color: var(--text, #e5e5e5);
       font-family: var(--font-sans, system-ui, sans-serif);
       position: relative;
-      caret-color: transparent;
-    }
-
-    :host input:focus,
-    :host textarea:focus {
-      caret-color: auto;
     }
 
     .top-toolbar {
@@ -293,7 +288,7 @@ export class EnClawsLogin extends LitElement {
     .divider span {
       padding: 0 0.75rem;
     }
-  `;
+  `];
 
   @property({ type: String }) gatewayUrl = "";
   @state() private mode: AuthMode = "login";

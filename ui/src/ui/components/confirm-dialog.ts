@@ -9,6 +9,7 @@
 
 import { html, css, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { caretFix } from "../shared-styles.ts";
 
 export interface ConfirmDialogOptions {
   title: string;
@@ -21,7 +22,7 @@ export interface ConfirmDialogOptions {
 
 @customElement("confirm-dialog")
 export class ConfirmDialog extends LitElement {
-  static styles = css`
+  static styles = [caretFix, css`
     .overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.6);
       display: flex; align-items: center; justify-content: center;
@@ -63,7 +64,7 @@ export class ConfirmDialog extends LitElement {
     }
     @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
     @keyframes slideUp { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
-  `;
+  `];
 
   @property() title = "";
   @property() message = "";
