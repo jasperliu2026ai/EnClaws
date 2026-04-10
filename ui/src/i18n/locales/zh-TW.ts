@@ -946,7 +946,7 @@ export const zh_TW: TranslationMap = {
     themeLight: "亮色",
     themeSystem: "跟隨",
     themeDark: "暗色",
-    formBadge: "工作空間登入",
+    formBadge: "企業入口",
     welcomeLine1: "歡迎",
     welcomeLine2: "回來",
     createLine1: "建立",

@@ -1282,7 +1282,7 @@ export const zh_CN: TranslationMap = {
     themeLight: "亮色",
     themeSystem: "跟随",
     themeDark: "暗色",
-    formBadge: "工作空间登录",
+    formBadge: "企业入口",
     welcomeLine1: "欢迎",
     welcomeLine2: "回来",
     createLine1: "创建",
