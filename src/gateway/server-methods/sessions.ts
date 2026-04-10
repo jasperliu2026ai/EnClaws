@@ -9,7 +9,10 @@ import { clearSessionQueues } from "../../auto-reply/reply/queue.js";
 import { loadConfig } from "../../config/config.js";
 import {
   resolveRequestConfig,
+  resolveRequestStorePath,
   loadTenantSessionStore,
+  loadAllTenantSessionStores,
+  findTenantStorePathForKey,
 } from "../tenant-session-utils.js";
 import {
   loadSessionStore,
@@ -49,6 +52,7 @@ import {
   readSessionPreviewItemsFromTranscript,
   resolveGatewaySessionStoreTarget,
   resolveSessionModelRef,
+  resolveSessionStoreKey,
   resolveSessionTranscriptCandidates,
   type SessionsPatchResult,
   type SessionsPreviewEntry,
@@ -299,7 +303,10 @@ export const sessionsHandlers: GatewayRequestHandlers = {
     if (tenant) {
       // Multi-tenant: load tenant-scoped config and session store.
       const cfg = await resolveRequestConfig(tenant);
-      const store = loadTenantSessionStore(tenant.tenantId, cfg, tenant.userId);
+      const isAdmin = tenant.role === "owner" || tenant.role === "admin";
+      const store = isAdmin
+        ? loadAllTenantSessionStores(tenant.tenantId, cfg)
+        : loadTenantSessionStore(tenant.tenantId, cfg, tenant.userId);
       const result = listSessionsFromStore({
         cfg,
         storePath: "",
@@ -409,7 +416,25 @@ export const sessionsHandlers: GatewayRequestHandlers = {
       return;
     }
 
-    const { cfg, target, storePath } = resolveGatewaySessionTargetFromKey(key);
+    const tenant = client?.tenant;
+    const { cfg, target, storePath } = tenant
+      ? await (async () => {
+          const tenantCfg = await resolveRequestConfig(tenant);
+          const agentId = normalizeAgentId(
+            parseAgentSessionKey(key)?.agentId ?? resolveDefaultAgentId(tenantCfg),
+          );
+          const isAdmin = tenant.role === "owner" || tenant.role === "admin";
+          const tenantStorePath = isAdmin
+            ? findTenantStorePathForKey(tenant.tenantId, tenantCfg, key, tenant.userId)
+            : resolveRequestStorePath(tenantCfg, agentId, tenant.tenantId, tenant.userId);
+          const canonicalKey = resolveSessionStoreKey({ cfg: tenantCfg, sessionKey: key });
+          return {
+            cfg: tenantCfg,
+            target: { canonicalKey, storePath: tenantStorePath, agentId, storeKeys: [canonicalKey, key] },
+            storePath: tenantStorePath,
+          };
+        })()
+      : resolveGatewaySessionTargetFromKey(key);
     const applied = await updateSessionStore(storePath, async (store) => {
       const { primaryKey } = migrateAndPruneSessionStoreKey({ cfg, key, store });
       return await applySessionsPatchToStore({
@@ -548,7 +573,25 @@ export const sessionsHandlers: GatewayRequestHandlers = {
       return;
     }
 
-    const { cfg, target, storePath } = resolveGatewaySessionTargetFromKey(key);
+    const tenant = client?.tenant;
+    const { cfg, target, storePath } = tenant
+      ? await (async () => {
+          const tenantCfg = await resolveRequestConfig(tenant);
+          const agentId = normalizeAgentId(
+            parseAgentSessionKey(key)?.agentId ?? resolveDefaultAgentId(tenantCfg),
+          );
+          const isAdmin = tenant.role === "owner" || tenant.role === "admin";
+          const tenantStorePath = isAdmin
+            ? findTenantStorePathForKey(tenant.tenantId, tenantCfg, key, tenant.userId)
+            : resolveRequestStorePath(tenantCfg, agentId, tenant.tenantId, tenant.userId);
+          const canonicalKey = resolveSessionStoreKey({ cfg: tenantCfg, sessionKey: key });
+          return {
+            cfg: tenantCfg,
+            target: { canonicalKey, storePath: tenantStorePath, agentId, storeKeys: [canonicalKey, key] },
+            storePath: tenantStorePath,
+          };
+        })()
+      : resolveGatewaySessionTargetFromKey(key);
     const mainKey = resolveMainSessionKey(cfg);
     if (target.canonicalKey === mainKey) {
       respond(
