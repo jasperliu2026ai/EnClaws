@@ -1499,6 +1499,115 @@
 }
 
 /* ===========================================
+   Session Card List (matches traces card style)
+   =========================================== */
+
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.session-card {
+  background: var(--card, #141414);
+  border: 1px solid var(--border, #262626);
+  border-radius: var(--radius-lg, 8px);
+  padding: 1rem;
+  transition: border-color 0.15s;
+}
+
+.session-card:hover {
+  border-color: var(--accent, #3b82f6);
+}
+
+.session-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.session-card__left {
+  flex: 1;
+  min-width: 0;
+}
+
+.session-card__title-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.session-card__key {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  color: var(--text, #e5e5e5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-card__display-name {
+  font-size: 0.75rem;
+  color: var(--text-muted, #525252);
+  margin-top: 0.2rem;
+}
+
+.session-card__badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.session-card__controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border, #262626);
+  flex-wrap: wrap;
+}
+
+.session-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.session-card__field-label {
+  font-size: 0.7rem;
+  color: var(--text-muted, #525252);
+  font-weight: 500;
+}
+
+.session-card__field input,
+.session-card__field select {
+  padding: 0.3rem 0.5rem;
+  background: var(--bg, #0a0a0a);
+  border: 1px solid var(--border, #262626);
+  border-radius: var(--radius-md, 6px);
+  color: var(--text, #e5e5e5);
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.session-card__field input {
+  max-width: 140px;
+}
+
+.session-card__field input:focus,
+.session-card__field select:focus {
+  border-color: var(--accent, #3b82f6);
+}
+
+.session-card__delete {
+  margin-left: auto;
+  align-self: flex-end;
+}
+
+/* ===========================================
    Log Stream
    =========================================== */
 

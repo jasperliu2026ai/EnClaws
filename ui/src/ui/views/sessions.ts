@@ -229,18 +229,7 @@ export function renderSessions(props: SessionsProps) {
       }
 
 
-      <div class="table" style="margin-top: 16px;">
-        <div class="table-head">
-          <div>${t("sessions.colKey")}</div>
-          <div>${t("sessions.colLabel")}</div>
-          <div>${t("sessions.colKind")}</div>
-          <div>${t("sessions.colUpdated")}</div>
-          <div>${t("sessions.colTokens")}</div>
-          <div>${t("sessions.colThinking")}</div>
-          <div>${t("sessions.colVerbose")}</div>
-          <div>${t("sessions.colReasoning")}</div>
-          <div>${t("sessions.colActions")}</div>
-        </div>
+      <div class="session-list" style="margin-top: 16px;">
         ${
           rows.length === 0
             ? html`
@@ -289,84 +278,99 @@ function renderRow(
     ? html`<span class="session-channel-badge" title=${keyChannel!}>${keyChannel}</span>`
     : html`<span class="session-channel-badge session-channel-badge--web">WebUI</span>`;
 
+  const kindLabel = KIND_LABEL_MAP[row.kind] ? t(KIND_LABEL_MAP[row.kind]) : row.kind;
+  const tokens = formatSessionTokens(row);
+  const modelDisplay = row.model ? row.model.split("/").pop() ?? row.model : "";
+
   return html`
-    <div class="table-row">
-      <div class="mono session-key-cell">
-        ${channelBadge}
-        ${canLink ? html`<a href=${chatUrl} class="session-link" title=${row.key} @click=${(e: MouseEvent) => {
-          if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-          e.preventDefault();
-          window.history.pushState({}, "", chatUrl);
-          window.dispatchEvent(new PopStateEvent("popstate"));
-        }}>${truncatedKey}</a>` : html`<span title=${row.key}>${truncatedKey}</span>`}
+    <div class="session-card">
+      <div class="session-card__header">
+        <div class="session-card__left">
+          <div class="session-card__title-line">
+            ${channelBadge}
+            ${canLink ? html`<a href=${chatUrl} class="session-link" title=${row.key} @click=${(e: MouseEvent) => {
+              if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              window.history.pushState({}, "", chatUrl);
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }}>${truncatedKey}</a>` : html`<span class="session-card__key" title=${row.key}>${truncatedKey}</span>`}
+          </div>
+          ${showDisplayName ? html`<div class="session-card__display-name">${displayName}</div>` : nothing}
+        </div>
+        <div class="session-card__badges">
+          <span class="badge badge-rounds">${kindLabel}</span>
+          ${tokens ? html`<span class="badge badge-tokens">${tokens}</span>` : nothing}
+          <span class="badge badge-time">${updated}</span>
+          ${modelDisplay ? html`<span class="badge badge-platform">${modelDisplay}</span>` : nothing}
+        </div>
       </div>
-      <div>
-        <input
-          style="max-width:120px"
-          .value=${row.label ?? ""}
-          ?disabled=${disabled}
-          placeholder=${t("sessions.optional")}
-          @change=${(e: Event) => {
-            const value = (e.target as HTMLInputElement).value.trim();
-            onPatch(row.key, { label: value || null });
-          }}
-        />
-      </div>
-      <div>${KIND_LABEL_MAP[row.kind] ? t(KIND_LABEL_MAP[row.kind]) : row.kind}</div>
-      <div>${updated}</div>
-      <div>${formatSessionTokens(row)}</div>
-      <div>
-        <select
-          ?disabled=${disabled}
-          @change=${(e: Event) => {
-            const value = (e.target as HTMLSelectElement).value;
-            onPatch(row.key, {
-              thinkingLevel: resolveThinkLevelPatchValue(value, isBinaryThinking),
-            });
-          }}
-        >
-          ${thinkLevels.map(
-            (level) =>
-              html`<option value=${level} ?selected=${thinking === level}>
-                ${level ? localizedLabel(level, THINK_LABEL_MAP) : t("sessions.inherit")}
-              </option>`,
-          )}
-        </select>
-      </div>
-      <div>
-        <select
-          ?disabled=${disabled}
-          @change=${(e: Event) => {
-            const value = (e.target as HTMLSelectElement).value;
-            onPatch(row.key, { verboseLevel: value || null });
-          }}
-        >
-          ${verboseLevels.map(
-            (level) =>
-              html`<option value=${level} ?selected=${verbose === level}>
-                ${level ? localizedLabel(level, VERBOSE_LABEL_MAP) : t("sessions.inherit")}
-              </option>`,
-          )}
-        </select>
-      </div>
-      <div>
-        <select
-          ?disabled=${disabled}
-          @change=${(e: Event) => {
-            const value = (e.target as HTMLSelectElement).value;
-            onPatch(row.key, { reasoningLevel: value || null });
-          }}
-        >
-          ${reasoningLevels.map(
-            (level) =>
-              html`<option value=${level} ?selected=${reasoning === level}>
-                ${level ? localizedLabel(level, REASONING_LABEL_MAP) : t("sessions.inherit")}
-              </option>`,
-          )}
-        </select>
-      </div>
-      <div>
-        <button class="btn danger" ?disabled=${disabled} @click=${() => onDelete(row.key)}>
+      <div class="session-card__controls">
+        <label class="session-card__field">
+          <span class="session-card__field-label">${t("sessions.colLabel")}</span>
+          <input
+            .value=${row.label ?? ""}
+            ?disabled=${disabled}
+            placeholder=${t("sessions.optional")}
+            @change=${(e: Event) => {
+              const value = (e.target as HTMLInputElement).value.trim();
+              onPatch(row.key, { label: value || null });
+            }}
+          />
+        </label>
+        <label class="session-card__field">
+          <span class="session-card__field-label">${t("sessions.colThinking")}</span>
+          <select
+            ?disabled=${disabled}
+            @change=${(e: Event) => {
+              const value = (e.target as HTMLSelectElement).value;
+              onPatch(row.key, {
+                thinkingLevel: resolveThinkLevelPatchValue(value, isBinaryThinking),
+              });
+            }}
+          >
+            ${thinkLevels.map(
+              (level) =>
+                html`<option value=${level} ?selected=${thinking === level}>
+                  ${level ? localizedLabel(level, THINK_LABEL_MAP) : t("sessions.inherit")}
+                </option>`,
+            )}
+          </select>
+        </label>
+        <label class="session-card__field">
+          <span class="session-card__field-label">${t("sessions.colVerbose")}</span>
+          <select
+            ?disabled=${disabled}
+            @change=${(e: Event) => {
+              const value = (e.target as HTMLSelectElement).value;
+              onPatch(row.key, { verboseLevel: value || null });
+            }}
+          >
+            ${verboseLevels.map(
+              (level) =>
+                html`<option value=${level} ?selected=${verbose === level}>
+                  ${level ? localizedLabel(level, VERBOSE_LABEL_MAP) : t("sessions.inherit")}
+                </option>`,
+            )}
+          </select>
+        </label>
+        <label class="session-card__field">
+          <span class="session-card__field-label">${t("sessions.colReasoning")}</span>
+          <select
+            ?disabled=${disabled}
+            @change=${(e: Event) => {
+              const value = (e.target as HTMLSelectElement).value;
+              onPatch(row.key, { reasoningLevel: value || null });
+            }}
+          >
+            ${reasoningLevels.map(
+              (level) =>
+                html`<option value=${level} ?selected=${reasoning === level}>
+                  ${level ? localizedLabel(level, REASONING_LABEL_MAP) : t("sessions.inherit")}
+                </option>`,
+            )}
+          </select>
+        </label>
+        <button class="btn danger session-card__delete" ?disabled=${disabled} @click=${() => onDelete(row.key)}>
           ${t("sessions.delete")}
         </button>
       </div>
