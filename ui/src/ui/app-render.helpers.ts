@@ -19,6 +19,16 @@ type SessionDefaultsSnapshot = {
 };
 
 function resolveSidebarChatSessionKey(state: AppViewState): string {
+  // Prefer the last session the user was actively chatting on so that
+  // navigating away and back (e.g. Sessions → Chat) doesn't reset the
+  // session.  In multi-tenant mode redirectToFirstTenantAgent sets
+  // lastActiveSessionKey to the tenant agent session; without this
+  // check the sidebar click would always fall back to the gateway-level
+  // default ("main") and discard the conversation.
+  const lastActive = state.settings.lastActiveSessionKey?.trim();
+  if (lastActive) {
+    return lastActive;
+  }
   const snapshot = state.hello?.snapshot as
     | { sessionDefaults?: SessionDefaultsSnapshot }
     | undefined;
