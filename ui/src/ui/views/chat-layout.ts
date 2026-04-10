@@ -2,7 +2,7 @@
 import { LitElement, html, css, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { icons } from "../icons.ts";
-import { t } from "../../i18n/index.ts";
+import { t, I18nController } from "../../i18n/index.ts";
 import type { ChatProps } from "./chat.ts";
 
 import { renderMarkdownSidebar } from "./markdown-sidebar.ts";
@@ -16,6 +16,7 @@ export type ChatLayoutProps = ChatProps & {
 
 @customElement("chat-layout")
 export class ChatLayout extends LitElement {
+  private _i18n = new I18nController(this);
   @property({ type: Object }) props!: ChatLayoutProps;
 
   static styles = [caretFix, css`

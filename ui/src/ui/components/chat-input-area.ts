@@ -1,6 +1,6 @@
 import { LitElement, html, css, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { t } from "../../i18n/index.ts";
+import { t, I18nController } from "../../i18n/index.ts";
 import { icons } from "../icons.ts";
 import { detectTextDirection } from "../text-direction.ts";
 import type { ChatAttachment } from "../ui-types.ts";
@@ -8,6 +8,7 @@ import { caretFix } from "../shared-styles.ts";
 
 @customElement("chat-input-area")
 export class ChatInputArea extends LitElement {
+  private _i18n = new I18nController(this);
   @property({ type: String }) draft = "";
   @property({ type: Boolean }) connected = false;
   @property({ type: Boolean }) sending = false;
