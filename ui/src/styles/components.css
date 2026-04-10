@@ -1495,7 +1495,45 @@
 }
 
 .session-channel-badge--web {
-  color: var(--text-muted, #9ca3af);
+  background: #1e3a5f;
+  color: #93c5fd;
+  border-color: #1e3a5f;
+}
+
+.session-channel-badge--feishu {
+  background: #2d1b4e;
+  color: #c4b5fd;
+  border-color: #2d1b4e;
+}
+
+.session-channel-badge--telegram {
+  background: #0c3547;
+  color: #67d4f1;
+  border-color: #0c3547;
+}
+
+.session-channel-badge--discord {
+  background: #272060;
+  color: #a8a1f6;
+  border-color: #272060;
+}
+
+.session-channel-badge--slack {
+  background: #1a2e1a;
+  color: #86efac;
+  border-color: #1a2e1a;
+}
+
+.session-channel-badge--whatsapp {
+  background: #1a2e1a;
+  color: #86efac;
+  border-color: #1a2e1a;
+}
+
+.session-channel-badge--signal {
+  background: #1e3a5f;
+  color: #93c5fd;
+  border-color: #1e3a5f;
 }
 
 /* ===========================================
@@ -1605,6 +1643,16 @@
 .session-card__delete {
   margin-left: auto;
   align-self: flex-end;
+}
+
+.session-card__delete.btn.danger {
+  background: #7f1d1d;
+  color: #fca5a5;
+  border: none;
+}
+
+.session-card__delete.btn.danger:hover {
+  background: #991b1b;
 }
 
 /* ===========================================

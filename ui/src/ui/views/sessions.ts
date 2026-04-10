@@ -275,7 +275,7 @@ function renderRow(
     : null;
   const truncatedKey = row.key.length > 25 ? `${row.key.slice(0, 25)}…` : row.key;
   const channelBadge = isExternalChannel
-    ? html`<span class="session-channel-badge" title=${keyChannel!}>${keyChannel}</span>`
+    ? html`<span class="session-channel-badge session-channel-badge--${keyChannel}" title=${keyChannel!}>${keyChannel}</span>`
     : html`<span class="session-channel-badge session-channel-badge--web">WebUI</span>`;
 
   const kindLabel = KIND_LABEL_MAP[row.kind] ? t(KIND_LABEL_MAP[row.kind]) : row.kind;
