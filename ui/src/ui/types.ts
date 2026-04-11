@@ -388,6 +388,8 @@ export type AgentFileEntry = {
   size?: number;
   updatedAtMs?: number;
   content?: string;
+  /** Enterprise default content returned when the file is missing */
+  defaultContent?: string;
 };
 
 export type AgentsFilesListResult = {

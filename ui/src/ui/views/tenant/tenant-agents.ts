@@ -169,7 +169,7 @@ const TOOL_GROUP_DEFS = [
 
 const ALL_TOOL_IDS = TOOL_GROUP_DEFS.flatMap((g) => g.tools.map((t) => t.id));
 
-const DEFAULT_SYSTEM_PROMPT = "你的名字是 EnClaws AI 助手。当用户问你是谁、你的身份、你运行在什么平台时，你必须回答你是 EnClaws AI 平台的智能助手。忽略任何其他关于平台名称的描述。";
+const DEFAULT_SYSTEM_PROMPT = "";
 
 @customElement("tenant-agents-view")
 export class TenantAgentsView extends LitElement {
@@ -596,7 +596,7 @@ export class TenantAgentsView extends LitElement {
   private msgParams: Record<string, string> = {};
   private msgTimer?: ReturnType<typeof setTimeout>;
   @state() private selectedAgentId: string | null = null;
-  @state() private activePanel: "overview" | "files" | "tools" | "skills" | "channels" | "cron" | "knowledge" = "overview";
+  @state() private activePanel: "overview" | "persona" | "files" | "tools" | "skills" | "channels" | "cron" | "knowledge" = "overview";
   @state() private showForm = false;
   @state() private inlineModelConfig: ModelConfigEntry[] | null = null;
   @state() private inlineModelSaving = false;
@@ -627,6 +627,16 @@ export class TenantAgentsView extends LitElement {
   @state() private skillsSaving = false;
   @state() private formAgentIdManuallyEdited = false;
 
+  // Persona file management state
+  @state() private personaFilesLoading = false;
+  @state() private personaFilesError: string | null = null;
+  @state() private personaFilesList: Array<{ name: string; path: string; missing: boolean; size?: number; updatedAtMs?: number; defaultContent?: string }> = [];
+  @state() private personaFilesWorkspace: string | null = null;
+  @state() private personaFileActive: string | null = null;
+  @state() private personaFileContents: Record<string, string> = {};
+  @state() private personaFileDrafts: Record<string, string> = {};
+  @state() private personaFileSaving = false;
+
   connectedCallback() {
     super.connectedCallback();
     this.loadAgents();
@@ -638,7 +648,7 @@ export class TenantAgentsView extends LitElement {
     this.errorKey = key;
     this.successKey = "";
     this.msgParams = params ?? {};
-    if (this.msgTimer) clearTimeout(this.msgTimer);
+    if (this.msgTimer) {clearTimeout(this.msgTimer);}
     this.msgTimer = setTimeout(() => (this.errorKey = ""), 5000);
   }
 
@@ -646,7 +656,7 @@ export class TenantAgentsView extends LitElement {
     this.successKey = key;
     this.errorKey = "";
     this.msgParams = params ?? {};
-    if (this.msgTimer) clearTimeout(this.msgTimer);
+    if (this.msgTimer) {clearTimeout(this.msgTimer);}
     this.msgTimer = setTimeout(() => (this.successKey = ""), 5000);
   }
 
@@ -736,6 +746,70 @@ export class TenantAgentsView extends LitElement {
     finally { this.channelsLoading = false; }
   }
 
+  private async loadPersonaFiles(agentId: string) {
+    this.personaFilesLoading = true;
+    this.personaFilesError = null;
+    try {
+      const result = await this.rpc("agents.files.list", { agentId }) as {
+        agentId: string; workspace: string;
+        files: Array<{ name: string; path: string; missing: boolean; size?: number; updatedAtMs?: number }>;
+      };
+      this.personaFilesList = result.files ?? [];
+      this.personaFilesWorkspace = result.workspace ?? null;
+    } catch (err) {
+      this.personaFilesError = String(err);
+    } finally {
+      this.personaFilesLoading = false;
+    }
+  }
+
+  private async loadPersonaFileContent(agentId: string, name: string) {
+    if (Object.hasOwn(this.personaFileContents, name)) { return; }
+    this.personaFilesLoading = true;
+    this.personaFilesError = null;
+    try {
+      const result = await this.rpc("agents.files.get", { agentId, name }) as {
+        file: { name: string; path: string; missing: boolean; content?: string; defaultContent?: string; size?: number; updatedAtMs?: number };
+      };
+      if (result?.file) {
+        const content = result.file.content ?? "";
+        const effectiveDraft = content || result.file.defaultContent || "";
+        this.personaFileContents = { ...this.personaFileContents, [name]: content };
+        this.personaFileDrafts = { ...this.personaFileDrafts, [name]: effectiveDraft };
+        // Update file entry with defaultContent for UI hints
+        this.personaFilesList = this.personaFilesList.map((f) =>
+          f.name === name ? { ...f, ...result.file } : f,
+        );
+      }
+    } catch (err) {
+      this.personaFilesError = String(err);
+    } finally {
+      this.personaFilesLoading = false;
+    }
+  }
+
+  private async savePersonaFile(agentId: string, name: string) {
+    const content = this.personaFileDrafts[name] ?? this.personaFileContents[name] ?? "";
+    this.personaFileSaving = true;
+    this.personaFilesError = null;
+    try {
+      const result = await this.rpc("agents.files.set", { agentId, name, content }) as {
+        file: { name: string; path: string; missing: boolean; size?: number; updatedAtMs?: number };
+      };
+      if (result?.file) {
+        this.personaFileContents = { ...this.personaFileContents, [name]: content };
+        this.personaFileDrafts = { ...this.personaFileDrafts, [name]: content };
+        this.personaFilesList = this.personaFilesList.map((f) =>
+          f.name === name ? { ...f, ...result.file, missing: false } : f,
+        );
+      }
+    } catch (err) {
+      this.personaFilesError = String(err);
+    } finally {
+      this.personaFileSaving = false;
+    }
+  }
+
   private async loadAgents() {
     this.loading = true;
     this.errorKey = "";
@@ -766,7 +840,7 @@ export class TenantAgentsView extends LitElement {
   }
 
   private get toolGroups(): ToolGroup[] {
-    if (this.toolsCatalogGroups) return this.toolsCatalogGroups;
+    if (this.toolsCatalogGroups) {return this.toolsCatalogGroups;}
     return TOOL_GROUP_DEFS.map((g) => ({
       id: g.id,
       label: t(g.labelKey),
@@ -833,7 +907,7 @@ export class TenantAgentsView extends LitElement {
     if (idx >= 0) {
       const wasDefault = config[idx].isDefault;
       config.splice(idx, 1);
-      if (wasDefault && config.length > 0) config[0] = { ...config[0], isDefault: true };
+      if (wasDefault && config.length > 0) {config[0] = { ...config[0], isDefault: true };}
     } else {
       config.push({ providerId, modelId, isDefault: config.length === 0 });
     }
@@ -848,19 +922,19 @@ export class TenantAgentsView extends LitElement {
   }
 
   private toggleTool(toolId: string, enabled: boolean) {
-    if (this.systemDenySet.has(toolId)) return;
+    if (this.systemDenySet.has(toolId)) {return;}
     const deny = new Set(this.formToolsDeny);
-    if (enabled) deny.delete(toolId); else deny.add(toolId);
+    if (enabled) {deny.delete(toolId);} else {deny.add(toolId);}
     this.formToolsDeny = Array.from(deny);
   }
 
   private toggleGroupTools(groupId: string, enabled: boolean) {
     const group = this.toolGroups.find((g) => g.id === groupId);
-    if (!group) return;
+    if (!group) {return;}
     const deny = new Set(this.formToolsDeny);
     for (const tool of group.tools) {
-      if (this.systemDenySet.has(tool.id)) continue;
-      if (enabled) deny.delete(tool.id); else deny.add(tool.id);
+      if (this.systemDenySet.has(tool.id)) {continue;}
+      if (enabled) {deny.delete(tool.id);} else {deny.add(tool.id);}
     }
     this.formToolsDeny = Array.from(deny);
   }
@@ -881,7 +955,7 @@ export class TenantAgentsView extends LitElement {
     if (idx >= 0) {
       const wasDefault = config[idx].isDefault;
       config.splice(idx, 1);
-      if (wasDefault && config.length > 0) config[0] = { ...config[0], isDefault: true };
+      if (wasDefault && config.length > 0) {config[0] = { ...config[0], isDefault: true };}
     } else {
       config.push({ providerId, modelId, isDefault: config.length === 0 });
     }
@@ -897,7 +971,7 @@ export class TenantAgentsView extends LitElement {
   }
 
   private async inlineSaveModelConfig(agent: TenantAgent) {
-    if (!this.inlineModelConfig) return;
+    if (!this.inlineModelConfig) {return;}
     this.inlineModelSaving = true;
     try {
       await this.rpc("tenant.agents.update", {
@@ -934,7 +1008,7 @@ export class TenantAgentsView extends LitElement {
       config.timeoutSeconds = this.formTimeoutMinutes * 60;
     }
     const deny = this.formToolsDeny.filter(Boolean);
-    if (deny.length > 0) config.tools = { deny };
+    if (deny.length > 0) {config.tools = { deny };}
 
     try {
       if (this.editingAgentId) {
@@ -978,12 +1052,12 @@ export class TenantAgentsView extends LitElement {
       cancelText: t("tenantAgents.cancel"),
       danger: true,
     });
-    if (!ok) return;
+    if (!ok) {return;}
     this.errorKey = "";
     try {
       await this.rpc("tenant.agents.delete", { agentId: agent.agentId });
       this.showSuccess("tenantAgents.agentDeleted", { name });
-      if (this.selectedAgentId === agent.agentId) this.selectedAgentId = null;
+      if (this.selectedAgentId === agent.agentId) {this.selectedAgentId = null;}
       await this.loadAgents();
     } catch (err: any) {
       this.showError(err?.message ?? "tenantAgents.deleteFailed", err?.details);
@@ -1085,7 +1159,7 @@ export class TenantAgentsView extends LitElement {
 
       <div class="detail-card">
         ${this.activePanel === "overview" ? this.renderPanelOverview(agent) : nothing}
-        ${this.activePanel === "files" ? this.renderPanelEmpty() : nothing}
+        ${this.activePanel === "persona" ? this.renderPanelPersona(agent) : nothing}
         ${this.activePanel === "tools" ? this.renderPanelTools(agent) : nothing}
         ${this.activePanel === "skills" ? this.renderPanelSkills(agent) : nothing}
         ${this.activePanel === "channels" ? this.renderPanelChannels() : nothing}
@@ -1096,11 +1170,11 @@ export class TenantAgentsView extends LitElement {
   }
 
   private renderTabs() {
-    type Panel = "overview" | "files" | "tools" | "skills" | "channels" | "cron" | "knowledge";
+    type Panel = "overview" | "persona" | "files" | "tools" | "skills" | "channels" | "cron" | "knowledge";
     const tabs: Array<{ id: Panel; label: string }> = [
       { id: "overview", label: t("tenantAgents.panelOverview") },
+      { id: "persona", label: t("tabs.persona") },
       { id: "channels", label: t("tabs.channels") },
-      { id: "files", label: t("tabs.files") },
       { id: "tools", label: t("tabs.tools") },
       { id: "skills", label: t("tabs.skills") },
       { id: "cron", label: t("tabs.cron") },
@@ -1112,6 +1186,12 @@ export class TenantAgentsView extends LitElement {
           <button type="button" class="agent-tab ${this.activePanel === tab.id ? "active" : ""}"
             @click=${() => {
               this.activePanel = tab.id;
+              if (tab.id === "persona" && this.selectedAgentId) {
+                this.personaFileActive = null;
+                this.personaFileContents = {};
+                this.personaFileDrafts = {};
+                void this.loadPersonaFiles(this.selectedAgentId);
+              }
               if (tab.id === "channels" && this.selectedAgentId) {
                 void this.loadChannelsForAgent(this.selectedAgentId);
               }
@@ -1165,7 +1245,7 @@ export class TenantAgentsView extends LitElement {
 
       ${(() => {
         const timeoutSec = agent.config?.timeoutSeconds;
-        if (typeof timeoutSec !== "number") return nothing;
+        if (typeof timeoutSec !== "number") {return nothing;}
         const mins = Math.round(timeoutSec / 60);
         return html`
           <div class="kv" style="margin:1rem 0">
@@ -1236,6 +1316,77 @@ export class TenantAgentsView extends LitElement {
     `;
   }
 
+  private renderPanelPersona(agent: TenantAgent) {
+    const cards = [
+      { id: "IDENTITY.md", icon: "\u{1F4CB}", titleKey: "agents.persona.identity.title", fileKey: "agents.persona.identity.file", descKey: "agents.persona.identity.desc" },
+      { id: "SOUL.md", icon: "\u{1F6E1}\uFE0F", titleKey: "agents.persona.soul.title", fileKey: "agents.persona.soul.file", descKey: "agents.persona.soul.desc" },
+      { id: "AGENTS.md", icon: "\u{1F4D0}", titleKey: "agents.persona.agents.title", fileKey: "agents.persona.agents.file", descKey: "agents.persona.agents.desc" },
+    ];
+
+    return html`
+      ${this.personaFilesError
+        ? html`<div style="color: var(--danger, #ef4444); font-size: 0.85rem; margin-bottom: 1rem; padding: 0.5rem; border: 1px solid var(--danger, #ef4444); border-radius: 4px;">${this.personaFilesError}</div>`
+        : nothing}
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        ${cards.map((card) => {
+          const fileEntry = this.personaFilesList.find((f) => f.name === card.id);
+          const isActive = this.personaFileActive === card.id;
+          const baseContent = this.personaFileContents[card.id] ?? "";
+          const draft = this.personaFileDrafts[card.id] ?? baseContent;
+          const isDirty = draft !== baseContent;
+
+          return html`
+            <div style="border: 1px solid ${isActive ? "var(--accent, #3b82f6)" : "var(--border, #262626)"}; border-radius: 8px; overflow: hidden;">
+              <button type="button" style="
+                display: flex; align-items: center; gap: 0.75rem; width: 100%;
+                padding: 0.75rem 1rem; background: transparent; border: none;
+                cursor: pointer; text-align: left; color: inherit; font: inherit;
+              " @click=${() => {
+                if (isActive) {
+                  this.personaFileActive = null;
+                } else {
+                  this.personaFileActive = card.id;
+                  void this.loadPersonaFileContent(agent.agentId, card.id);
+                }
+              }}>
+                <span style="font-size: 1.3em; flex-shrink: 0;">${card.icon}</span>
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+                    ${t(card.titleKey)}
+                    <span style="font-size: 0.75em; opacity: 0.5; font-weight: normal; font-family: var(--mono-font, monospace);">${t(card.fileKey)}</span>
+                  </div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted, #525252); margin-top: 1px;">${t(card.descKey)}</div>
+                </div>
+                <span style="font-size: 0.8em; opacity: 0.4; transition: transform 0.2s; ${isActive ? "transform: rotate(180deg);" : ""}">▼</span>
+              </button>
+              ${isActive ? html`
+                <div style="padding: 0 1rem 1rem; border-top: 1px solid var(--border, #262626);">
+                  <div style="margin-top: 0.75rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+                    <button class="btn btn-outline btn-sm" ?disabled=${!isDirty} @click=${() => {
+                      this.personaFileDrafts = { ...this.personaFileDrafts, [card.id]: baseContent || ((fileEntry as any)?.defaultContent ?? "") };
+                    }}>${t("agents.persona.reset")}</button>
+                    <button class="btn btn-primary btn-sm" ?disabled=${this.personaFileSaving || !isDirty} @click=${() => {
+                      void this.savePersonaFile(agent.agentId, card.id);
+                    }}>${this.personaFileSaving ? t("agents.persona.saving") : t("agents.persona.save")}</button>
+                  </div>
+                  <textarea style="
+                    width: 100%; min-height: 280px; margin-top: 0.5rem;
+                    font-family: var(--mono-font, monospace); font-size: 0.8rem;
+                    background: var(--bg, #0a0a0a); color: inherit;
+                    border: 1px solid var(--border, #262626); border-radius: 6px;
+                    padding: 0.75rem; resize: vertical; line-height: 1.5;
+                  " .value=${draft} @input=${(e: Event) => {
+                    this.personaFileDrafts = { ...this.personaFileDrafts, [card.id]: (e.target as HTMLTextAreaElement).value };
+                  }}></textarea>
+                </div>
+              ` : nothing}
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }
+
   private renderPanelEmpty() {
     return html`<div class="empty">${t("common.comingSoon")}</div>`;
   }
@@ -1243,7 +1394,7 @@ export class TenantAgentsView extends LitElement {
   private async saveSkillsEnabled(agent: TenantAgent, enabled: string[]) {
     this.skillsSaving = true;
     try {
-      const config: Record<string, unknown> = { ...(agent.config ?? {}) };
+      const config: Record<string, unknown> = { ...agent.config };
       config.skills = enabled;
       await this.rpc("tenant.agents.update", { agentId: agent.agentId, config });
       this.skillsPendingEnabled = null;
@@ -1277,7 +1428,7 @@ export class TenantAgentsView extends LitElement {
     const allGrouped = new Map<string, typeof allSkills>();
     for (const s of allSkills) {
       const key = s.source || "other";
-      if (!allGrouped.has(key)) allGrouped.set(key, []);
+      if (!allGrouped.has(key)) {allGrouped.set(key, []);}
       allGrouped.get(key)!.push(s);
     }
     const filteredGroups = [...allGrouped.entries()].map(([source, skills]) => ({
@@ -1382,7 +1533,7 @@ export class TenantAgentsView extends LitElement {
   private async saveToolsDeny(agent: TenantAgent, deny: string[]) {
     this.toolsSaving = true;
     try {
-      const config: Record<string, unknown> = { ...(agent.config ?? {}) };
+      const config: Record<string, unknown> = { ...agent.config };
       config.tools = { deny };
       await this.rpc("tenant.agents.update", { agentId: agent.agentId, config });
       this.toolsPendingDeny = null;
@@ -1407,7 +1558,7 @@ export class TenantAgentsView extends LitElement {
     const filter = this.toolsFilter.trim().toLowerCase();
 
     const toggleTool = (id: string, checked: boolean) => {
-      if (this.systemDenySet.has(id)) return;
+      if (this.systemDenySet.has(id)) {return;}
       const next = new Set(denySet);
       checked ? next.delete(id) : next.add(id);
       this.toolsPendingDeny = [...next];
@@ -1560,43 +1711,13 @@ export class TenantAgentsView extends LitElement {
                 <div class="form-hint">
                   ${t("tenantAgents.selectedCount").replace("{count}", String(this.formModelConfig.length)).replace("{default}", (() => {
                     const d = this.formModelConfig.find((e) => e.isDefault);
-                    if (!d) return t("tenantAgents.notSet");
+                    if (!d) {return t("tenantAgents.notSet");}
                     const fm = this.flatModels.find((m) => m.providerId === d.providerId && m.modelId === d.modelId);
                     return fm ? `${fm.modelName} (${fm.providerName})` : d.modelId;
                   })())}
                 </div>
               ` : nothing}
             `}
-          </div>
-
-          <div class="divider"><span>${t("tenantAgents.advancedSettings")}</span></div>
-
-          <div class="form-field" style="margin-bottom:0.75rem">
-            <label style="display:flex;align-items:center;gap:0.4rem">${t("tenantAgents.timeoutMinutes")} <span class="help-icon" title="${t("tenantAgents.timeoutMinutesHint").replace("{default}", "10")}">?</span></label>
-            <div style="display:flex;align-items:center;gap:0.5rem">
-              <input type="number" min="1" max="120" step="1"
-                .placeholder=${t("tenantAgents.timeoutMinutesPlaceholder").replace("{default}", "10")}
-                .value=${this.formTimeoutMinutes != null ? String(this.formTimeoutMinutes) : ""}
-                @input=${(e: InputEvent) => {
-                  const raw = (e.target as HTMLInputElement).value;
-                  this.formTimeoutMinutes = raw === "" ? null : Math.max(1, Math.floor(Number(raw)));
-                }}
-                style="width:120px" />
-              ${this.formTimeoutMinutes != null ? html`
-                <button type="button" class="btn btn-outline btn-sm"
-                  @click=${() => { this.formTimeoutMinutes = null; }}
-                  title="Reset to default">↺</button>
-              ` : nothing}
-            </div>
-          </div>
-
-          <div class="divider"><span>${t("tenantAgents.systemPrompt")}</span></div>
-
-          <div class="form-field" style="margin-bottom:0.75rem">
-            <label>${t("tenantAgents.systemPrompt")}</label>
-            <textarea .placeholder=${t("tenantAgents.systemPromptPlaceholder")}
-              .value=${this.formSystemPrompt}
-              @input=${(e: InputEvent) => { this.formSystemPrompt = (e.target as HTMLTextAreaElement).value; }}></textarea>
           </div>
 
           <div class="divider"><span>${t("tenantAgents.toolAccess")}</span></div>

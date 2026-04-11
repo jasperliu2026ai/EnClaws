@@ -53,6 +53,7 @@ export const en: TranslationMap = {
     logs: "Logs",
     sandbox: "Sandbox",
     files: "Files",
+    persona: "Persona & Standards",
     tools: "Tools",
     knowledge: "Knowledge",
     "platform-models": "Models",
@@ -623,6 +624,33 @@ export const en: TranslationMap = {
       saving: "Saving...",
       selectFileHint: "Select a knowledge file from the list to view or edit its contents.",
       promptNewFile: "Enter new file name (e.g., guide.md):"
+    },
+    persona: {
+      title: "Persona & Standards",
+      subtitle: "Define this Agent's identity, behavior boundaries, and working standards.",
+      refresh: "Refresh",
+      loading: "Loading...",
+      saving: "Saving...",
+      save: "Save",
+      reset: "Reset",
+      identity: {
+        title: "Identity Profile",
+        file: "IDENTITY.md",
+        desc: "Name, personality, avatar, and public image",
+      },
+      soul: {
+        title: "Behavior Boundaries",
+        file: "SOUL.md",
+        desc: "Mandatory rules and safety guardrails",
+      },
+      agents: {
+        title: "Work Standards",
+        file: "AGENTS.md",
+        desc: "Workflows, collaboration rules, and task handling",
+      },
+      missingHint: "This file has not been created yet. The default content is shown. Saving will create it in the agent workspace.",
+      noDefault: "This file has not been created yet. Saving will create it in the agent workspace.",
+      workspace: "Workspace",
     }
   },
   sandbox: {

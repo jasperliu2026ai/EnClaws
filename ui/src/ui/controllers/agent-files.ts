@@ -81,12 +81,15 @@ export async function loadAgentFileContent(
       const preserveDraft = opts?.preserveDraft ?? true;
       state.agentFilesList = mergeFileEntry(state.agentFilesList, res.file);
       state.agentFileContents = { ...state.agentFileContents, [name]: content };
+      // When file is missing and has enterprise defaults, use them as initial draft
+      // so the user sees meaningful content in the editor instead of a blank textarea.
+      const effectiveDraft = content || res.file.defaultContent || "";
       if (
         !preserveDraft ||
         !Object.hasOwn(state.agentFileDrafts, name) ||
         currentDraft === previousBase
       ) {
-        state.agentFileDrafts = { ...state.agentFileDrafts, [name]: content };
+        state.agentFileDrafts = { ...state.agentFileDrafts, [name]: effectiveDraft };
       }
     }
   } catch (err) {

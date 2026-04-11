@@ -53,6 +53,7 @@ export const zh_CN: TranslationMap = {
     logs: "日志",
     sandbox: "沙盘",
     files: "文件",
+    persona: "人设与规范",
     tools: "工具",
     knowledge: "知识库",
     "platform-models": "模型管理",
@@ -616,6 +617,33 @@ export const zh_CN: TranslationMap = {
       saving: "保存中...",
       selectFileHint: "从列表中选择一个知识库文件以查看或编辑其内容。",
       promptNewFile: "输入新文件名 (例如: guide.md):"
+    },
+    persona: {
+      title: "人设与规范",
+      subtitle: "定义这个 Agent 的身份、行为边界和工作方式。",
+      refresh: "刷新",
+      loading: "加载中...",
+      saving: "保存中...",
+      save: "保存",
+      reset: "重置",
+      identity: {
+        title: "身份档案",
+        file: "IDENTITY.md",
+        desc: "名字、性格、头像和对外形象",
+      },
+      soul: {
+        title: "行为边界",
+        file: "SOUL.md",
+        desc: "必须遵守的底线规则和安全红线",
+      },
+      agents: {
+        title: "工作规范",
+        file: "AGENTS.md",
+        desc: "工作流程、协作规则和任务处理方式",
+      },
+      missingHint: "该文件尚未创建，当前显示的是默认内容。保存后将在 Agent 工作区中创建此文件。",
+      noDefault: "该文件尚未创建。保存后将在 Agent 工作区中创建此文件。",
+      workspace: "工作区",
     }
   },
   sandbox: {
