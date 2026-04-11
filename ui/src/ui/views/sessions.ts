@@ -284,7 +284,7 @@ function renderRow(
   const titleText = displayName ?? (row.key.length > 25 ? `${row.key.slice(0, 25)}…` : row.key);
   const channelBadge = isExternalChannel
     ? html`<span class="session-channel-badge session-channel-badge--${keyChannel}" title=${keyChannel!}>${keyChannel}</span>`
-    : html`<span class="session-channel-badge session-channel-badge--web">WebUI</span>`;
+    : html`<span class="session-channel-badge session-channel-badge--web">WebChat</span>`;
 
   const kindLabel = KIND_LABEL_MAP[row.kind] ? t(KIND_LABEL_MAP[row.kind]) : row.kind;
   const tokens = formatSessionTokens(row);
